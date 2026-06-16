@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abudi Cyber Tools</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🛡️ Abudi Cyber Tools</h1>
+        <p>Cybersecurity Analysis Toolkit</p>
+
+        <!-- Text Analyzer -->
+        <div class="card">
+
+            <h2>📝 Text Analyzer</h2>
+
+            <textarea
+                id="textInput"
+                placeholder="Enter text here..."
+            ></textarea>
+
+            <button id="analyzeTextBtn">
+                Analyze Text
+            </button>
+
+        </div>
+
+        <!-- Password Checker -->
+        <div class="card">
+
+            <h2>🔐 Password Strength Checker</h2>
+
+            <input
+                type="password"
+                id="passwordInput"
+                placeholder="Enter password"
+            >
+
+            <button id="checkPasswordBtn">
+                Check Password
+            </button>
+
+        </div>
+
+        <!-- Password Generator -->
+        <div class="card">
+
+            <h2>🎲 Password Generator</h2>
+
+            <button id="generatePasswordBtn">
+                Generate Password
+            </button>
+
+        </div>
+
+        <!-- Link Analyzer -->
+        <div class="card">
+
+            <h2>🔗 Link Analyzer</h2>
+
+            <input
+                type="text"
+                id="linkInput"
+                placeholder="Enter URL"
+            >
+
+            <button id="analyzeLinkBtn">
+                Analyze Link
+            </button>
+
+        </div>
+
+        <!-- Results -->
+        <div class="card">
+
+            <h2>📋 Results</h2>
+
+            <div id="results">
+
+                Waiting for analysis...
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
