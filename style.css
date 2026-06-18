@@ -154,3 +154,12 @@ button:hover {
     }
 
 }
+select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 8px;
+    background-color: #334155;
+    color: white;
+}
