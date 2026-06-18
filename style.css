@@ -163,3 +163,24 @@ select {
     background-color: #334155;
     color: white;
 }
+select {
+
+    width: 100%;
+
+    padding: 12px;
+
+    margin-top: 10px;
+
+    margin-bottom: 15px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background-color: #334155;
+
+    color: white;
+
+    outline: none;
+
+}
