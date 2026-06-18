@@ -204,7 +204,7 @@ function ()
 
     for (
         let i = 0;
-        i < passwordLength.value
+        i < passwordLength.value;
         i++
     )
     {
@@ -220,6 +220,8 @@ function ()
         chars[randomIndex];
 
     }
+
+    generatedPassword = password;
 
     results.innerHTML =
     `
