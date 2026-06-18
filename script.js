@@ -12,6 +12,16 @@ const checkPasswordBtn = document.getElementById("checkPasswordBtn");
 
 // Password Generator
 const generatePasswordBtn = document.getElementById("generatePasswordBtn");
+const passwordLength =
+document.getElementById("passwordLength");
+
+const copyPasswordBtn =
+document.getElementById("copyPasswordBtn");
+
+const clearResultsBtn =
+document.getElementById("clearResultsBtn");
+
+let generatedPassword = "";
 
 // Link Analyzer
 const linkInput = document.getElementById("linkInput");
@@ -194,7 +204,7 @@ function ()
 
     for (
         let i = 0;
-        i < 12;
+        i < passwordLength.value
         i++
     )
     {
@@ -301,5 +311,39 @@ function ()
 
     ${status}
     `;
+
+});
+copyPasswordBtn.addEventListener(
+"click",
+function ()
+{
+
+if (
+generatedPassword === ""
+)
+{
+
+results.innerHTML =
+"⚠ Generate a password first";
+
+return;
+
+}
+
+navigator.clipboard.writeText(
+generatedPassword
+);
+
+results.innerHTML =
+"✅ Password copied";
+
+});
+clearResultsBtn.addEventListener(
+"click",
+function ()
+{
+
+results.innerHTML =
+"Waiting for analysis...";
 
 });
