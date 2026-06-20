@@ -1,65 +1,83 @@
 // =====================
-// Abudi Cyber Tools v1.0
+// Abudi Cyber Tools v1.1
 // =====================
 
-// Text Analyzer
-const textInput = document.getElementById("textInput");
-const analyzeTextBtn = document.getElementById("analyzeTextBtn");
+// ===== Inputs =====
 
-// Password Checker
-const passwordInput = document.getElementById("passwordInput");
-const checkPasswordBtn = document.getElementById("checkPasswordBtn");
+const textInput =
+document.getElementById("textInput");
 
-// Password Generator
-const generatePasswordBtn = document.getElementById("generatePasswordBtn");
+const passwordInput =
+document.getElementById("passwordInput");
+
 const passwordLength =
 document.getElementById("passwordLength");
+
+const linkInput =
+document.getElementById("linkInput");
+
+// ===== Buttons =====
+
+const analyzeTextBtn =
+document.getElementById("analyzeTextBtn");
+
+const checkPasswordBtn =
+document.getElementById("checkPasswordBtn");
+
+const generatePasswordBtn =
+document.getElementById("generatePasswordBtn");
 
 const copyPasswordBtn =
 document.getElementById("copyPasswordBtn");
 
+const analyzeLinkBtn =
+document.getElementById("analyzeLinkBtn");
+
 const clearResultsBtn =
 document.getElementById("clearResultsBtn");
 
+// ===== Results =====
+
+const results =
+document.getElementById("results");
+
 let generatedPassword = "";
 
-// Link Analyzer
-const linkInput = document.getElementById("linkInput");
-const analyzeLinkBtn = document.getElementById("analyzeLinkBtn");
-
-// Results
-const results = document.getElementById("results");
-
 // =====================
-// Security Function
+// Security
 // =====================
 
 function sanitize(input)
 {
     return input
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;");
 }
 
 // =====================
 // Text Analyzer
 // =====================
 
-analyzeTextBtn.addEventListener("click", function ()
+function analyzeText()
 {
 
-    let text = textInput.value.trim();
+    let text =
+    textInput.value.trim();
 
-    if (text.length > 5000)
+    if(text.length > 5000)
     {
+
         results.innerHTML =
-        "⚠ Input too large (Max 5000 characters)";
+        "⚠ Max 5000 characters";
+
         return;
+
     }
 
     text = sanitize(text);
 
-    const characters = text.length;
+    const characters =
+    text.length;
 
     const words =
     text === ""
@@ -67,32 +85,10 @@ analyzeTextBtn.addEventListener("click", function ()
     : text.split(/\s+/).length;
 
     const numbers =
-    (text.match(/\d/g) || []).length;
+    (text.match(/\d/g)||[]).length;
 
     const symbols =
-    (text.match(/[^a-zA-Z0-9\s]/g) || []).length;
-
-    let suspiciousFound = false;
-
-    const suspiciousPatterns =
-    [
-        "<script",
-        "eval(",
-        "document.cookie",
-        "javascript:"
-    ];
-
-    for (let pattern of suspiciousPatterns)
-    {
-        if (
-            text
-            .toLowerCase()
-            .includes(pattern)
-        )
-        {
-            suspiciousFound = true;
-        }
-    }
+    (text.match(/[^a-zA-Z0-9\s]/g)||[]).length;
 
     results.innerHTML =
     `
@@ -115,25 +111,13 @@ analyzeTextBtn.addEventListener("click", function ()
     Symbols: ${symbols}
     `;
 
-    if (suspiciousFound)
-    {
-        results.innerHTML +=
-        `
-        <br><br>
-
-        ⚠ Suspicious content detected
-        `;
-    }
-
-});
+}
 
 // =====================
 // Password Checker
 // =====================
 
-checkPasswordBtn.addEventListener(
-"click",
-function ()
+function checkPassword()
 {
 
     const password =
@@ -151,7 +135,7 @@ function ()
     const hasSymbols =
     /[!@#$%^&*]/.test(password);
 
-    if (
+    if(
         password.length >= 8
         &&
         hasNumbers
@@ -161,11 +145,13 @@ function ()
         hasSymbols
     )
     {
+
         strength =
         "Strong 💪";
+
     }
 
-    else if (
+    else if(
         password.length >= 6
         &&
         hasNumbers
@@ -173,8 +159,10 @@ function ()
         hasLetters
     )
     {
+
         strength =
-        "Medium ⚠️";
+        "Medium ⚠";
+
     }
 
     results.innerHTML =
@@ -186,166 +174,4 @@ function ()
     ${strength}
     `;
 
-});
-
-// =====================
-// Password Generator
-// =====================
-
-generatePasswordBtn.addEventListener(
-"click",
-function ()
-{
-
-    const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-
-    let password = "";
-
-    for (
-        let i = 0;
-        i < passwordLength.value;
-        i++
-    )
-    {
-
-        const randomIndex =
-        Math.floor(
-            Math.random()
-            *
-            chars.length
-        );
-
-        password +=
-        chars[randomIndex];
-
-    }
-
-    generatedPassword = password;
-
-    results.innerHTML =
-    `
-    🎲 Generated Password
-
-    <br><br>
-
-    <b>${password}</b>
-    `;
-
-});
-
-// =====================
-// Link Analyzer
-// =====================
-
-analyzeLinkBtn.addEventListener(
-"click",
-function ()
-{
-
-    const link =
-    linkInput.value.trim();
-
-    if (link === "")
-    {
-        results.innerHTML =
-        "⚠ Please enter a link";
-
-        return;
-    }
-
-    let status =
-    "Safe ✅";
-
-    const suspiciousWords =
-    [
-        "login",
-        "verify",
-        "free",
-        "gift",
-        "prize",
-        "account",
-        "update",
-        "secure"
-    ];
-
-    for (
-        let word
-        of suspiciousWords
-    )
-    {
-
-        if (
-            link
-            .toLowerCase()
-            .includes(word)
-        )
-        {
-
-            status =
-            "Suspicious ⚠️";
-
-        }
-
-    }
-
-    if (
-        !link.startsWith("http")
-    )
-    {
-
-        status =
-        "Invalid Link ❌";
-
-    }
-
-    results.innerHTML =
-    `
-    🔗 Link Analysis
-
-    <br><br>
-
-    ${link}
-
-    <br><br>
-
-    Status:
-
-    ${status}
-    `;
-
-});
-copyPasswordBtn.addEventListener(
-"click",
-function ()
-{
-
-if (
-generatedPassword === ""
-)
-{
-
-results.innerHTML =
-"⚠ Generate a password first";
-
-return;
-
 }
-
-navigator.clipboard.writeText(
-generatedPassword
-);
-
-results.innerHTML =
-"✅ Password copied";
-
-});
-clearResultsBtn.addEventListener(
-"click",
-function ()
-{
-
-results.innerHTML =
-"Waiting for analysis...";
-
-});
