@@ -9,7 +9,7 @@
 /* ===== Body ===== */
 
 body {
-    background-color: #0f172a;
+    background: #0f172a;
     color: white;
     font-family: Arial, sans-serif;
     padding: 20px;
@@ -27,38 +27,47 @@ body {
 h1 {
     text-align: center;
     margin-bottom: 10px;
+    color: #60a5fa;
 }
 
 p {
     text-align: center;
-    margin-bottom: 25px;
     color: #cbd5e1;
+    margin-bottom: 30px;
 }
 
 /* ===== Cards ===== */
 
 .card {
-    background-color: #1e293b;
+
+    background: #1e293b;
 
     padding: 20px;
 
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 
-    border-radius: 12px;
+    border-radius: 15px;
 
-    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    box-shadow:
+    0 0 20px rgba(0,0,0,0.3);
+
 }
 
-/* ===== Card Title ===== */
+/* ===== Titles ===== */
 
 .card h2 {
+
     margin-bottom: 15px;
+
+    color: #93c5fd;
+
 }
 
 /* ===== Inputs ===== */
 
 textarea,
-input {
+input,
+select {
 
     width: 100%;
 
@@ -70,17 +79,17 @@ input {
 
     border: none;
 
-    border-radius: 8px;
+    outline: none;
 
-    background-color: #334155;
+    border-radius: 10px;
+
+    background: #334155;
 
     color: white;
 
-    outline: none;
-
 }
 
-/* ===== Text Area ===== */
+/* ===== Textarea ===== */
 
 textarea {
 
@@ -96,91 +105,77 @@ button {
 
     width: 100%;
 
-    padding: 12px;
+    padding: 13px;
 
     border: none;
 
-    border-radius: 8px;
+    border-radius: 10px;
 
-    background-color: #2563eb;
+    background: #2563eb;
 
     color: white;
 
+    font-size: 15px;
+
     cursor: pointer;
 
-    font-size: 15px;
+    transition: 0.3s;
 
 }
 
-/* Hover */
+/* ===== Hover ===== */
 
 button:hover {
 
-    background-color: #1d4ed8;
+    background: #1d4ed8;
 
 }
 
-/* ===== Results Box ===== */
+/* ===== Results ===== */
 
 #results {
 
-    background-color: #334155;
+    background: #334155;
+
+    min-height: 80px;
 
     padding: 15px;
 
-    border-radius: 8px;
-
-    min-height: 80px;
+    border-radius: 10px;
 
     line-height: 1.8;
 
 }
 
+/* ===== Space Between Buttons ===== */
+
+#copyPasswordBtn,
+#clearResultsBtn {
+
+    margin-top: 12px;
+
+}
+
 /* ===== Mobile ===== */
 
-@media (max-width: 600px)
-{
+@media(max-width:600px){
 
-    .card {
+    body{
 
-        padding: 15px;
-
-    }
-
-    h1 {
-
-        font-size: 24px;
+        padding:15px;
 
     }
 
-}
-select {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border: none;
-    border-radius: 8px;
-    background-color: #334155;
-    color: white;
-}
-select {
+    .card{
 
-    width: 100%;
+        padding:15px;
 
-    padding: 12px;
+    }
 
-    margin-top: 10px;
+    h1{
 
-    margin-bottom: 15px;
+        font-size:26px;
 
-    border: none;
-
-    border-radius: 8px;
-
-    background-color: #334155;
-
-    color: white;
-
-    outline: none;
+    }
 
 }
