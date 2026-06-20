@@ -2,57 +2,74 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abudi Cyber Tools</title>
 
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Abudi Cyber Tools</title>
+
+<link rel="stylesheet"
+href="style.css">
+
 </head>
 
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <h1>🛡️ Abudi Cyber Tools</h1>
-        <p>Cybersecurity Analysis Toolkit</p>
+<h1>🛡️ Abudi Cyber Tools</h1>
 
-        <!-- Text Analyzer -->
-        <div class="card">
+<p>
+Simple Cyber Security Tools
+</p>
 
-            <h2>📝 Text Analyzer</h2>
 
-            <textarea
-                id="textInput"
-                placeholder="Enter text here..."
-            ></textarea>
+<!-- Text Analyzer -->
 
-            <button id="analyzeTextBtn">
-                Analyze Text
-            </button>
+<div class="card">
 
-        </div>
+<h2>📝 Text Analyzer</h2>
 
-        <!-- Password Checker -->
-        <div class="card">
+<textarea
+id="textInput"
+placeholder="Enter text here..."></textarea>
 
-            <h2>🔐 Password Strength Checker</h2>
+<button id="analyzeTextBtn">
 
-            <input
-                type="password"
-                id="passwordInput"
-                placeholder="Enter password"
-            >
+Analyze Text
 
-            <button id="checkPasswordBtn">
-                Check Password
-            </button>
+</button>
 
-        </div>
+</div>
 
-        <!-- Password Generator -->
-        <div class="card">
 
-             <h2>🎲 Password Generator</h2>
+<!-- Password Checker -->
+
+<div class="card">
+
+<h2>🔐 Password Checker</h2>
+
+<input
+type="text"
+id="passwordInput"
+placeholder="Enter password">
+
+<button id="checkPasswordBtn">
+
+Check Password
+
+</button>
+
+</div>
+
+
+<!-- Password Generator -->
+
+<div class="card">
+
+<h2>🎲 Password Generator</h2>
 
 <select id="passwordLength">
 
@@ -80,37 +97,40 @@ Generate Password
 
 </button>
 
-        </div>
+</div>
 
-        <!-- Link Analyzer -->
-        <div class="card">
 
-            <h2>🔗 Link Analyzer</h2>
+<!-- Link Analyzer -->
 
-            <input
-                type="text"
-                id="linkInput"
-                placeholder="Enter URL"
-            >
+<div class="card">
 
-            <button id="analyzeLinkBtn">
-                Analyze Link
-            </button>
+<h2>🔗 Link Analyzer</h2>
 
-        </div>
+<input
+type="text"
+id="linkInput"
+placeholder="https://example.com">
 
-        <!-- Results -->
-        <div class="card">
+<button id="analyzeLinkBtn">
 
-            <h2>📋 Results</h2>
+Analyze Link
 
-            <div id="results">
+</button>
 
-            Waiting for analysis...
+</div>
 
-            </div>
 
-           <br>
+<!-- Results -->
+
+<div class="card">
+
+<h2>📊 Results</h2>
+
+<div id="results">
+
+Waiting for analysis...
+
+</div>
 
 <button id="clearResultsBtn">
 
@@ -118,11 +138,12 @@ Generate Password
 
 </button>
 
-        </div>
+</div>
 
-    </div>
 
-    <script src="script.js"></script>
+</div>
+
+<script src="script.js"></script>
 
 </body>
 
