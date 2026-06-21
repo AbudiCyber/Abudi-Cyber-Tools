@@ -1,190 +1,160 @@
-// =====================
-// Abudi Cyber Tools v1.1
-// =====================
+// Abudi Cyber Tools - كامل السيكربت
 
 // ===== Inputs =====
-
-const textInput =
-document.getElementById("textInput");
-
-const passwordInput =
-document.getElementById("passwordInput");
-
-const passwordLength =
-document.getElementById("passwordLength");
-
-const linkInput =
-document.getElementById("linkInput");
+const textInput = document.getElementById("textInput");
+const passwordInput = document.getElementById("passwordInput");
+const passwordLength = document.getElementById("passwordLength");
+const linkInput = document.getElementById("linkInput");
 
 // ===== Buttons =====
-
-const analyzeTextBtn =
-document.getElementById("analyzeTextBtn");
-
-const checkPasswordBtn =
-document.getElementById("checkPasswordBtn");
-
-const generatePasswordBtn =
-document.getElementById("generatePasswordBtn");
-
-const copyPasswordBtn =
-document.getElementById("copyPasswordBtn");
-
-const analyzeLinkBtn =
-document.getElementById("analyzeLinkBtn");
-
-const clearResultsBtn =
-document.getElementById("clearResultsBtn");
+const analyzeTextBtn = document.getElementById("analyzeTextBtn");
+const checkPasswordBtn = document.getElementById("checkPasswordBtn");
+const generatePasswordBtn = document.getElementById("generatePasswordBtn");
+const copyPasswordBtn = document.getElementById("copyPasswordBtn");
+const analyzeLinkBtn = document.getElementById("analyzeLinkBtn");
+const clearResultsBtn = document.getElementById("clearResultsBtn");
 
 // ===== Results =====
-
-const results =
-document.getElementById("results");
-
+const results = document.getElementById("results");
 let generatedPassword = "";
 
-// =====================
-// Security
-// =====================
-
-function sanitize(input)
-{
-    return input
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;");
+// ===== Helpers =====
+function sanitize(input) {
+  return input.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-// =====================
-// Text Analyzer
-// =====================
-
-function analyzeText()
-{
-
-    let text =
-    textInput.value.trim();
-
-    if(text.length > 5000)
-    {
-
-        results.innerHTML =
-        "⚠ Max 5000 characters";
-
-        return;
-
-    }
-
-    text = sanitize(text);
-
-    const characters =
-    text.length;
-
-    const words =
-    text === ""
-    ? 0
-    : text.split(/\s+/).length;
-
-    const numbers =
-    (text.match(/\d/g)||[]).length;
-
-    const symbols =
-    (text.match(/[^a-zA-Z0-9\s]/g)||[]).length;
-
-    results.innerHTML =
-    `
+// ===== Text Analyzer =====
+function analyzeText() {
+  let text = textInput.value.trim();
+  if (text.length > 5000) {
+    results.innerHTML = "⚠ Max 5000 characters";
+    return;
+  }
+  text = sanitize(text);
+  const characters = text.length;
+  const words = text === "" ? 0 : text.split(/\s+/).length;
+  const numbers = (text.match(/\d/g) || []).length;
+  const symbols = (text.match(/[^a-zA-Z0-9\s]/g) || []).length;
+  results.innerHTML = `
     📝 Text Analysis
-
     <br><br>
-
     Characters: ${characters}
-
     <br>
-
     Words: ${words}
-
     <br>
-
     Numbers: ${numbers}
-
     <br>
-
     Symbols: ${symbols}
-    `;
-
+  `;
 }
 
-// =====================
-// Password Checker
-// =====================
-
-function checkPassword()
-{
-
-    const password =
-    passwordInput.value;
-
-    let strength =
-    "Weak ❌";
-
-    const hasNumbers =
-    /\d/.test(password);
-
-    const hasLetters =
-    /[a-zA-Z]/.test(password);
-
-    const hasSymbols =
-    /[!@#$%^&*]/.test(password);
-
-    if(
-        password.length >= 8
-        &&
-        hasNumbers
-        &&
-        hasLetters
-        &&
-        hasSymbols
-    )
-    {
-
-        strength =
-        "Strong 💪";
-
-    }
-
-    else if(
-        password.length >= 6
-        &&
-        hasNumbers
-        &&
-        hasLetters
-    )
-    {
-
-        strength =
-        "Medium ⚠";
-
-    }
-
-    results.innerHTML =
-    `
+// ===== Password Checker =====
+function checkPassword() {
+  const password = passwordInput.value;
+  let strength = "Weak ❌";
+  const hasNumbers = /\d/.test(password);
+  const hasLetters = /[a-zA-Z]/.test(password);
+  const hasSymbols = /[!@#$%^&*()_\-+={}\[\]|;:'",.<>/?`~]/.test(password);
+  if (password.length >= 8 && hasNumbers && hasLetters && hasSymbols) {
+    strength = "Strong 💪";
+  } else if (password.length >= 6 && hasNumbers && hasLetters) {
+    strength = "Medium ⚠";
+  }
+  results.innerHTML = `
     🔐 Password Strength
-
     <br><br>
-
     ${strength}
-    `;
-
+  `;
 }
-// =====================
-// Event Listeners
-// =====================
 
-analyzeTextBtn.addEventListener(
-"click",
-analyzeText
-);
+// ===== Password Generator =====
+function generatePassword() {
+  const len = parseInt(passwordLength.value, 10) || 12;
+  const lower = "abcdefghijklmnopqrstuvwxyz";
+  const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const numbers = "0123456789";
+  const symbols = "!@#$%^&*()_+-=[]{}|;:,.<>/?";
+  const all = lower + upper + numbers + symbols;
+  let pass = "";
+  // Ensure at least one of each category for better strength
+  pass += lower[Math.floor(Math.random() * lower.length)];
+  pass += upper[Math.floor(Math.random() * upper.length)];
+  pass += numbers[Math.floor(Math.random() * numbers.length)];
+  pass += symbols[Math.floor(Math.random() * symbols.length)];
+  for (let i = pass.length; i < len; i++) {
+    pass += all[Math.floor(Math.random() * all.length)];
+  }
+  // shuffle
+  generatedPassword = pass.split("").sort(() => 0.5 - Math.random()).join("");
+  results.innerHTML = `
+    🎲 Generated Password
+    <br><br>
+    <code style="user-select: all; background:#0b1220; padding:6px; display:inline-block; border-radius:6px;">${generatedPassword}</code>
+  `;
+}
 
-checkPasswordBtn.addEventListener(
-"click",
-checkPassword
-);
+// ===== Copy Password =====nasync function copyPassword() {
+  if (!generatedPassword) {
+    // if no generated, try copy from input if any
+    const maybe = passwordInput.value.trim();
+    if (maybe) {
+      generatedPassword = maybe;
+    } else {
+      results.innerHTML = "⚠ No password to copy";
+      return;
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(generatedPassword);
+    results.innerHTML = "✅ Password copied to clipboard";
+  } catch (e) {
+    // fallback
+    const ta = document.createElement("textarea");
+    ta.value = generatedPassword;
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand("copy");
+      results.innerHTML = "✅ Password copied (fallback)";
+    } catch (err) {
+      results.innerHTML = "❌ Copy failed";
+    }
+    ta.remove();
+  }
+}
+
+// ===== Link Analyzer (بسيط) =====
+function analyzeLink() {
+  const url = linkInput.value.trim();
+  if (!url) {
+    results.innerHTML = "⚠ Enter a URL";
+    return;
+  }
+  try {
+    const parsed = new URL(url.startsWith("http") ? url : "https://" + url);
+    results.innerHTML = `
+      🔗 Link Analysis
+      <br><br>
+      Host: ${parsed.host}
+      <br>
+      Protocol: ${parsed.protocol}
+      <br>
+      Path: ${parsed.pathname}
+    `;
+  } catch (e) {
+    results.innerHTML = "❌ Invalid URL";
+  }
+}
+
+// ===== Clear Results =====
+function clearResults() {
+  results.innerHTML = "Waiting for analysis...";
+}
+
+// ===== Event Listeners =====
+analyzeTextBtn.addEventListener("click", analyzeText);
+checkPasswordBtn.addEventListener("click", checkPassword);
+generatePasswordBtn.addEventListener("click", generatePassword);
+copyPasswordBtn.addEventListener("click", copyPassword);
+analyzeLinkBtn.addEventListener("click", analyzeLink);
+clearResultsBtn.addEventListener("click", clearResults);
