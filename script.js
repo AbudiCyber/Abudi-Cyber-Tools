@@ -1,4 +1,4 @@
-// Abudi Cyber Tools - كامل السيكربت
+// Abudi Cyber Tools - كامل السيكربت (مُصحح بالكامل)
 
 // ===== Inputs =====
 const textInput = document.getElementById("textInput");
@@ -93,7 +93,8 @@ function generatePassword() {
   `;
 }
 
-// ===== Copy Password =====nasync function copyPassword() {
+// ===== Copy Password =====
+async function copyPassword() {
   if (!generatedPassword) {
     // if no generated, try copy from input if any
     const maybe = passwordInput.value.trim();
@@ -123,7 +124,7 @@ function generatePassword() {
   }
 }
 
-// ===== Link Analyzer (بسيط) =====
+// ===== Link Analyzer =====
 function analyzeLink() {
   const url = linkInput.value.trim();
   if (!url) {
