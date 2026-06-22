@@ -126,25 +126,25 @@ async function copyPassword() {
 
 // ===== Link Analyzer =====
 function analyzeLink() {
-  const url = linkInput.value.trim();
-  if (!url) {
-    results.innerHTML = "⚠ Enter a URL";
-    return;
-  }
-  try {
-    const parsed = new URL(url.startsWith("http") ? url : "https://" + url);
-    results.innerHTML = `
-      🔗 Link Analysis
-      <br><br>
-      Host: ${parsed.host}
-      <br>
-      Protocol: ${parsed.protocol}
-      <br>
-      Path: ${parsed.pathname}
-    `;
-  } catch (e) {
-    results.innerHTML = "❌ Invalid URL";
-  }
+    const url = linkInput.value.trim();
+    if (!url) {
+        results.innerHTML = "⚠ Enter a URL";
+        return;
+    }
+    try {
+        const parsed = new URL(url.startsWith("http") ? url : "https://" + url);
+        results.innerHTML = `
+            🔗 Link Analysis
+            <br><br>
+            Host: ${parsed.host}
+            <br>
+            Protocol: ${parsed.protocol}
+            <br>
+            Path: ${parsed.pathname}
+        `;
+    } catch (e) {
+        results.innerHTML = "❌ Invalid URL";
+    }
 }
 
 // ===== Clear Results =====
