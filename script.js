@@ -5,6 +5,9 @@ const textInput = document.getElementById("textInput");
 const passwordInput = document.getElementById("passwordInput");
 const passwordLength = document.getElementById("passwordLength");
 const linkInput = document.getElementById("linkInput");
+const hashInput = document.getElementById("hashInput");
+const hashType = document.getElementById("hashType");
+const generateHashBtn = document.getElementById("generateHashBtn");
 
 // ===== Buttons =====
 const analyzeTextBtn = document.getElementById("analyzeTextBtn");
@@ -147,6 +150,30 @@ function analyzeLink() {
     }
 }
 
+// ===== Hash Generator =====
+async function generateHash() {
+    const text = hashInput.value.trim();
+    if (!text) {
+        results.innerHTML = "⚠ Enter text to hash";
+        return;
+    }
+    const algorithm = hashType.value;
+    try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(text);
+        const hashBuffer = await crypto.subtle.digest(algorithm, data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        results.innerHTML = `
+            🔑 Hash Generated (${algorithm})
+            <br><br>
+            <code style="user-select: all; background:#0b1220; padding:8px 12px; display:inline-block; border-radius:6px; word-break:break-all; max-width:100%;">${hashHex}</code>
+        `;
+    } catch (e) {
+        results.innerHTML = "❌ Hash generation failed";
+    }
+}
+
 // ===== Clear Results =====
 function clearResults() {
   results.innerHTML = "Waiting for analysis...";
@@ -158,4 +185,5 @@ checkPasswordBtn.addEventListener("click", checkPassword);
 generatePasswordBtn.addEventListener("click", generatePassword);
 copyPasswordBtn.addEventListener("click", copyPassword);
 analyzeLinkBtn.addEventListener("click", analyzeLink);
+generateHashBtn.addEventListener("click", generateHash);
 clearResultsBtn.addEventListener("click", clearResults);
