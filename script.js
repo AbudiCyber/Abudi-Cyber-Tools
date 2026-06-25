@@ -177,40 +177,37 @@ async function generateHash() {
     }
 }
 
-// ===== Base64 Encoder/Decoder =====
+// ===== Base64 Encoder =====
 function encodeBase64() {
-    const text = base64Input.value;
+    const text = base64Input.value.trim();
     if (!text) {
-        results.innerHTML = "⚠ Enter text to encode";
+        results.innerHTML = "⚠ Enter text";
         return;
     }
-    try {
-        const encoded = btoa(text);
-        results.innerHTML = `
-            🔢 Base64 Encoded
-            <br><br>
-            <code style="user-select: all; background:#0b1220; padding:8px 12px; display:inline-block; border-radius:6px; word-break:break-all; max-width:100%;">${encoded}</code>
-        `;
-    } catch (e) {
-        results.innerHTML = "❌ Encoding failed - Please check your input";
-    }
+    const encoded = btoa(text);
+    results.innerHTML = `
+        🔐 Base64 Encoded
+        <br><br>
+        ${encoded}
+    `;
 }
 
+// ===== Base64 Decoder =====
 function decodeBase64() {
-    const text = base64Input.value;
+    const text = base64Input.value.trim();
     if (!text) {
-        results.innerHTML = "⚠ Enter Base64 text to decode";
+        results.innerHTML = "⚠ Enter Base64";
         return;
     }
     try {
         const decoded = atob(text);
         results.innerHTML = `
-            🔢 Base64 Decoded
+            🔓 Base64 Decoded
             <br><br>
-            <code style="user-select: all; background:#0b1220; padding:8px 12px; display:inline-block; border-radius:6px; word-break:break-all; max-width:100%;">${decoded}</code>
+            ${decoded}
         `;
-    } catch (e) {
-        results.innerHTML = "❌ Decoding failed - Invalid Base64 string";
+    } catch {
+        results.innerHTML = "❌ Invalid Base64";
     }
 }
 
