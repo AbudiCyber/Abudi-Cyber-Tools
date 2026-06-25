@@ -8,6 +8,9 @@ const linkInput = document.getElementById("linkInput");
 const hashInput = document.getElementById("hashInput");
 const hashType = document.getElementById("hashType");
 const generateHashBtn = document.getElementById("generateHashBtn");
+const base64Input = document.getElementById("base64Input");
+const encodeBtn = document.getElementById("encodeBtn");
+const decodeBtn = document.getElementById("decodeBtn");
 
 // ===== Buttons =====
 const analyzeTextBtn = document.getElementById("analyzeTextBtn");
@@ -174,6 +177,43 @@ async function generateHash() {
     }
 }
 
+// ===== Base64 Encoder/Decoder =====
+function encodeBase64() {
+    const text = base64Input.value;
+    if (!text) {
+        results.innerHTML = "⚠ Enter text to encode";
+        return;
+    }
+    try {
+        const encoded = btoa(text);
+        results.innerHTML = `
+            🔢 Base64 Encoded
+            <br><br>
+            <code style="user-select: all; background:#0b1220; padding:8px 12px; display:inline-block; border-radius:6px; word-break:break-all; max-width:100%;">${encoded}</code>
+        `;
+    } catch (e) {
+        results.innerHTML = "❌ Encoding failed - Please check your input";
+    }
+}
+
+function decodeBase64() {
+    const text = base64Input.value;
+    if (!text) {
+        results.innerHTML = "⚠ Enter Base64 text to decode";
+        return;
+    }
+    try {
+        const decoded = atob(text);
+        results.innerHTML = `
+            🔢 Base64 Decoded
+            <br><br>
+            <code style="user-select: all; background:#0b1220; padding:8px 12px; display:inline-block; border-radius:6px; word-break:break-all; max-width:100%;">${decoded}</code>
+        `;
+    } catch (e) {
+        results.innerHTML = "❌ Decoding failed - Invalid Base64 string";
+    }
+}
+
 // ===== Clear Results =====
 function clearResults() {
   results.innerHTML = "Waiting for analysis...";
@@ -186,4 +226,6 @@ generatePasswordBtn.addEventListener("click", generatePassword);
 copyPasswordBtn.addEventListener("click", copyPassword);
 analyzeLinkBtn.addEventListener("click", analyzeLink);
 generateHashBtn.addEventListener("click", generateHash);
+encodeBtn.addEventListener("click", encodeBase64);
+decodeBtn.addEventListener("click", decodeBase64);
 clearResultsBtn.addEventListener("click", clearResults);
