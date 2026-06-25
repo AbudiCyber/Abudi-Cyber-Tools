@@ -11,6 +11,8 @@ const generateHashBtn = document.getElementById("generateHashBtn");
 const base64Input = document.getElementById("base64Input");
 const encodeBtn = document.getElementById("encodeBtn");
 const decodeBtn = document.getElementById("decodeBtn");
+const emailInput = document.getElementById("emailInput");
+const validateEmailBtn = document.getElementById("validateEmailBtn");
 
 // ===== Buttons =====
 const analyzeTextBtn = document.getElementById("analyzeTextBtn");
@@ -211,6 +213,29 @@ function decodeBase64() {
     }
 }
 
+// ===== Email Validator =====
+function validateEmail() {
+    const email = emailInput.value.trim();
+    if (!email) {
+        results.innerHTML = "⚠ Enter an email address";
+        return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(email)) {
+        results.innerHTML = `
+            ✅ Valid Email
+            <br><br>
+            ${email} is a valid email address
+        `;
+    } else {
+        results.innerHTML = `
+            ❌ Invalid Email
+            <br><br>
+            ${email} is not a valid email address
+        `;
+    }
+}
+
 // ===== Clear Results =====
 function clearResults() {
   results.innerHTML = "Waiting for analysis...";
@@ -225,4 +250,5 @@ analyzeLinkBtn.addEventListener("click", analyzeLink);
 generateHashBtn.addEventListener("click", generateHash);
 encodeBtn.addEventListener("click", encodeBase64);
 decodeBtn.addEventListener("click", decodeBase64);
+validateEmailBtn.addEventListener("click", validateEmail);
 clearResultsBtn.addEventListener("click", clearResults);
