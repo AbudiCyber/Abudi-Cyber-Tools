@@ -188,7 +188,7 @@ function encodeBase64() {
     }
     const encoded = btoa(text);
     results.innerHTML = `
-        🔐 Base64 Encoded
+        Base64 Encoded
         <br><br>
         ${encoded}
     `;
@@ -204,7 +204,7 @@ function decodeBase64() {
     try {
         const decoded = atob(text);
         results.innerHTML = `
-            🔓 Base64 Decoded
+            Base64 Decoded
             <br><br>
             ${decoded}
         `;
