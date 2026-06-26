@@ -216,22 +216,22 @@ function decodeBase64() {
 // ===== Email Validator =====
 function validateEmail() {
     const email = emailInput.value.trim();
-    if (!email) {
-        results.innerHTML = "⚠ Enter an email address";
+    if (email === "") {
+        results.innerHTML = "⚠ Please enter an email address";
         return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (emailRegex.test(email)) {
         results.innerHTML = `
-            ✅ Valid Email
+            Email Validation
             <br><br>
-            ${email} is a valid email address
+            Valid Email Address
         `;
     } else {
         results.innerHTML = `
-            ❌ Invalid Email
+            Email Validation
             <br><br>
-            ${email} is not a valid email address
+            Invalid Email Address
         `;
     }
 }
