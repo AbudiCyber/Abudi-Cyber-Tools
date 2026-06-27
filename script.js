@@ -15,7 +15,7 @@ const emailInput = document.getElementById("emailInput");
 const validateEmailBtn = document.getElementById("validateEmailBtn");
 const urlParserInput = document.getElementById("urlParserInput");
 const parseUrlBtn = document.getElementById("parseUrlBtn");
-const fileInput = document.getElementById("fileInput");
+const fileHashInput = document.getElementById("fileHashInput");
 const generateFileHashBtn = document.getElementById("generateFileHashBtn");
 
 // ===== Buttons =====
@@ -271,27 +271,29 @@ function parseURL() {
 
 // ===== File Hash Checker =====
 async function generateFileHash() {
-    const file = fileInput.files[0];
+    const file = fileHashInput.files[0];
     if (!file) {
-        results.innerHTML = "⚠ Please select a file";
+        results.innerHTML = "⚠ Please choose a file.";
         return;
     }
     try {
         const buffer = await file.arrayBuffer();
         const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
         results.innerHTML = `
-            📁 File Hash (SHA-256)
+            📂 File Hash
             <br><br>
-            <b>File:</b> ${file.name}
-            <br>
-            <b>Size:</b> ${file.size} bytes
+            File: <b>${file.name}</b>
             <br><br>
-            <code style="user-select: all; background:#0b1220; padding:8px 12px; display:inline-block; border-radius:6px; word-break:break-all; max-width:100%;">${hashHex}</code>
+            SHA-256
+            <br><br>
+            <code style="user-select:all; word-break:break-all;">
+                ${hashHex}
+            </code>
         `;
-    } catch (e) {
-        results.innerHTML = "❌ Failed to generate file hash";
+    } catch {
+        results.innerHTML = "❌ Failed to generate file hash.";
     }
 }
 
