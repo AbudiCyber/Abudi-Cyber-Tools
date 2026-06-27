@@ -285,10 +285,12 @@ async function generateFileHash() {
             📂 File Hash
             <br><br>
             File: <b>${file.name}</b>
+            <br>
+            Size: <b>${file.size}</b> bytes
             <br><br>
             SHA-256
             <br><br>
-            <code style="user-select:all; word-break:break-all;">
+            <code style="user-select:all; word-break:break-all; background:#0b1220; padding:8px 12px; display:inline-block; border-radius:6px; max-width:100%;">
                 ${hashHex}
             </code>
         `;
