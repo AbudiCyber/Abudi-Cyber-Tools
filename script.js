@@ -13,6 +13,8 @@ const encodeBtn = document.getElementById("encodeBtn");
 const decodeBtn = document.getElementById("decodeBtn");
 const emailInput = document.getElementById("emailInput");
 const validateEmailBtn = document.getElementById("validateEmailBtn");
+const urlParserInput = document.getElementById("urlParserInput");
+const parseUrlBtn = document.getElementById("parseUrlBtn");
 
 // ===== Buttons =====
 const analyzeTextBtn = document.getElementById("analyzeTextBtn");
@@ -236,6 +238,37 @@ function validateEmail() {
     }
 }
 
+// ===== URL Parser =====
+function parseURL() {
+    const url = urlParserInput.value.trim();
+    if (!url) {
+        results.innerHTML = "⚠ Please enter a URL";
+        return;
+    }
+    try {
+        const parsed = new URL(url.startsWith("http") ? url : "https://" + url);
+        results.innerHTML = `
+            📊 URL Parser
+            <br><br>
+            Protocol: ${parsed.protocol}
+            <br>
+            Host: ${parsed.host}
+            <br>
+            Pathname: ${parsed.pathname}
+            <br>
+            Search: ${parsed.search || "None"}
+            <br>
+            Hash: ${parsed.hash || "None"}
+            <br>
+            Hostname: ${parsed.hostname}
+            <br>
+            Port: ${parsed.port || "Default"}
+        `;
+    } catch (e) {
+        results.innerHTML = "❌ Invalid URL";
+    }
+}
+
 // ===== Clear Results =====
 function clearResults() {
   results.innerHTML = "Waiting for analysis...";
@@ -251,4 +284,5 @@ generateHashBtn.addEventListener("click", generateHash);
 encodeBtn.addEventListener("click", encodeBase64);
 decodeBtn.addEventListener("click", decodeBase64);
 validateEmailBtn.addEventListener("click", validateEmail);
+parseUrlBtn.addEventListener("click", parseURL);
 clearResultsBtn.addEventListener("click", clearResults);
