@@ -240,31 +240,29 @@ function validateEmail() {
 
 // ===== URL Parser =====
 function parseURL() {
-    const url = urlParserInput.value.trim();
-    if (!url) {
+    const input = urlParserInput.value.trim();
+    if (input === "") {
         results.innerHTML = "⚠ Please enter a URL";
         return;
     }
     try {
-        const parsed = new URL(url.startsWith("http") ? url : "https://" + url);
+        const url = new URL(input);
         results.innerHTML = `
-            📊 URL Parser
+            🌍 URL Analysis
             <br><br>
-            Protocol: ${parsed.protocol}
+            <b>Protocol:</b> ${url.protocol}
             <br>
-            Host: ${parsed.host}
+            <b>Hostname:</b> ${url.hostname}
             <br>
-            Pathname: ${parsed.pathname}
+            <b>Port:</b> ${url.port || "Default"}
             <br>
-            Search: ${parsed.search || "None"}
+            <b>Path:</b> ${url.pathname}
             <br>
-            Hash: ${parsed.hash || "None"}
+            <b>Query:</b> ${url.search || "None"}
             <br>
-            Hostname: ${parsed.hostname}
-            <br>
-            Port: ${parsed.port || "Default"}
+            <b>Fragment:</b> ${url.hash || "None"}
         `;
-    } catch (e) {
+    } catch {
         results.innerHTML = "❌ Invalid URL";
     }
 }
