@@ -17,6 +17,7 @@ const urlParserInput = document.getElementById("urlParserInput");
 const parseUrlBtn = document.getElementById("parseUrlBtn");
 const fileHashInput = document.getElementById("fileHashInput");
 const generateFileHashBtn = document.getElementById("generateFileHashBtn");
+const fileHashResult = document.getElementById("fileHashResult");
 
 // ===== Buttons =====
 const analyzeTextBtn = document.getElementById("analyzeTextBtn");
@@ -273,7 +274,7 @@ function parseURL() {
 async function generateFileHash() {
     const file = fileHashInput.files[0];
     if (!file) {
-        results.innerHTML = "⚠ Please choose a file.";
+        fileHashResult.innerHTML = "⚠ Please choose a file.";
         return;
     }
     try {
@@ -281,7 +282,7 @@ async function generateFileHash() {
         const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-        results.innerHTML = `
+        fileHashResult.innerHTML = `
             📂 File Hash
             <br><br>
             File: <b>${file.name}</b>
@@ -295,7 +296,7 @@ async function generateFileHash() {
             </code>
         `;
     } catch {
-        results.innerHTML = "❌ Failed to generate file hash.";
+        fileHashResult.innerHTML = "❌ Failed to generate file hash.";
     }
 }
 
