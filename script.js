@@ -18,6 +18,9 @@ const parseUrlBtn = document.getElementById("parseUrlBtn");
 const fileHashInput = document.getElementById("fileHashInput");
 const generateFileHashBtn = document.getElementById("generateFileHashBtn");
 const fileHashResult = document.getElementById("fileHashResult");
+const copyFileHashBtn = document.getElementById("copyFileHashBtn");
+const downloadReportBtn = document.getElementById("downloadReportBtn");
+const clearFileHashBtn = document.getElementById("clearFileHashBtn");
 
 // ===== Buttons =====
 const analyzeTextBtn = document.getElementById("analyzeTextBtn");
@@ -30,10 +33,25 @@ const clearResultsBtn = document.getElementById("clearResultsBtn");
 // ===== Results =====
 const results = document.getElementById("results");
 let generatedPassword = "";
+let lastFileHash = "";
+let lastFileName = "";
 
 // ===== Helpers =====
 function sanitize(input) {
   return input.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+
+function formatDate(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleString();
 }
 
 // ===== Text Analyzer =====
@@ -270,11 +288,13 @@ function parseURL() {
     }
 }
 
-// ===== File Hash Checker =====
+// ===== File Hash Checker Pro =====
 async function generateFileHash() {
     const file = fileHashInput.files[0];
     if (!file) {
         fileHashResult.innerHTML = "⚠ Please choose a file.";
+        lastFileHash = "";
+        lastFileName = "";
         return;
     }
     try {
@@ -282,14 +302,27 @@ async function generateFileHash() {
         const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+        
+        lastFileHash = hashHex;
+        lastFileName = file.name;
+        
+        const fileType = file.type || "Unknown";
+        const fileSizeBytes = file.size;
+        const fileSizeFormatted = formatFileSize(fileSizeBytes);
+        const lastModified = formatDate(file.lastModified);
+        
         fileHashResult.innerHTML = `
             📂 File Hash
             <br><br>
-            File: <b>${file.name}</b>
+            <b>File Name:</b> ${file.name}
             <br>
-            Size: <b>${file.size}</b> bytes
+            <b>File Type:</b> ${fileType}
+            <br>
+            <b>File Size:</b> ${fileSizeFormatted} (${fileSizeBytes} bytes)
+            <br>
+            <b>Last Modified:</b> ${lastModified}
             <br><br>
-            SHA-256
+            <b>SHA-256:</b>
             <br><br>
             <code style="user-select:all; word-break:break-all; background:#0b1220; padding:8px 12px; display:inline-block; border-radius:6px; max-width:100%;">
                 ${hashHex}
@@ -297,7 +330,66 @@ async function generateFileHash() {
         `;
     } catch {
         fileHashResult.innerHTML = "❌ Failed to generate file hash.";
+        lastFileHash = "";
+        lastFileName = "";
     }
+}
+
+// ===== Copy File Hash =====
+async function copyFileHash() {
+    if (!lastFileHash) {
+        fileHashResult.innerHTML = "⚠ No hash to copy. Generate a file hash first.";
+        return;
+    }
+    try {
+        await navigator.clipboard.writeText(lastFileHash);
+        fileHashResult.innerHTML = "✅ SHA-256 copied to clipboard!";
+    } catch (e) {
+        const ta = document.createElement("textarea");
+        ta.value = lastFileHash;
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand("copy");
+            fileHashResult.innerHTML = "✅ SHA-256 copied (fallback)!";
+        } catch (err) {
+            fileHashResult.innerHTML = "❌ Copy failed";
+        }
+        ta.remove();
+    }
+}
+
+// ===== Download Report =====
+function downloadReport() {
+    if (!lastFileHash || !lastFileName) {
+        fileHashResult.innerHTML = "⚠ No hash to download. Generate a file hash first.";
+        return;
+    }
+    const reportContent = `
+=== File Hash Report ===
+Generated: ${new Date().toLocaleString()}
+
+File Name: ${lastFileName}
+SHA-256: ${lastFileHash}
+    `;
+    const blob = new Blob([reportContent], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${lastFileName}_hash_report.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    fileHashResult.innerHTML = "✅ Report downloaded successfully!";
+}
+
+// ===== Clear File Hash Result =====
+function clearFileHashResult() {
+    fileHashResult.innerHTML = "Waiting for file analysis...";
+    lastFileHash = "";
+    lastFileName = "";
+    fileHashInput.value = "";
 }
 
 // ===== Clear Results =====
@@ -317,4 +409,7 @@ decodeBtn.addEventListener("click", decodeBase64);
 validateEmailBtn.addEventListener("click", validateEmail);
 parseUrlBtn.addEventListener("click", parseURL);
 generateFileHashBtn.addEventListener("click", generateFileHash);
+copyFileHashBtn.addEventListener("click", copyFileHash);
+downloadReportBtn.addEventListener("click", downloadReport);
+clearFileHashBtn.addEventListener("click", clearFileHashResult);
 clearResultsBtn.addEventListener("click", clearResults);
