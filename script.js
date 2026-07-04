@@ -8,6 +8,9 @@ const linkInput = document.getElementById("linkInput");
 const hashInput = document.getElementById("hashInput");
 const hashType = document.getElementById("hashType");
 const generateHashBtn = document.getElementById("generateHashBtn");
+const hashResult = document.getElementById("hashResult");
+const copyHashBtn = document.getElementById("copyHashBtn");
+const clearHashBtn = document.getElementById("clearHashBtn");
 const base64Input = document.getElementById("base64Input");
 const encodeBtn = document.getElementById("encodeBtn");
 const decodeBtn = document.getElementById("decodeBtn");
@@ -42,6 +45,7 @@ const clearResultsBtn = document.getElementById("clearResultsBtn");
 // ===== Results =====
 const results = document.getElementById("results");
 let generatedPassword = "";
+let lastHashResult = "";
 let lastFileHash = "";
 let lastFileName = "";
 let lastBase64Result = "";
@@ -213,11 +217,12 @@ function analyzeLink() {
     }
 }
 
-// ===== Hash Generator =====
+// ===== Hash Generator Pro =====
 async function generateHash() {
     const text = hashInput.value.trim();
     if (!text) {
-        results.innerHTML = "⚠ Enter text to hash";
+        hashResult.innerHTML = "⚠ Enter text to hash.";
+        lastHashResult = "";
         return;
     }
     const algorithm = hashType.value;
@@ -227,14 +232,49 @@ async function generateHash() {
         const hashBuffer = await crypto.subtle.digest(algorithm, data);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        results.innerHTML = `
-            🔑 Hash Generated (${algorithm})
+        lastHashResult = hashHex;
+        hashResult.innerHTML = `
+            🔐 Hash Generated
             <br><br>
-            <code style="user-select: all; background:#0b1220; padding:8px 12px; display:inline-block; border-radius:6px; word-break:break-all; max-width:100%;">${hashHex}</code>
+            <b>Algorithm:</b> ${sanitize(algorithm)}
+            <br>
+            <b>Input Length:</b> ${text.length} characters
+            <br><br>
+            <b>Hash:</b>
+            <br><br>
+            <code style="user-select:all; word-break:break-all; background:#0b1220; padding:8px 12px; display:inline-block; border-radius:6px; max-width:100%;">
+                ${hashHex}
+            </code>
         `;
     } catch (e) {
-        results.innerHTML = "❌ Hash generation failed";
+        hashResult.innerHTML = "❌ Hash generation failed.";
+        lastHashResult = "";
     }
+}
+
+// ===== Copy Hash Result =====
+async function copyHashResult() {
+    if (!lastHashResult) {
+        hashResult.innerHTML = "⚠ No hash to copy. Generate a hash first.";
+        return;
+    }
+    try {
+        await navigator.clipboard.writeText(lastHashResult);
+        hashResult.innerHTML += "<br><br>✅ Hash copied.";
+    } catch {
+        if (copyTextWithFallback(lastHashResult)) {
+            hashResult.innerHTML += "<br><br>✅ Hash copied (fallback).";
+        } else {
+            hashResult.innerHTML += "<br><br>❌ Copy failed.";
+        }
+    }
+}
+
+// ===== Clear Hash Result =====
+function clearHashResult() {
+    hashInput.value = "";
+    hashResult.innerHTML = "Waiting for hash generation...";
+    lastHashResult = "";
 }
 
 // ===== Base64 Encoder Pro =====
@@ -533,6 +573,8 @@ generatePasswordBtn.addEventListener("click", generatePassword);
 copyPasswordBtn.addEventListener("click", copyPassword);
 analyzeLinkBtn.addEventListener("click", analyzeLink);
 generateHashBtn.addEventListener("click", generateHash);
+copyHashBtn.addEventListener("click", copyHashResult);
+clearHashBtn.addEventListener("click", clearHashResult);
 encodeBtn.addEventListener("click", encodeBase64);
 decodeBtn.addEventListener("click", decodeBase64);
 copyBase64Btn.addEventListener("click", copyBase64Result);
