@@ -24,7 +24,7 @@
 </div>
 
 <div class="card">
-<h2>🎲 Password Generator</h2>
+<h2>🎲 Password Generator Pro</h2>
 <select id="passwordLength">
 <option value="8">8</option>
 <option value="12" selected>12</option>
@@ -33,7 +33,11 @@
 <option value="24">24</option>
 </select>
 <button id="generatePasswordBtn">Generate Password</button>
-<button id="copyPasswordBtn">📋 Copy Password</button>
+<div id="passwordGeneratorResult" class="tool-result">Waiting for password generation...</div>
+<div class="tool-actions">
+<button id="copyPasswordBtn" class="action-btn copy-btn">📋 Copy Password</button>
+<button id="clearPasswordBtn" class="action-btn clear-btn">🧹 Clear Result</button>
+</div>
 </div>
 
 <div class="card">
@@ -110,6 +114,6 @@
 <button id="clearResultsBtn">🧹 Clear Results</button>
 </div>
 </div>
-<script src="script.js?v=hash-generator-pro-2"></script>
+<script src="script.js?v=password-generator-pro-1"></script>
 </body>
 </html>
