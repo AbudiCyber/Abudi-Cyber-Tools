@@ -1,311 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Abudi Cyber Tools</title>
-
-<!-- Prevent aggressive caching in browsers (helps when Pages updates) -->
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-
-<link rel="stylesheet"
-href="style.css?v=ui-polish-url-parser-1">
-
+<link rel="stylesheet" href="style.css?v=ui-polish-url-parser-2">
 </head>
-
 <body>
-
 <div class="container">
-
 <h1>🛡️ Abudi Cyber Tools</h1>
-
-<p>
-Simple Cyber Security Tools
-</p>
-
-
-<!-- Text Analyzer -->
+<p>Simple Cyber Security Tools</p>
 
 <div class="card">
-
 <h2>📝 Text Analyzer</h2>
-
-<textarea
-id="textInput"
-placeholder="Enter text here..."></textarea>
-
-<button id="analyzeTextBtn">
-
-Analyze Text
-
-</button>
-
+<textarea id="textInput" placeholder="Enter text here..."></textarea>
+<button id="analyzeTextBtn">Analyze Text</button>
 </div>
 
-
-<!-- Password Checker -->
-
 <div class="card">
-
 <h2>🔐 Password Checker</h2>
-
-<input
-type="text"
-id="passwordInput"
-placeholder="Enter password">
-
-<button id="checkPasswordBtn">
-
-Check Password
-
-</button>
-
+<input type="text" id="passwordInput" placeholder="Enter password">
+<button id="checkPasswordBtn">Check Password</button>
 </div>
 
-
-<!-- Password Generator -->
-
 <div class="card">
-
 <h2>🎲 Password Generator</h2>
-
 <select id="passwordLength">
-
 <option value="8">8</option>
-
 <option value="12" selected>12</option>
-
 <option value="16">16</option>
-
 <option value="20">20</option>
-
 <option value="24">24</option>
-
 </select>
-
-<button id="generatePasswordBtn">
-
-Generate Password
-
-</button>
-
-<button id="copyPasswordBtn">
-
-📋 Copy Password
-
-</button>
-
+<button id="generatePasswordBtn">Generate Password</button>
+<button id="copyPasswordBtn">📋 Copy Password</button>
 </div>
 
-
-<!-- Link Analyzer -->
-
 <div class="card">
-
 <h2>🔗 Link Analyzer</h2>
-
-<input
-type="text"
-id="linkInput"
-placeholder="https://example.com">
-
-<button id="analyzeLinkBtn">
-
-Analyze Link
-
-</button>
-
+<input type="text" id="linkInput" placeholder="https://example.com">
+<button id="analyzeLinkBtn">Analyze Link</button>
 </div>
 
-
-<!-- Hash Generator -->
-
 <div class="card">
-
 <h2>🔐 Hash Generator</h2>
-
-<input
-type="text"
-id="hashInput"
-placeholder="Enter text to hash">
-
+<input type="text" id="hashInput" placeholder="Enter text to hash">
 <select id="hashType">
-
 <option value="SHA-256">SHA-256</option>
-
 <option value="SHA-1">SHA-1</option>
-
 </select>
-
-<button id="generateHashBtn">
-
-Generate Hash
-
-</button>
-
+<button id="generateHashBtn">Generate Hash</button>
 </div>
 
-
-<!-- Email Validator -->
-
 <div class="card">
-
 <h2>📧 Email Validator</h2>
-
 <input type="text" id="emailInput" placeholder="Enter email">
-
-<button id="validateEmailBtn">
-
-Validate Email
-
-</button>
-
+<button id="validateEmailBtn">Validate Email</button>
 </div>
 
-
-<!-- URL Parser Pro -->
-
 <div class="card">
-
 <h2>📊 URL Parser Pro</h2>
-
 <input type="text" id="urlParserInput" placeholder="https://example.com/path?query=test#section">
-
-<button id="parseUrlBtn">
-
-Analyze URL
-
-</button>
-
-<div id="urlParserResult" class="tool-result">
-    Waiting for URL analysis...
-</div>
-
+<button id="parseUrlBtn">Analyze URL</button>
+<div id="urlParserResult" class="tool-result">Waiting for URL analysis...</div>
 <div class="tool-actions">
-
-    <button id="copyUrlParserBtn" class="action-btn copy-btn">
-        📋 Copy Result
-    </button>
-
-    <button id="clearUrlParserBtn" class="action-btn clear-btn">
-        🧹 Clear Result
-    </button>
-
+<button id="copyUrlParserBtn" class="action-btn copy-btn">📋 Copy Result</button>
+<button id="clearUrlParserBtn" class="action-btn clear-btn">🧹 Clear Result</button>
 </div>
-
 </div>
-
-
-<!-- File Hash Checker Pro -->
 
 <div class="card">
-
 <h2>📁 File Hash Checker Pro</h2>
-
 <input type="file" id="fileHashInput">
-
-<button id="generateFileHashBtn">
-
-Generate File Hash
-
-</button>
-
-<div id="fileHashResult" class="tool-result">
-    Waiting for file analysis...
-</div>
-
+<button id="generateFileHashBtn">Generate File Hash</button>
+<div id="fileHashResult" class="tool-result">Waiting for file analysis...</div>
 <div class="tool-actions">
-
-    <button id="copyFileHashBtn" class="action-btn copy-btn">
-        📋 Copy SHA-256
-    </button>
-
-    <button id="downloadReportBtn" class="action-btn download-btn">
-        ⬇️ Download Report
-    </button>
-
-    <button id="clearFileHashBtn" class="action-btn clear-btn">
-        🧹 Clear Result
-    </button>
-
+<button id="copyFileHashBtn" class="action-btn copy-btn">📋 Copy SHA-256</button>
+<button id="downloadReportBtn" class="action-btn download-btn">⬇️ Download Report</button>
+<button id="clearFileHashBtn" class="action-btn clear-btn">🧹 Clear Result</button>
 </div>
-
 </div>
-
-
-<!-- Base64 Tool Pro -->
 
 <div class="card">
-
 <h2>🔢 Base64 Encoder / Decoder Pro</h2>
-
 <textarea id="base64Input" placeholder="Enter text..."></textarea>
-
-<button id="encodeBtn">
-
-Encode Base64
-
-</button>
-
+<button id="encodeBtn">Encode Base64</button>
 <br><br>
-
-<button id="decodeBtn">
-
-Decode Base64
-
-</button>
-
-<div id="base64Result" class="tool-result">
-    Waiting for Base64 input...
-</div>
-
+<button id="decodeBtn">Decode Base64</button>
+<div id="base64Result" class="tool-result">Waiting for Base64 input...</div>
 <div class="tool-actions">
-
-    <button id="copyBase64Btn" class="action-btn copy-btn">
-        📋 Copy Result
-    </button>
-
-    <button id="clearBase64Btn" class="action-btn clear-btn">
-        🧹 Clear Result
-    </button>
-
+<button id="copyBase64Btn" class="action-btn copy-btn">📋 Copy Result</button>
+<button id="clearBase64Btn" class="action-btn clear-btn">🧹 Clear Result</button>
 </div>
-
 </div>
-
-
-<!-- Results -->
 
 <div class="card">
-
 <h2>📊 Results</h2>
-
-<div id="results">
-
-Waiting for analysis...
-
+<div id="results">Waiting for analysis...</div>
+<button id="clearResultsBtn">🧹 Clear Results</button>
 </div>
-
-<button id="clearResultsBtn">
-
-🧹 Clear Results
-
-</button>
-
 </div>
-
-
-</div>
-
-<script src="script.js?v=url-parser-pro-ui-polish-1"></script>
-
+<script src="script.js?v=url-parser-pro-ui-polish-2"></script>
 </body>
-
 </html>
