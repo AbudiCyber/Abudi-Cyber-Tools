@@ -39,28 +39,18 @@ p {
 /* ===== Cards ===== */
 
 .card {
-
     background: #1e293b;
-
     padding: 20px;
-
     margin-bottom: 25px;
-
     border-radius: 15px;
-
-    box-shadow:
-    0 0 20px rgba(0,0,0,0.3);
-
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
 }
 
 /* ===== Titles ===== */
 
 .card h2 {
-
     margin-bottom: 15px;
-
     color: #93c5fd;
-
 }
 
 /* ===== Inputs ===== */
@@ -68,244 +58,154 @@ p {
 textarea,
 input,
 select {
-
     width: 100%;
-
     max-width: 100%;
-
     padding: 12px;
-
     margin-top: 10px;
-
     margin-bottom: 15px;
-
     border: none;
-
     outline: none;
-
     border-radius: 10px;
-
     background: #334155;
-
     color: white;
-
     overflow-wrap: anywhere;
-
     word-break: break-word;
-
 }
 
 /* ===== Textarea ===== */
 
 textarea {
-
     min-height: 120px;
-
     resize: vertical;
-
     white-space: pre-wrap;
-
 }
 
 /* ===== Buttons ===== */
 
 button {
-
     width: 100%;
-
     padding: 13px;
-
     border: none;
-
     border-radius: 10px;
-
     background: #2563eb;
-
     color: white;
-
     font-size: 15px;
-
     cursor: pointer;
-
     transition: 0.3s;
-
 }
 
 /* ===== Hover ===== */
 
 button:hover {
-
     background: #1d4ed8;
-
 }
 
 /* ===== Tool Results ===== */
 
 .tool-result,
 #results {
-
     max-width: 100%;
-
     overflow-wrap: anywhere;
-
     word-break: break-word;
-
-    white-space: pre-wrap;
-
+    white-space: normal;
 }
 
 .tool-result {
-
     margin-top: 12px;
-
     line-height: 1.7;
-
 }
 
 .tool-result code,
 #results code {
-
     max-width: 100%;
-
     overflow-wrap: anywhere;
-
     word-break: break-word;
-
     white-space: pre-wrap;
-
 }
 
 /* ===== Results ===== */
 
 #results {
-
     background: #334155;
-
     min-height: 80px;
-
     padding: 15px;
-
     border-radius: 10px;
-
     line-height: 1.8;
-
 }
 
 /* ===== Tool Action Buttons ===== */
 
 .tool-actions {
-
     display: flex;
-
     gap: 10px;
-
     margin-top: 14px;
-
     flex-wrap: wrap;
-
 }
 
 .action-btn {
-
     flex: 1;
-
     min-width: 120px;
-
     width: auto;
-
     padding: 11px 14px;
-
     border-radius: 999px;
-
     font-size: 14px;
-
     font-weight: 600;
-
     line-height: 1.25;
-
 }
 
 .copy-btn {
-
     background: #2563eb;
-
 }
 
 .copy-btn:hover {
-
     background: #1d4ed8;
-
 }
 
 .download-btn {
-
     background: #16a34a;
-
 }
 
 .download-btn:hover {
-
     background: #15803d;
-
 }
 
 .clear-btn {
-
     background: #dc2626;
-
 }
 
 .clear-btn:hover {
-
     background: #b91c1c;
-
 }
 
 /* ===== Space Between Buttons ===== */
 
 #copyPasswordBtn,
 #clearResultsBtn {
-
     margin-top: 12px;
-
 }
 
 /* ===== Mobile ===== */
 
 @media(max-width:600px){
-
     body{
-
         padding:15px;
-
     }
 
     .card{
-
         padding:15px;
-
     }
 
     h1{
-
         font-size:26px;
-
     }
 
     .tool-actions {
-
         gap: 8px;
-
     }
 
     .action-btn {
-
         min-width: 105px;
-
         padding: 10px 12px;
-
         font-size: 13px;
-
     }
-
 }
