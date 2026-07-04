@@ -71,6 +71,8 @@ select {
 
     width: 100%;
 
+    max-width: 100%;
+
     padding: 12px;
 
     margin-top: 10px;
@@ -87,6 +89,10 @@ select {
 
     color: white;
 
+    overflow-wrap: anywhere;
+
+    word-break: break-word;
+
 }
 
 /* ===== Textarea ===== */
@@ -96,6 +102,8 @@ textarea {
     min-height: 120px;
 
     resize: vertical;
+
+    white-space: pre-wrap;
 
 }
 
@@ -131,6 +139,42 @@ button:hover {
 
 }
 
+/* ===== Tool Results ===== */
+
+.tool-result,
+#results {
+
+    max-width: 100%;
+
+    overflow-wrap: anywhere;
+
+    word-break: break-word;
+
+    white-space: pre-wrap;
+
+}
+
+.tool-result {
+
+    margin-top: 12px;
+
+    line-height: 1.7;
+
+}
+
+.tool-result code,
+#results code {
+
+    max-width: 100%;
+
+    overflow-wrap: anywhere;
+
+    word-break: break-word;
+
+    white-space: pre-wrap;
+
+}
+
 /* ===== Results ===== */
 
 #results {
@@ -144,6 +188,76 @@ button:hover {
     border-radius: 10px;
 
     line-height: 1.8;
+
+}
+
+/* ===== Tool Action Buttons ===== */
+
+.tool-actions {
+
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 14px;
+
+    flex-wrap: wrap;
+
+}
+
+.action-btn {
+
+    flex: 1;
+
+    min-width: 120px;
+
+    width: auto;
+
+    padding: 11px 14px;
+
+    border-radius: 999px;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.25;
+
+}
+
+.copy-btn {
+
+    background: #2563eb;
+
+}
+
+.copy-btn:hover {
+
+    background: #1d4ed8;
+
+}
+
+.download-btn {
+
+    background: #16a34a;
+
+}
+
+.download-btn:hover {
+
+    background: #15803d;
+
+}
+
+.clear-btn {
+
+    background: #dc2626;
+
+}
+
+.clear-btn:hover {
+
+    background: #b91c1c;
 
 }
 
@@ -175,6 +289,22 @@ button:hover {
     h1{
 
         font-size:26px;
+
+    }
+
+    .tool-actions {
+
+        gap: 8px;
+
+    }
+
+    .action-btn {
+
+        min-width: 105px;
+
+        padding: 10px 12px;
+
+        font-size: 13px;
 
     }
 
