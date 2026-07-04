@@ -43,13 +43,18 @@
 </div>
 
 <div class="card">
-<h2>🔐 Hash Generator</h2>
+<h2>🔐 Hash Generator Pro</h2>
 <input type="text" id="hashInput" placeholder="Enter text to hash">
 <select id="hashType">
 <option value="SHA-256">SHA-256</option>
 <option value="SHA-1">SHA-1</option>
 </select>
 <button id="generateHashBtn">Generate Hash</button>
+<div id="hashResult" class="tool-result">Waiting for hash generation...</div>
+<div class="tool-actions">
+<button id="copyHashBtn" class="action-btn copy-btn">📋 Copy Hash</button>
+<button id="clearHashBtn" class="action-btn clear-btn">🧹 Clear Result</button>
+</div>
 </div>
 
 <div class="card">
@@ -105,6 +110,6 @@
 <button id="clearResultsBtn">🧹 Clear Results</button>
 </div>
 </div>
-<script src="script.js?v=email-validator-pro-1"></script>
+<script src="script.js?v=hash-generator-pro-1"></script>
 </body>
 </html>
