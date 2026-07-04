@@ -11,6 +11,9 @@ const generateHashBtn = document.getElementById("generateHashBtn");
 const base64Input = document.getElementById("base64Input");
 const encodeBtn = document.getElementById("encodeBtn");
 const decodeBtn = document.getElementById("decodeBtn");
+const base64Result = document.getElementById("base64Result");
+const copyBase64Btn = document.getElementById("copyBase64Btn");
+const clearBase64Btn = document.getElementById("clearBase64Btn");
 const emailInput = document.getElementById("emailInput");
 const validateEmailBtn = document.getElementById("validateEmailBtn");
 const urlParserInput = document.getElementById("urlParserInput");
@@ -35,6 +38,7 @@ const results = document.getElementById("results");
 let generatedPassword = "";
 let lastFileHash = "";
 let lastFileName = "";
+let lastBase64Result = "";
 
 // ===== Helpers =====
 function sanitize(input) {
@@ -52,6 +56,24 @@ function formatFileSize(bytes) {
 function formatDate(timestamp) {
     const date = new Date(timestamp);
     return date.toLocaleString();
+}
+
+function encodeUnicodeBase64(text) {
+    const bytes = new TextEncoder().encode(text);
+    let binary = "";
+    bytes.forEach(byte => {
+        binary += String.fromCharCode(byte);
+    });
+    return btoa(binary);
+}
+
+function decodeUnicodeBase64(base64Text) {
+    const binary = atob(base64Text);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return new TextDecoder().decode(bytes);
 }
 
 // ===== Text Analyzer =====
@@ -107,7 +129,6 @@ function generatePassword() {
   const symbols = "!@#$%^&*()_+-=[]{}|;:,.<>/?";
   const all = lower + upper + numbers + symbols;
   let pass = "";
-  // Ensure at least one of each category for better strength
   pass += lower[Math.floor(Math.random() * lower.length)];
   pass += upper[Math.floor(Math.random() * upper.length)];
   pass += numbers[Math.floor(Math.random() * numbers.length)];
@@ -115,7 +136,6 @@ function generatePassword() {
   for (let i = pass.length; i < len; i++) {
     pass += all[Math.floor(Math.random() * all.length)];
   }
-  // shuffle
   generatedPassword = pass.split("").sort(() => 0.5 - Math.random()).join("");
   results.innerHTML = `
     🎲 Generated Password
@@ -127,7 +147,6 @@ function generatePassword() {
 // ===== Copy Password =====
 async function copyPassword() {
   if (!generatedPassword) {
-    // if no generated, try copy from input if any
     const maybe = passwordInput.value.trim();
     if (maybe) {
       generatedPassword = maybe;
@@ -140,7 +159,6 @@ async function copyPassword() {
     await navigator.clipboard.writeText(generatedPassword);
     results.innerHTML = "✅ Password copied to clipboard";
   } catch (e) {
-    // fallback
     const ta = document.createElement("textarea");
     ta.value = generatedPassword;
     document.body.appendChild(ta);
@@ -202,38 +220,83 @@ async function generateHash() {
     }
 }
 
-// ===== Base64 Encoder =====
+// ===== Base64 Encoder Pro =====
 function encodeBase64() {
     const text = base64Input.value.trim();
     if (!text) {
-        results.innerHTML = "⚠ Enter text";
-        return;
-    }
-    const encoded = btoa(text);
-    results.innerHTML = `
-        Base64 Encoded
-        <br><br>
-        ${encoded}
-    `;
-}
-
-// ===== Base64 Decoder =====
-function decodeBase64() {
-    const text = base64Input.value.trim();
-    if (!text) {
-        results.innerHTML = "⚠ Enter Base64";
+        base64Result.innerHTML = "⚠ Enter text to encode.";
+        lastBase64Result = "";
         return;
     }
     try {
-        const decoded = atob(text);
-        results.innerHTML = `
-            Base64 Decoded
+        const encoded = encodeUnicodeBase64(text);
+        lastBase64Result = encoded;
+        base64Result.innerHTML = `
+            🔢 Base64 Encoded
             <br><br>
-            ${decoded}
+            <code style="user-select:all; word-break:break-all; background:#0b1220; padding:8px 12px; display:inline-block; border-radius:6px; max-width:100%;">
+                ${sanitize(encoded)}
+            </code>
         `;
     } catch {
-        results.innerHTML = "❌ Invalid Base64";
+        base64Result.innerHTML = "❌ Failed to encode Base64.";
+        lastBase64Result = "";
     }
+}
+
+// ===== Base64 Decoder Pro =====
+function decodeBase64() {
+    const text = base64Input.value.trim();
+    if (!text) {
+        base64Result.innerHTML = "⚠ Enter Base64 text to decode.";
+        lastBase64Result = "";
+        return;
+    }
+    try {
+        const decoded = decodeUnicodeBase64(text);
+        lastBase64Result = decoded;
+        base64Result.innerHTML = `
+            🔓 Base64 Decoded
+            <br><br>
+            <code style="user-select:all; white-space:pre-wrap; word-break:break-word; background:#0b1220; padding:8px 12px; display:inline-block; border-radius:6px; max-width:100%;">
+                ${sanitize(decoded)}
+            </code>
+        `;
+    } catch {
+        base64Result.innerHTML = "❌ Invalid Base64.";
+        lastBase64Result = "";
+    }
+}
+
+// ===== Copy Base64 Result =====
+async function copyBase64Result() {
+    if (!lastBase64Result) {
+        base64Result.innerHTML = "⚠ No Base64 result to copy.";
+        return;
+    }
+    try {
+        await navigator.clipboard.writeText(lastBase64Result);
+        base64Result.innerHTML += "<br><br>✅ Base64 result copied.";
+    } catch {
+        const ta = document.createElement("textarea");
+        ta.value = lastBase64Result;
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand("copy");
+            base64Result.innerHTML += "<br><br>✅ Base64 result copied (fallback).";
+        } catch {
+            base64Result.innerHTML += "<br><br>❌ Copy failed.";
+        }
+        ta.remove();
+    }
+}
+
+// ===== Clear Base64 Result =====
+function clearBase64Result() {
+    base64Result.innerHTML = "Waiting for Base64 input...";
+    base64Input.value = "";
+    lastBase64Result = "";
 }
 
 // ===== Email Validator =====
@@ -406,6 +469,8 @@ analyzeLinkBtn.addEventListener("click", analyzeLink);
 generateHashBtn.addEventListener("click", generateHash);
 encodeBtn.addEventListener("click", encodeBase64);
 decodeBtn.addEventListener("click", decodeBase64);
+copyBase64Btn.addEventListener("click", copyBase64Result);
+clearBase64Btn.addEventListener("click", clearBase64Result);
 validateEmailBtn.addEventListener("click", validateEmail);
 parseUrlBtn.addEventListener("click", parseURL);
 generateFileHashBtn.addEventListener("click", generateFileHash);
