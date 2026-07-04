@@ -4,6 +4,7 @@
 const textInput = document.getElementById("textInput");
 const passwordInput = document.getElementById("passwordInput");
 const passwordLength = document.getElementById("passwordLength");
+const passwordGeneratorResult = document.getElementById("passwordGeneratorResult");
 const linkInput = document.getElementById("linkInput");
 const hashInput = document.getElementById("hashInput");
 const hashType = document.getElementById("hashType");
@@ -39,6 +40,7 @@ const analyzeTextBtn = document.getElementById("analyzeTextBtn");
 const checkPasswordBtn = document.getElementById("checkPasswordBtn");
 const generatePasswordBtn = document.getElementById("generatePasswordBtn");
 const copyPasswordBtn = document.getElementById("copyPasswordBtn");
+const clearPasswordBtn = document.getElementById("clearPasswordBtn");
 const analyzeLinkBtn = document.getElementById("analyzeLinkBtn");
 const clearResultsBtn = document.getElementById("clearResultsBtn");
 
@@ -147,7 +149,7 @@ function checkPassword() {
   `;
 }
 
-// ===== Password Generator =====
+// ===== Password Generator Pro =====
 function generatePassword() {
   const len = parseInt(passwordLength.value, 10) || 12;
   const lower = "abcdefghijklmnopqrstuvwxyz";
@@ -164,34 +166,43 @@ function generatePassword() {
     pass += all[Math.floor(Math.random() * all.length)];
   }
   generatedPassword = pass.split("").sort(() => 0.5 - Math.random()).join("");
-  results.innerHTML = `
+  passwordGeneratorResult.innerHTML = `
     🎲 Generated Password
     <br><br>
-    <code style="user-select: all; background:#0b1220; padding:6px; display:inline-block; border-radius:6px;">${generatedPassword}</code>
+    <b>Length:</b> ${len} characters
+    <br>
+    <b>Contains:</b> Uppercase, lowercase, numbers, symbols
+    <br><br>
+    <b>Password:</b>
+    <br><br>
+    <code style="user-select:all; word-break:break-all; background:#0b1220; padding:8px 12px; display:inline-block; border-radius:6px; max-width:100%;">
+        ${sanitize(generatedPassword)}
+    </code>
   `;
 }
 
 // ===== Copy Password =====
 async function copyPassword() {
   if (!generatedPassword) {
-    const maybe = passwordInput.value.trim();
-    if (maybe) {
-      generatedPassword = maybe;
-    } else {
-      results.innerHTML = "⚠ No password to copy";
-      return;
-    }
+    passwordGeneratorResult.innerHTML = "⚠ No generated password to copy.";
+    return;
   }
   try {
     await navigator.clipboard.writeText(generatedPassword);
-    results.innerHTML = "✅ Password copied to clipboard";
+    passwordGeneratorResult.innerHTML += "<br><br>✅ Password copied.";
   } catch (e) {
     if (copyTextWithFallback(generatedPassword)) {
-      results.innerHTML = "✅ Password copied (fallback)";
+      passwordGeneratorResult.innerHTML += "<br><br>✅ Password copied (fallback).";
     } else {
-      results.innerHTML = "❌ Copy failed";
+      passwordGeneratorResult.innerHTML += "<br><br>❌ Copy failed.";
     }
   }
+}
+
+// ===== Clear Password Generator Result =====
+function clearPasswordResult() {
+  generatedPassword = "";
+  passwordGeneratorResult.innerHTML = "Waiting for password generation...";
 }
 
 // ===== Link Analyzer =====
@@ -571,6 +582,7 @@ analyzeTextBtn.addEventListener("click", analyzeText);
 checkPasswordBtn.addEventListener("click", checkPassword);
 generatePasswordBtn.addEventListener("click", generatePassword);
 copyPasswordBtn.addEventListener("click", copyPassword);
+clearPasswordBtn.addEventListener("click", clearPasswordResult);
 analyzeLinkBtn.addEventListener("click", analyzeLink);
 generateHashBtn.addEventListener("click", generateHash);
 copyHashBtn.addEventListener("click", copyHashResult);
