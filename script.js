@@ -18,6 +18,9 @@ const emailInput = document.getElementById("emailInput");
 const validateEmailBtn = document.getElementById("validateEmailBtn");
 const urlParserInput = document.getElementById("urlParserInput");
 const parseUrlBtn = document.getElementById("parseUrlBtn");
+const urlParserResult = document.getElementById("urlParserResult");
+const copyUrlParserBtn = document.getElementById("copyUrlParserBtn");
+const clearUrlParserBtn = document.getElementById("clearUrlParserBtn");
 const fileHashInput = document.getElementById("fileHashInput");
 const generateFileHashBtn = document.getElementById("generateFileHashBtn");
 const fileHashResult = document.getElementById("fileHashResult");
@@ -39,10 +42,11 @@ let generatedPassword = "";
 let lastFileHash = "";
 let lastFileName = "";
 let lastBase64Result = "";
+let lastUrlParserResult = "";
 
 // ===== Helpers =====
 function sanitize(input) {
-  return input.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return String(input).replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function formatFileSize(bytes) {
@@ -74,6 +78,21 @@ function decodeUnicodeBase64(base64Text) {
         bytes[i] = binary.charCodeAt(i);
     }
     return new TextDecoder().decode(bytes);
+}
+
+function copyTextWithFallback(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    let copied = false;
+    try {
+        copied = document.execCommand("copy");
+    } catch {
+        copied = false;
+    }
+    ta.remove();
+    return copied;
 }
 
 // ===== Text Analyzer =====
@@ -159,17 +178,11 @@ async function copyPassword() {
     await navigator.clipboard.writeText(generatedPassword);
     results.innerHTML = "✅ Password copied to clipboard";
   } catch (e) {
-    const ta = document.createElement("textarea");
-    ta.value = generatedPassword;
-    document.body.appendChild(ta);
-    ta.select();
-    try {
-      document.execCommand("copy");
+    if (copyTextWithFallback(generatedPassword)) {
       results.innerHTML = "✅ Password copied (fallback)";
-    } catch (err) {
+    } else {
       results.innerHTML = "❌ Copy failed";
     }
-    ta.remove();
   }
 }
 
@@ -185,11 +198,11 @@ function analyzeLink() {
         results.innerHTML = `
             🔗 Link Analysis
             <br><br>
-            Host: ${parsed.host}
+            Host: ${sanitize(parsed.host)}
             <br>
-            Protocol: ${parsed.protocol}
+            Protocol: ${sanitize(parsed.protocol)}
             <br>
-            Path: ${parsed.pathname}
+            Path: ${sanitize(parsed.pathname)}
         `;
     } catch (e) {
         results.innerHTML = "❌ Invalid URL";
@@ -278,17 +291,11 @@ async function copyBase64Result() {
         await navigator.clipboard.writeText(lastBase64Result);
         base64Result.innerHTML += "<br><br>✅ Base64 result copied.";
     } catch {
-        const ta = document.createElement("textarea");
-        ta.value = lastBase64Result;
-        document.body.appendChild(ta);
-        ta.select();
-        try {
-            document.execCommand("copy");
+        if (copyTextWithFallback(lastBase64Result)) {
             base64Result.innerHTML += "<br><br>✅ Base64 result copied (fallback).";
-        } catch {
+        } else {
             base64Result.innerHTML += "<br><br>❌ Copy failed.";
         }
-        ta.remove();
     }
 }
 
@@ -322,33 +329,83 @@ function validateEmail() {
     }
 }
 
-// ===== URL Parser =====
+// ===== URL Parser Pro =====
 function parseURL() {
     const input = urlParserInput.value.trim();
     if (input === "") {
-        results.innerHTML = "⚠ Please enter a URL";
+        urlParserResult.innerHTML = "⚠ Please enter a URL.";
+        lastUrlParserResult = "";
         return;
     }
     try {
-        const url = new URL(input);
-        results.innerHTML = `
+        const normalizedInput = input.startsWith("http://") || input.startsWith("https://")
+            ? input
+            : "https://" + input;
+        const url = new URL(normalizedInput);
+        const port = url.port || "Default";
+        const query = url.search || "None";
+        const fragment = url.hash || "None";
+
+        lastUrlParserResult =
+`URL Analysis
+
+Original Input: ${input}
+Normalized URL: ${url.href}
+Protocol: ${url.protocol}
+Hostname: ${url.hostname}
+Port: ${port}
+Path: ${url.pathname}
+Query: ${query}
+Fragment: ${fragment}`;
+
+        urlParserResult.innerHTML = `
             🌍 URL Analysis
             <br><br>
-            <b>Protocol:</b> ${url.protocol}
+            <b>Original Input:</b> ${sanitize(input)}
             <br>
-            <b>Hostname:</b> ${url.hostname}
+            <b>Normalized URL:</b> ${sanitize(url.href)}
             <br>
-            <b>Port:</b> ${url.port || "Default"}
+            <b>Protocol:</b> ${sanitize(url.protocol)}
             <br>
-            <b>Path:</b> ${url.pathname}
+            <b>Hostname:</b> ${sanitize(url.hostname)}
             <br>
-            <b>Query:</b> ${url.search || "None"}
+            <b>Port:</b> ${sanitize(port)}
             <br>
-            <b>Fragment:</b> ${url.hash || "None"}
+            <b>Path:</b> ${sanitize(url.pathname)}
+            <br>
+            <b>Query:</b> ${sanitize(query)}
+            <br>
+            <b>Fragment:</b> ${sanitize(fragment)}
         `;
     } catch {
-        results.innerHTML = "❌ Invalid URL";
+        urlParserResult.innerHTML = "❌ Invalid URL.";
+        lastUrlParserResult = "";
     }
+}
+
+// ===== Copy URL Parser Result =====
+async function copyUrlParserResult() {
+    if (!lastUrlParserResult) {
+        urlParserResult.innerHTML = "⚠ No URL analysis to copy.";
+        return;
+    }
+    try {
+        await navigator.clipboard.writeText(lastUrlParserResult);
+        urlParserResult.innerHTML += "<br><br>✅ URL analysis copied.";
+    } catch {
+        if (copyTextWithFallback(lastUrlParserResult)) {
+            urlParserResult.innerHTML += "<br><br>✅ URL analysis copied (fallback).";
+        } else {
+            urlParserResult.innerHTML += "<br><br>❌ Copy failed.";
+        }
+    }
+}
+
+// ===== Clear URL Parser Result =====
+function clearUrlParserResult() {
+    urlParserInput.value = "";
+    urlParserResult.innerHTML = "Waiting for URL analysis...";
+    lastUrlParserResult = "";
 }
 
 // ===== File Hash Checker Pro =====
@@ -377,13 +434,13 @@ async function generateFileHash() {
         fileHashResult.innerHTML = `
             📂 File Hash
             <br><br>
-            <b>File Name:</b> ${file.name}
+            <b>File Name:</b> ${sanitize(file.name)}
             <br>
-            <b>File Type:</b> ${fileType}
+            <b>File Type:</b> ${sanitize(fileType)}
             <br>
-            <b>File Size:</b> ${fileSizeFormatted} (${fileSizeBytes} bytes)
+            <b>File Size:</b> ${sanitize(fileSizeFormatted)} (${fileSizeBytes} bytes)
             <br>
-            <b>Last Modified:</b> ${lastModified}
+            <b>Last Modified:</b> ${sanitize(lastModified)}
             <br><br>
             <b>SHA-256:</b>
             <br><br>
@@ -408,17 +465,11 @@ async function copyFileHash() {
         await navigator.clipboard.writeText(lastFileHash);
         fileHashResult.innerHTML = "✅ SHA-256 copied to clipboard!";
     } catch (e) {
-        const ta = document.createElement("textarea");
-        ta.value = lastFileHash;
-        document.body.appendChild(ta);
-        ta.select();
-        try {
-            document.execCommand("copy");
+        if (copyTextWithFallback(lastFileHash)) {
             fileHashResult.innerHTML = "✅ SHA-256 copied (fallback)!";
-        } catch (err) {
+        } else {
             fileHashResult.innerHTML = "❌ Copy failed";
         }
-        ta.remove();
     }
 }
 
@@ -473,6 +524,8 @@ copyBase64Btn.addEventListener("click", copyBase64Result);
 clearBase64Btn.addEventListener("click", clearBase64Result);
 validateEmailBtn.addEventListener("click", validateEmail);
 parseUrlBtn.addEventListener("click", parseURL);
+copyUrlParserBtn.addEventListener("click", copyUrlParserResult);
+clearUrlParserBtn.addEventListener("click", clearUrlParserResult);
 generateFileHashBtn.addEventListener("click", generateFileHash);
 copyFileHashBtn.addEventListener("click", copyFileHash);
 downloadReportBtn.addEventListener("click", downloadReport);
