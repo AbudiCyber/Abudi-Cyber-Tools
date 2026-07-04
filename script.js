@@ -16,6 +16,9 @@ const copyBase64Btn = document.getElementById("copyBase64Btn");
 const clearBase64Btn = document.getElementById("clearBase64Btn");
 const emailInput = document.getElementById("emailInput");
 const validateEmailBtn = document.getElementById("validateEmailBtn");
+const emailResult = document.getElementById("emailResult");
+const copyEmailBtn = document.getElementById("copyEmailBtn");
+const clearEmailBtn = document.getElementById("clearEmailBtn");
 const urlParserInput = document.getElementById("urlParserInput");
 const parseUrlBtn = document.getElementById("parseUrlBtn");
 const urlParserResult = document.getElementById("urlParserResult");
@@ -43,6 +46,7 @@ let lastFileHash = "";
 let lastFileName = "";
 let lastBase64Result = "";
 let lastUrlParserResult = "";
+let lastEmailResult = "";
 
 // ===== Helpers =====
 function sanitize(input) {
@@ -306,27 +310,59 @@ function clearBase64Result() {
     lastBase64Result = "";
 }
 
-// ===== Email Validator =====
+// ===== Email Validator Pro =====
 function validateEmail() {
     const email = emailInput.value.trim();
     if (email === "") {
-        results.innerHTML = "⚠ Please enter an email address";
+        emailResult.innerHTML = "⚠ Please enter an email address.";
+        lastEmailResult = "";
         return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (emailRegex.test(email)) {
-        results.innerHTML = `
-            Email Validation
+        lastEmailResult = `Email Validation\n\nEmail: ${email}\nStatus: Valid Email Address`;
+        emailResult.innerHTML = `
+            📧 Email Validation
             <br><br>
-            Valid Email Address
+            <b>Email:</b> ${sanitize(email)}
+            <br><br>
+            ✅ <b>Valid Email Address</b>
         `;
     } else {
-        results.innerHTML = `
-            Email Validation
+        lastEmailResult = `Email Validation\n\nEmail: ${email}\nStatus: Invalid Email Address`;
+        emailResult.innerHTML = `
+            📧 Email Validation
             <br><br>
-            Invalid Email Address
+            <b>Email:</b> ${sanitize(email)}
+            <br><br>
+            ❌ <b>Invalid Email Address</b>
         `;
     }
+}
+
+// ===== Copy Email Result =====
+async function copyEmailResult() {
+    if (!lastEmailResult) {
+        emailResult.innerHTML = "⚠ No email validation result to copy.";
+        return;
+    }
+    try {
+        await navigator.clipboard.writeText(lastEmailResult);
+        emailResult.innerHTML += "<br><br>✅ Email result copied.";
+    } catch {
+        if (copyTextWithFallback(lastEmailResult)) {
+            emailResult.innerHTML += "<br><br>✅ Email result copied (fallback).";
+        } else {
+            emailResult.innerHTML += "<br><br>❌ Copy failed.";
+        }
+    }
+}
+
+// ===== Clear Email Result =====
+function clearEmailResult() {
+    emailInput.value = "";
+    emailResult.innerHTML = "Waiting for email validation...";
+    lastEmailResult = "";
 }
 
 // ===== URL Parser Pro =====
@@ -338,25 +374,13 @@ function parseURL() {
         return;
     }
     try {
-        const normalizedInput = input.startsWith("http://") || input.startsWith("https://")
-            ? input
-            : "https://" + input;
+        const normalizedInput = input.startsWith("http://") || input.startsWith("https://") ? input : "https://" + input;
         const url = new URL(normalizedInput);
         const port = url.port || "Default";
         const query = url.search || "None";
         const fragment = url.hash || "None";
 
-        lastUrlParserResult =
-`URL Analysis
-
-Original Input: ${input}
-Normalized URL: ${url.href}
-Protocol: ${url.protocol}
-Hostname: ${url.hostname}
-Port: ${port}
-Path: ${url.pathname}
-Query: ${query}
-Fragment: ${fragment}`;
+        lastUrlParserResult = `URL Analysis\n\nOriginal Input: ${input}\nNormalized URL: ${url.href}\nProtocol: ${url.protocol}\nHostname: ${url.hostname}\nPort: ${port}\nPath: ${url.pathname}\nQuery: ${query}\nFragment: ${fragment}`;
 
         urlParserResult.innerHTML = `
             🌍 URL Analysis
@@ -422,15 +446,12 @@ async function generateFileHash() {
         const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-        
         lastFileHash = hashHex;
         lastFileName = file.name;
-        
         const fileType = file.type || "Unknown";
         const fileSizeBytes = file.size;
         const fileSizeFormatted = formatFileSize(fileSizeBytes);
         const lastModified = formatDate(file.lastModified);
-        
         fileHashResult.innerHTML = `
             📂 File Hash
             <br><br>
@@ -479,13 +500,7 @@ function downloadReport() {
         fileHashResult.innerHTML = "⚠ No hash to download. Generate a file hash first.";
         return;
     }
-    const reportContent = `
-=== File Hash Report ===
-Generated: ${new Date().toLocaleString()}
-
-File Name: ${lastFileName}
-SHA-256: ${lastFileHash}
-    `;
+    const reportContent = `\n=== File Hash Report ===\nGenerated: ${new Date().toLocaleString()}\n\nFile Name: ${lastFileName}\nSHA-256: ${lastFileHash}\n    `;
     const blob = new Blob([reportContent], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -523,6 +538,8 @@ decodeBtn.addEventListener("click", decodeBase64);
 copyBase64Btn.addEventListener("click", copyBase64Result);
 clearBase64Btn.addEventListener("click", clearBase64Result);
 validateEmailBtn.addEventListener("click", validateEmail);
+copyEmailBtn.addEventListener("click", copyEmailResult);
+clearEmailBtn.addEventListener("click", clearEmailResult);
 parseUrlBtn.addEventListener("click", parseURL);
 copyUrlParserBtn.addEventListener("click", copyUrlParserResult);
 clearUrlParserBtn.addEventListener("click", clearUrlParserResult);
