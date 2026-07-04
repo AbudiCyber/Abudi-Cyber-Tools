@@ -16,7 +16,7 @@ content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Expires" content="0">
 
 <link rel="stylesheet"
-href="style.css?v=7ed350c">
+href="style.css?v=ui-polish-url-parser-1">
 
 </head>
 
@@ -170,19 +170,35 @@ Validate Email
 </div>
 
 
-<!-- URL Parser -->
+<!-- URL Parser Pro -->
 
 <div class="card">
 
-<h2>📊 URL Parser</h2>
+<h2>📊 URL Parser Pro</h2>
 
-<input type="text" id="urlParserInput" placeholder="https://example.com/path?query=test">
+<input type="text" id="urlParserInput" placeholder="https://example.com/path?query=test#section">
 
 <button id="parseUrlBtn">
 
 Analyze URL
 
 </button>
+
+<div id="urlParserResult" class="tool-result">
+    Waiting for URL analysis...
+</div>
+
+<div class="tool-actions">
+
+    <button id="copyUrlParserBtn" class="action-btn copy-btn">
+        📋 Copy Result
+    </button>
+
+    <button id="clearUrlParserBtn" class="action-btn clear-btn">
+        🧹 Clear Result
+    </button>
+
+</div>
 
 </div>
 
@@ -205,17 +221,17 @@ Generate File Hash
     Waiting for file analysis...
 </div>
 
-<div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+<div class="tool-actions">
 
-    <button id="copyFileHashBtn" style="flex:1; background-color:#2563eb;">
+    <button id="copyFileHashBtn" class="action-btn copy-btn">
         📋 Copy SHA-256
     </button>
 
-    <button id="downloadReportBtn" style="flex:1; background-color:#16a34a;">
+    <button id="downloadReportBtn" class="action-btn download-btn">
         ⬇️ Download Report
     </button>
 
-    <button id="clearFileHashBtn" style="flex:1; background-color:#dc2626;">
+    <button id="clearFileHashBtn" class="action-btn clear-btn">
         🧹 Clear Result
     </button>
 
@@ -250,13 +266,13 @@ Decode Base64
     Waiting for Base64 input...
 </div>
 
-<div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+<div class="tool-actions">
 
-    <button id="copyBase64Btn" style="flex:1; background-color:#2563eb;">
+    <button id="copyBase64Btn" class="action-btn copy-btn">
         📋 Copy Result
     </button>
 
-    <button id="clearBase64Btn" style="flex:1; background-color:#dc2626;">
+    <button id="clearBase64Btn" class="action-btn clear-btn">
         🧹 Clear Result
     </button>
 
@@ -288,7 +304,7 @@ Waiting for analysis...
 
 </div>
 
-<script src="script.js?v=base64-pro-3-authorized"></script>
+<script src="script.js?v=url-parser-pro-ui-polish-1"></script>
 
 </body>
 
