@@ -36,6 +36,72 @@ p {
     margin-bottom: 30px;
 }
 
+/* ===== Platform Panel ===== */
+
+.platform-panel {
+    background: #1e293b;
+    padding: 18px;
+    margin-bottom: 25px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.25);
+}
+
+.tool-counter {
+    color: #93c5fd;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.tool-note {
+    color: #cbd5e1;
+    font-size: 14px;
+    margin-bottom: 14px;
+}
+
+.tool-search {
+    margin-top: 0;
+}
+
+.category-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 4px 0 12px;
+}
+
+.category-pill {
+    width: auto;
+    padding: 9px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    background: #334155;
+    color: #e5e7eb;
+}
+
+.category-pill:hover,
+.category-pill.active {
+    background: #2563eb;
+}
+
+.tool-search-status {
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+.category-title {
+    color: #93c5fd;
+    font-size: 22px;
+    font-weight: 800;
+    margin: 28px 0 14px;
+    padding-left: 4px;
+}
+
+.tool-hidden {
+    display: none !important;
+}
+
 /* ===== Cards ===== */
 
 .card {
@@ -179,8 +245,7 @@ button:hover {
 
 /* ===== Space Between Buttons ===== */
 
-#copyPasswordBtn,
-#clearResultsBtn {
+#copyPasswordBtn {
     margin-top: 12px;
 }
 
@@ -191,12 +256,26 @@ button:hover {
         padding:15px;
     }
 
-    .card{
+    .card,
+    .platform-panel{
         padding:15px;
     }
 
     h1{
         font-size:26px;
+    }
+
+    .tool-counter {
+        font-size: 19px;
+    }
+
+    .category-title {
+        font-size: 20px;
+    }
+
+    .category-pill {
+        padding: 8px 12px;
+        font-size: 12px;
     }
 
     .tool-actions {
