@@ -8,6 +8,7 @@ const passwordCheckerResult = document.getElementById("passwordCheckerResult");
 const passwordLength = document.getElementById("passwordLength");
 const passwordGeneratorResult = document.getElementById("passwordGeneratorResult");
 const linkInput = document.getElementById("linkInput");
+const linkAnalyzerResult = document.getElementById("linkAnalyzerResult");
 const hashInput = document.getElementById("hashInput");
 const hashType = document.getElementById("hashType");
 const generateHashBtn = document.getElementById("generateHashBtn");
@@ -48,6 +49,8 @@ const generatePasswordBtn = document.getElementById("generatePasswordBtn");
 const copyPasswordBtn = document.getElementById("copyPasswordBtn");
 const clearPasswordBtn = document.getElementById("clearPasswordBtn");
 const analyzeLinkBtn = document.getElementById("analyzeLinkBtn");
+const copyLinkAnalysisBtn = document.getElementById("copyLinkAnalysisBtn");
+const clearLinkAnalysisBtn = document.getElementById("clearLinkAnalysisBtn");
 const clearResultsBtn = document.getElementById("clearResultsBtn");
 
 // ===== Results =====
@@ -55,6 +58,7 @@ const results = document.getElementById("results");
 let lastTextAnalysisResult = "";
 let generatedPassword = "";
 let lastPasswordCheckResult = "";
+let lastLinkAnalysisResult = "";
 let lastHashResult = "";
 let lastFileHash = "";
 let lastFileName = "";
@@ -338,27 +342,115 @@ function clearPasswordResult() {
   passwordGeneratorResult.innerHTML = "Waiting for password generation...";
 }
 
-// ===== Link Analyzer =====
+// ===== Link Analyzer Pro =====
 function analyzeLink() {
-    const url = linkInput.value.trim();
-    if (!url) {
-        results.innerHTML = "⚠ Enter a URL";
+    const input = linkInput.value.trim();
+
+    if (!input) {
+        linkAnalyzerResult.innerHTML = "⚠ Enter a URL or domain to analyze.";
+        lastLinkAnalysisResult = "";
+        return;
+    }
+
+    try {
+        const normalizedInput = input.startsWith("http://") || input.startsWith("https://") ? input : "https://" + input;
+        const parsed = new URL(normalizedInput);
+        const hostname = parsed.hostname;
+        const protocol = parsed.protocol;
+        const path = parsed.pathname || "/";
+        const query = parsed.search || "None";
+        const isHttps = protocol === "https:";
+        const suspiciousKeywords = ["login", "verify", "update", "secure", "account", "bank", "free", "gift", "password", "wallet"];
+        const hasSuspiciousKeyword = suspiciousKeywords.some(keyword => normalizedInput.toLowerCase().includes(keyword));
+        const hasAtSymbol = normalizedInput.includes("@");
+        const hasLongHost = hostname.length > 40;
+        const hasManySubdomains = hostname.split(".").length > 4;
+
+        let riskLevel = "✅ Safe-looking Link";
+        let advice = "The link structure looks normal. Still verify the source before opening sensitive pages.";
+
+        if (!isHttps || hasAtSymbol || hasSuspiciousKeyword || hasLongHost || hasManySubdomains) {
+            riskLevel = "⚠ Suspicious Link";
+            advice = "Review the URL carefully before opening it, especially if it asks for login, payment, or personal data.";
+        }
+
+        lastLinkAnalysisResult =
+`Link Analysis
+
+Status: ${riskLevel}
+Original Input: ${input}
+Normalized URL: ${parsed.href}
+Protocol: ${protocol}
+Hostname: ${hostname}
+Path: ${path}
+Query: ${query}
+HTTPS: ${isHttps ? "Yes" : "No"}
+Suspicious Keyword: ${hasSuspiciousKeyword ? "Yes" : "No"}
+@ Symbol: ${hasAtSymbol ? "Yes" : "No"}
+Long Hostname: ${hasLongHost ? "Yes" : "No"}
+Many Subdomains: ${hasManySubdomains ? "Yes" : "No"}
+Advice: ${advice}`;
+
+        linkAnalyzerResult.innerHTML = `
+            🔗 Link Analysis
+            <br><br>
+            <b>Status:</b> ${riskLevel}
+            <br>
+            <b>Original Input:</b> ${sanitize(input)}
+            <br>
+            <b>Normalized URL:</b> ${sanitize(parsed.href)}
+            <br>
+            <b>Protocol:</b> ${sanitize(protocol)}
+            <br>
+            <b>Hostname:</b> ${sanitize(hostname)}
+            <br>
+            <b>Path:</b> ${sanitize(path)}
+            <br>
+            <b>Query:</b> ${sanitize(query)}
+            <br><br>
+            <b>Checks:</b>
+            <br>
+            ${isHttps ? "✅" : "❌"} HTTPS
+            <br>
+            ${hasSuspiciousKeyword ? "⚠" : "✅"} Suspicious keywords
+            <br>
+            ${hasAtSymbol ? "⚠" : "✅"} @ symbol check
+            <br>
+            ${hasLongHost ? "⚠" : "✅"} Hostname length
+            <br>
+            ${hasManySubdomains ? "⚠" : "✅"} Subdomain count
+            <br><br>
+            <b>Advice:</b> ${sanitize(advice)}
+        `;
+    } catch (e) {
+        linkAnalyzerResult.innerHTML = "❌ Invalid URL or domain.";
+        lastLinkAnalysisResult = "";
+    }
+}
+
+// ===== Copy Link Analysis Result =====
+async function copyLinkAnalysisResult() {
+    if (!lastLinkAnalysisResult) {
+        linkAnalyzerResult.innerHTML = "⚠ No link analysis result to copy.";
         return;
     }
     try {
-        const parsed = new URL(url.startsWith("http") ? url : "https://" + url);
-        results.innerHTML = `
-            🔗 Link Analysis
-            <br><br>
-            Host: ${sanitize(parsed.host)}
-            <br>
-            Protocol: ${sanitize(parsed.protocol)}
-            <br>
-            Path: ${sanitize(parsed.pathname)}
-        `;
-    } catch (e) {
-        results.innerHTML = "❌ Invalid URL";
+        await navigator.clipboard.writeText(lastLinkAnalysisResult);
+        linkAnalyzerResult.innerHTML += "<br><br>✅ Link analysis copied.";
+    } catch {
+        if (copyTextWithFallback(lastLinkAnalysisResult)) {
+            linkAnalyzerResult.innerHTML += "<br><br>✅ Link analysis copied (fallback).";
+        } else {
+            linkAnalyzerResult.innerHTML += "<br><br>❌ Copy failed.";
+        }
     }
+}
+
+// ===== Clear Link Analysis Result =====
+function clearLinkAnalysisResult() {
+    linkInput.value = "";
+    linkAnalyzerResult.innerHTML = "Waiting for link analysis...";
+    lastLinkAnalysisResult = "";
 }
 
 // ===== Hash Generator Pro =====
@@ -721,6 +813,8 @@ generatePasswordBtn.addEventListener("click", generatePassword);
 copyPasswordBtn.addEventListener("click", copyPassword);
 clearPasswordBtn.addEventListener("click", clearPasswordResult);
 analyzeLinkBtn.addEventListener("click", analyzeLink);
+copyLinkAnalysisBtn.addEventListener("click", copyLinkAnalysisResult);
+clearLinkAnalysisBtn.addEventListener("click", clearLinkAnalysisResult);
 generateHashBtn.addEventListener("click", generateHash);
 copyHashBtn.addEventListener("click", copyHashResult);
 clearHashBtn.addEventListener("click", clearHashResult);
