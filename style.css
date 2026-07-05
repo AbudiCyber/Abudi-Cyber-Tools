@@ -42,13 +42,13 @@ p {
     position: relative;
     background: #1e293b;
     padding: 18px;
-    margin-bottom: 25px;
+    margin-bottom: 30px;
     border-radius: 15px;
     box-shadow: 0 0 20px rgba(0,0,0,0.25);
 }
 
 .platform-panel::after {
-    content: "🚀 v1.8.1";
+    content: "🚀 v1.8.2";
     position: absolute;
     top: 16px;
     right: 18px;
@@ -149,10 +149,21 @@ p {
 
 .category-title {
     color: #93c5fd;
-    font-size: 22px;
-    font-weight: 800;
-    margin: 28px 0 14px;
+    font-size: 23px;
+    font-weight: 900;
+    margin: 34px 0 16px;
     padding-left: 4px;
+    letter-spacing: 0.2px;
+}
+
+.category-title::after {
+    content: "";
+    display: block;
+    width: 56px;
+    height: 3px;
+    margin-top: 8px;
+    border-radius: 999px;
+    background: rgba(147, 197, 253, 0.35);
 }
 
 .tool-hidden {
@@ -163,17 +174,18 @@ p {
 
 .card {
     background: #1e293b;
-    padding: 20px;
-    margin-bottom: 25px;
-    border-radius: 15px;
+    padding: 22px;
+    margin-bottom: 32px;
+    border-radius: 17px;
     box-shadow: 0 0 20px rgba(0,0,0,0.3);
 }
 
 /* ===== Titles ===== */
 
 .card h2 {
-    margin-bottom: 15px;
+    margin-bottom: 18px;
     color: #93c5fd;
+    line-height: 1.25;
 }
 
 /* ===== Inputs ===== */
@@ -234,16 +246,32 @@ button:hover {
 }
 
 .tool-result {
-    margin-top: 12px;
-    line-height: 1.7;
+    margin-top: 16px;
+    line-height: 1.75;
+    color: #f8fafc;
+}
+
+.tool-result:empty {
+    display: none;
 }
 
 .tool-result code,
 #results code {
+    display: inline-block;
     max-width: 100%;
+    overflow-x: auto;
     overflow-wrap: anywhere;
     word-break: break-word;
     white-space: pre-wrap;
+    background: #0b1220;
+    border-radius: 10px;
+    padding: 10px 13px;
+    line-height: 1.6;
+    vertical-align: top;
+}
+
+.tool-result b {
+    color: #ffffff;
 }
 
 /* ===== Results ===== */
@@ -261,7 +289,7 @@ button:hover {
 .tool-actions {
     display: flex;
     gap: 10px;
-    margin-top: 14px;
+    margin-top: 16px;
     flex-wrap: wrap;
 }
 
@@ -306,6 +334,32 @@ button:hover {
     margin-top: 12px;
 }
 
+/* ===== Footer ===== */
+
+.site-footer {
+    margin: 36px 0 12px;
+    padding: 22px 18px;
+    border-radius: 17px;
+    background: #1e293b;
+    box-shadow: 0 0 20px rgba(0,0,0,0.25);
+    text-align: center;
+}
+
+.footer-brand {
+    color: #93c5fd;
+    font-size: 22px;
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.footer-made,
+.footer-note {
+    color: #cbd5e1;
+    font-size: 14px;
+    margin: 4px 0;
+    text-align: center;
+}
+
 /* ===== Mobile ===== */
 
 @media(max-width:600px){
@@ -316,6 +370,11 @@ button:hover {
     .card,
     .platform-panel{
         padding:15px;
+    }
+
+    .card {
+        margin-bottom: 36px;
+        border-radius: 16px;
     }
 
     .platform-panel::after {
@@ -350,11 +409,25 @@ button:hover {
 
     .category-title {
         font-size: 20px;
+        margin: 36px 0 14px;
     }
 
     .category-pill {
         padding: 8px 12px;
         font-size: 12px;
+    }
+
+    .tool-result {
+        margin-top: 15px;
+        line-height: 1.7;
+    }
+
+    .tool-result code,
+    #results code {
+        width: auto;
+        max-width: 100%;
+        padding: 9px 11px;
+        font-size: 14px;
     }
 
     .tool-actions {
@@ -366,6 +439,11 @@ button:hover {
         padding: 10px 12px;
         font-size: 13px;
     }
+
+    .site-footer {
+        margin-top: 40px;
+        padding: 20px 14px;
+    }
 }
 
-/* deployment retry: polish v1.8.1 */
+/* deployment retry: polish v1.8.2 */
