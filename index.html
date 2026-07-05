@@ -12,10 +12,10 @@
 <p>Simple Cyber Security Tools</p>
 
 <div class="platform-panel">
-<div class="tool-counter">🧰 9 Tools Available</div>
+<div class="tool-counter">🧰 10 Tools Available</div>
 <div class="tool-note">Privacy-first • Runs in your browser • Mobile-friendly</div>
 <div class="tool-search-row">
-<input type="search" id="toolSearch" class="tool-search" placeholder="Search tools... example: hash, password, url">
+<input type="search" id="toolSearch" class="tool-search" placeholder="Search tools... example: hash, password, url, ip">
 <button id="clearToolSearch" class="clear-tool-search" type="button" hidden>Clear</button>
 </div>
 <div class="category-pills" aria-label="Tool categories">
@@ -110,6 +110,17 @@
 </div>
 </div>
 
+<div class="card tool-card" data-category="web" data-tool="ip analyzer ipv4 ipv6 public private loopback network address">
+<h2>🌐 IP Analyzer Pro</h2>
+<input type="text" id="ipInput" placeholder="Example: 192.168.1.1 or 2001:db8::1">
+<button id="analyzeIpBtn">Analyze IP</button>
+<div id="ipAnalyzerResult" class="tool-result">Waiting for IP analysis...</div>
+<div class="tool-actions">
+<button id="copyIpAnalysisBtn" class="action-btn copy-btn">📋 Copy Result</button>
+<button id="clearIpAnalysisBtn" class="action-btn clear-btn">🧹 Clear Result</button>
+</div>
+</div>
+
 <div class="category-title" data-category-title="hash">🔐 Hash Tools</div>
 
 <div class="card tool-card" data-category="hash" data-tool="hash generator sha sha-1 sha-256 digest text checksum">
@@ -153,7 +164,7 @@
 </div>
 
 </div>
-<script src="script.js?v=cleanup-copy-2"></script>
+<script src="script.js?v=ip-analyzer-pro-1"></script>
 <script>
 (function () {
   const searchInput = document.getElementById("toolSearch");
