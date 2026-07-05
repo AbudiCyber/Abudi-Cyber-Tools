@@ -51,10 +51,8 @@ const clearPasswordBtn = document.getElementById("clearPasswordBtn");
 const analyzeLinkBtn = document.getElementById("analyzeLinkBtn");
 const copyLinkAnalysisBtn = document.getElementById("copyLinkAnalysisBtn");
 const clearLinkAnalysisBtn = document.getElementById("clearLinkAnalysisBtn");
-const clearResultsBtn = document.getElementById("clearResultsBtn");
 
-// ===== Results =====
-const results = document.getElementById("results");
+// ===== Stored logical copy values =====
 let lastTextAnalysisResult = "";
 let generatedPassword = "";
 let lastPasswordCheckResult = "";
@@ -65,6 +63,7 @@ let lastFileName = "";
 let lastBase64Result = "";
 let lastUrlParserResult = "";
 let lastEmailResult = "";
+let lastFileReport = "";
 
 // ===== Helpers =====
 function sanitize(input) {
@@ -80,8 +79,7 @@ function formatFileSize(bytes) {
 }
 
 function formatDate(timestamp) {
-    const date = new Date(timestamp);
-    return date.toLocaleString();
+    return new Date(timestamp).toLocaleString();
 }
 
 function encodeUnicodeBase64(text) {
@@ -105,7 +103,12 @@ function decodeUnicodeBase64(base64Text) {
 function copyTextWithFallback(text) {
     const ta = document.createElement("textarea");
     ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    ta.style.top = "-9999px";
     document.body.appendChild(ta);
+    ta.focus();
     ta.select();
     let copied = false;
     try {
@@ -115,6 +118,24 @@ function copyTextWithFallback(text) {
     }
     ta.remove();
     return copied;
+}
+
+async function copyLogicalValue(value, resultBox, successMessage) {
+    if (!value) {
+        resultBox.innerHTML += "<br><br>⚠ Nothing to copy.";
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(value);
+        resultBox.innerHTML += `<br><br>✅ ${successMessage}`;
+    } catch {
+        if (copyTextWithFallback(value)) {
+            resultBox.innerHTML += `<br><br>✅ ${successMessage}`;
+        } else {
+            resultBox.innerHTML += "<br><br>❌ Copy failed.";
+        }
+    }
 }
 
 // ===== Text Analyzer Pro =====
@@ -142,7 +163,6 @@ function analyzeText() {
 
   lastTextAnalysisResult =
 `Text Analysis
-
 Characters: ${characters}
 Words: ${words}
 Numbers: ${numbers}
@@ -167,26 +187,10 @@ Spaces: ${spaces}`;
   `;
 }
 
-// ===== Copy Text Analysis Result =====
 async function copyTextAnalysisResult() {
-  if (!lastTextAnalysisResult) {
-    textAnalyzerResult.innerHTML = "⚠ No text analysis result to copy.";
-    return;
-  }
-
-  try {
-    await navigator.clipboard.writeText(lastTextAnalysisResult);
-    textAnalyzerResult.innerHTML += "<br><br>✅ Text analysis copied.";
-  } catch {
-    if (copyTextWithFallback(lastTextAnalysisResult)) {
-      textAnalyzerResult.innerHTML += "<br><br>✅ Text analysis copied (fallback).";
-    } else {
-      textAnalyzerResult.innerHTML += "<br><br>❌ Copy failed.";
-    }
-  }
+  await copyLogicalValue(lastTextAnalysisResult, textAnalyzerResult, "Text analysis copied.");
 }
 
-// ===== Clear Text Analysis Result =====
 function clearTextAnalysisResult() {
   textInput.value = "";
   textAnalyzerResult.innerHTML = "Waiting for text analysis...";
@@ -229,11 +233,10 @@ function checkPassword() {
 
   lastPasswordCheckResult =
 `Password Strength
-
 Status: ${status}
 Length: ${password.length} characters
-Lowercase: ${hasLower ? "Yes" : "No"}
-Uppercase: ${hasUpper ? "Yes" : "No"}
+Lowercase letters: ${hasLower ? "Yes" : "No"}
+Uppercase letters: ${hasUpper ? "Yes" : "No"}
 Numbers: ${hasNumbers ? "Yes" : "No"}
 Symbols: ${hasSymbols ? "Yes" : "No"}
 Advice: ${advice}`;
@@ -261,25 +264,10 @@ Advice: ${advice}`;
   `;
 }
 
-// ===== Copy Password Check Result =====
 async function copyPasswordCheckResult() {
-  if (!lastPasswordCheckResult) {
-    passwordCheckerResult.innerHTML = "⚠ No password check result to copy.";
-    return;
-  }
-  try {
-    await navigator.clipboard.writeText(lastPasswordCheckResult);
-    passwordCheckerResult.innerHTML += "<br><br>✅ Password check result copied.";
-  } catch {
-    if (copyTextWithFallback(lastPasswordCheckResult)) {
-      passwordCheckerResult.innerHTML += "<br><br>✅ Password check result copied (fallback).";
-    } else {
-      passwordCheckerResult.innerHTML += "<br><br>❌ Copy failed.";
-    }
-  }
+  await copyLogicalValue(lastPasswordCheckResult, passwordCheckerResult, "Password check result copied.");
 }
 
-// ===== Clear Password Check Result =====
 function clearPasswordCheckResult() {
   passwordInput.value = "";
   passwordCheckerResult.innerHTML = "Waiting for password check...";
@@ -318,25 +306,10 @@ function generatePassword() {
   `;
 }
 
-// ===== Copy Password =====
 async function copyPassword() {
-  if (!generatedPassword) {
-    passwordGeneratorResult.innerHTML = "⚠ No generated password to copy.";
-    return;
-  }
-  try {
-    await navigator.clipboard.writeText(generatedPassword);
-    passwordGeneratorResult.innerHTML += "<br><br>✅ Password copied.";
-  } catch (e) {
-    if (copyTextWithFallback(generatedPassword)) {
-      passwordGeneratorResult.innerHTML += "<br><br>✅ Password copied (fallback).";
-    } else {
-      passwordGeneratorResult.innerHTML += "<br><br>❌ Copy failed.";
-    }
-  }
+  await copyLogicalValue(generatedPassword, passwordGeneratorResult, "Password copied.");
 }
 
-// ===== Clear Password Generator Result =====
 function clearPasswordResult() {
   generatedPassword = "";
   passwordGeneratorResult.innerHTML = "Waiting for password generation...";
@@ -376,7 +349,6 @@ function analyzeLink() {
 
         lastLinkAnalysisResult =
 `Link Analysis
-
 Status: ${riskLevel}
 Original Input: ${input}
 Normalized URL: ${parsed.href}
@@ -428,25 +400,10 @@ Advice: ${advice}`;
     }
 }
 
-// ===== Copy Link Analysis Result =====
 async function copyLinkAnalysisResult() {
-    if (!lastLinkAnalysisResult) {
-        linkAnalyzerResult.innerHTML = "⚠ No link analysis result to copy.";
-        return;
-    }
-    try {
-        await navigator.clipboard.writeText(lastLinkAnalysisResult);
-        linkAnalyzerResult.innerHTML += "<br><br>✅ Link analysis copied.";
-    } catch {
-        if (copyTextWithFallback(lastLinkAnalysisResult)) {
-            linkAnalyzerResult.innerHTML += "<br><br>✅ Link analysis copied (fallback).";
-        } else {
-            linkAnalyzerResult.innerHTML += "<br><br>❌ Copy failed.";
-        }
-    }
+    await copyLogicalValue(lastLinkAnalysisResult, linkAnalyzerResult, "Link analysis copied.");
 }
 
-// ===== Clear Link Analysis Result =====
 function clearLinkAnalysisResult() {
     linkInput.value = "";
     linkAnalyzerResult.innerHTML = "Waiting for link analysis...";
@@ -467,7 +424,7 @@ async function generateHash() {
         const data = encoder.encode(text);
         const hashBuffer = await crypto.subtle.digest(algorithm, data);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
         lastHashResult = hashHex;
         hashResult.innerHTML = `
             🔐 Hash Generated
@@ -488,32 +445,17 @@ async function generateHash() {
     }
 }
 
-// ===== Copy Hash Result =====
 async function copyHashResult() {
-    if (!lastHashResult) {
-        hashResult.innerHTML = "⚠ No hash to copy. Generate a hash first.";
-        return;
-    }
-    try {
-        await navigator.clipboard.writeText(lastHashResult);
-        hashResult.innerHTML += "<br><br>✅ Hash copied.";
-    } catch {
-        if (copyTextWithFallback(lastHashResult)) {
-            hashResult.innerHTML += "<br><br>✅ Hash copied (fallback).";
-        } else {
-            hashResult.innerHTML += "<br><br>❌ Copy failed.";
-        }
-    }
+    await copyLogicalValue(lastHashResult, hashResult, "Hash copied.");
 }
 
-// ===== Clear Hash Result =====
 function clearHashResult() {
     hashInput.value = "";
     hashResult.innerHTML = "Waiting for hash generation...";
     lastHashResult = "";
 }
 
-// ===== Base64 Encoder Pro =====
+// ===== Base64 Encoder / Decoder Pro =====
 function encodeBase64() {
     const text = base64Input.value.trim();
     if (!text) {
@@ -537,7 +479,6 @@ function encodeBase64() {
     }
 }
 
-// ===== Base64 Decoder Pro =====
 function decodeBase64() {
     const text = base64Input.value.trim();
     if (!text) {
@@ -561,25 +502,10 @@ function decodeBase64() {
     }
 }
 
-// ===== Copy Base64 Result =====
 async function copyBase64Result() {
-    if (!lastBase64Result) {
-        base64Result.innerHTML = "⚠ No Base64 result to copy.";
-        return;
-    }
-    try {
-        await navigator.clipboard.writeText(lastBase64Result);
-        base64Result.innerHTML += "<br><br>✅ Base64 result copied.";
-    } catch {
-        if (copyTextWithFallback(lastBase64Result)) {
-            base64Result.innerHTML += "<br><br>✅ Base64 result copied (fallback).";
-        } else {
-            base64Result.innerHTML += "<br><br>❌ Copy failed.";
-        }
-    }
+    await copyLogicalValue(lastBase64Result, base64Result, "Base64 result copied.");
 }
 
-// ===== Clear Base64 Result =====
 function clearBase64Result() {
     base64Result.innerHTML = "Waiting for Base64 input...";
     base64Input.value = "";
@@ -595,46 +521,23 @@ function validateEmail() {
         return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (emailRegex.test(email)) {
-        lastEmailResult = `Email Validation\n\nEmail: ${email}\nStatus: Valid Email Address`;
-        emailResult.innerHTML = `
-            📧 Email Validation
-            <br><br>
-            <b>Email:</b> ${sanitize(email)}
-            <br><br>
-            ✅ <b>Valid Email Address</b>
-        `;
-    } else {
-        lastEmailResult = `Email Validation\n\nEmail: ${email}\nStatus: Invalid Email Address`;
-        emailResult.innerHTML = `
-            📧 Email Validation
-            <br><br>
-            <b>Email:</b> ${sanitize(email)}
-            <br><br>
-            ❌ <b>Invalid Email Address</b>
-        `;
-    }
+    const isValid = emailRegex.test(email);
+    const status = isValid ? "Valid Email Address" : "Invalid Email Address";
+    const icon = isValid ? "✅" : "❌";
+    lastEmailResult = `${email} - ${status}`;
+    emailResult.innerHTML = `
+        📧 Email Validation
+        <br><br>
+        <b>Email:</b> ${sanitize(email)}
+        <br><br>
+        ${icon} <b>${status}</b>
+    `;
 }
 
-// ===== Copy Email Result =====
 async function copyEmailResult() {
-    if (!lastEmailResult) {
-        emailResult.innerHTML = "⚠ No email validation result to copy.";
-        return;
-    }
-    try {
-        await navigator.clipboard.writeText(lastEmailResult);
-        emailResult.innerHTML += "<br><br>✅ Email result copied.";
-    } catch {
-        if (copyTextWithFallback(lastEmailResult)) {
-            emailResult.innerHTML += "<br><br>✅ Email result copied (fallback).";
-        } else {
-            emailResult.innerHTML += "<br><br>❌ Copy failed.";
-        }
-    }
+    await copyLogicalValue(lastEmailResult, emailResult, "Email result copied.");
 }
 
-// ===== Clear Email Result =====
 function clearEmailResult() {
     emailInput.value = "";
     emailResult.innerHTML = "Waiting for email validation...";
@@ -656,7 +559,15 @@ function parseURL() {
         const query = url.search || "None";
         const fragment = url.hash || "None";
 
-        lastUrlParserResult = `URL Analysis\n\nOriginal Input: ${input}\nNormalized URL: ${url.href}\nProtocol: ${url.protocol}\nHostname: ${url.hostname}\nPort: ${port}\nPath: ${url.pathname}\nQuery: ${query}\nFragment: ${fragment}`;
+        lastUrlParserResult = `URL Analysis
+Original Input: ${input}
+Normalized URL: ${url.href}
+Protocol: ${url.protocol}
+Hostname: ${url.hostname}
+Port: ${port}
+Path: ${url.pathname}
+Query: ${query}
+Fragment: ${fragment}`;
 
         urlParserResult.innerHTML = `
             🌍 URL Analysis
@@ -683,25 +594,10 @@ function parseURL() {
     }
 }
 
-// ===== Copy URL Parser Result =====
 async function copyUrlParserResult() {
-    if (!lastUrlParserResult) {
-        urlParserResult.innerHTML = "⚠ No URL analysis to copy.";
-        return;
-    }
-    try {
-        await navigator.clipboard.writeText(lastUrlParserResult);
-        urlParserResult.innerHTML += "<br><br>✅ URL analysis copied.";
-    } catch {
-        if (copyTextWithFallback(lastUrlParserResult)) {
-            urlParserResult.innerHTML += "<br><br>✅ URL analysis copied (fallback).";
-        } else {
-            urlParserResult.innerHTML += "<br><br>❌ Copy failed.";
-        }
-    }
+    await copyLogicalValue(lastUrlParserResult, urlParserResult, "URL analysis copied.");
 }
 
-// ===== Clear URL Parser Result =====
 function clearUrlParserResult() {
     urlParserInput.value = "";
     urlParserResult.innerHTML = "Waiting for URL analysis...";
@@ -715,6 +611,7 @@ async function generateFileHash() {
         fileHashResult.innerHTML = "⚠ Please choose a file.";
         lastFileHash = "";
         lastFileName = "";
+        lastFileReport = "";
         return;
     }
     try {
@@ -728,6 +625,13 @@ async function generateFileHash() {
         const fileSizeBytes = file.size;
         const fileSizeFormatted = formatFileSize(fileSizeBytes);
         const lastModified = formatDate(file.lastModified);
+        lastFileReport = `File Hash Report
+Generated: ${new Date().toLocaleString()}
+File Name: ${file.name}
+File Type: ${fileType}
+File Size: ${fileSizeFormatted} (${fileSizeBytes} bytes)
+Last Modified: ${lastModified}
+SHA-256: ${hashHex}`;
         fileHashResult.innerHTML = `
             📂 File Hash
             <br><br>
@@ -749,35 +653,20 @@ async function generateFileHash() {
         fileHashResult.innerHTML = "❌ Failed to generate file hash.";
         lastFileHash = "";
         lastFileName = "";
+        lastFileReport = "";
     }
 }
 
-// ===== Copy File Hash =====
 async function copyFileHash() {
-    if (!lastFileHash) {
-        fileHashResult.innerHTML = "⚠ No hash to copy. Generate a file hash first.";
-        return;
-    }
-    try {
-        await navigator.clipboard.writeText(lastFileHash);
-        fileHashResult.innerHTML = "✅ SHA-256 copied to clipboard!";
-    } catch (e) {
-        if (copyTextWithFallback(lastFileHash)) {
-            fileHashResult.innerHTML = "✅ SHA-256 copied (fallback)!";
-        } else {
-            fileHashResult.innerHTML = "❌ Copy failed";
-        }
-    }
+    await copyLogicalValue(lastFileHash, fileHashResult, "SHA-256 copied.");
 }
 
-// ===== Download Report =====
 function downloadReport() {
-    if (!lastFileHash || !lastFileName) {
-        fileHashResult.innerHTML = "⚠ No hash to download. Generate a file hash first.";
+    if (!lastFileReport || !lastFileName) {
+        fileHashResult.innerHTML += "<br><br>⚠ No report to download. Generate a file hash first.";
         return;
     }
-    const reportContent = `\n=== File Hash Report ===\nGenerated: ${new Date().toLocaleString()}\n\nFile Name: ${lastFileName}\nSHA-256: ${lastFileHash}\n    `;
-    const blob = new Blob([reportContent], { type: "text/plain" });
+    const blob = new Blob([lastFileReport], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -786,20 +675,15 @@ function downloadReport() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    fileHashResult.innerHTML = "✅ Report downloaded successfully!";
+    fileHashResult.innerHTML += "<br><br>✅ Report downloaded successfully!";
 }
 
-// ===== Clear File Hash Result =====
 function clearFileHashResult() {
     fileHashResult.innerHTML = "Waiting for file analysis...";
     lastFileHash = "";
     lastFileName = "";
+    lastFileReport = "";
     fileHashInput.value = "";
-}
-
-// ===== Clear Results =====
-function clearResults() {
-  results.innerHTML = "Waiting for analysis...";
 }
 
 // ===== Event Listeners =====
@@ -832,4 +716,3 @@ generateFileHashBtn.addEventListener("click", generateFileHash);
 copyFileHashBtn.addEventListener("click", copyFileHash);
 downloadReportBtn.addEventListener("click", downloadReport);
 clearFileHashBtn.addEventListener("click", clearFileHashResult);
-clearResultsBtn.addEventListener("click", clearResults);
