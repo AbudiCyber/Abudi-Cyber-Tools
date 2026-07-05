@@ -59,8 +59,32 @@ p {
     margin-bottom: 14px;
 }
 
+.tool-search-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    margin-bottom: 12px;
+}
+
 .tool-search {
     margin-top: 0;
+    margin-bottom: 0;
+    flex: 1;
+}
+
+.clear-tool-search {
+    width: auto;
+    min-width: 86px;
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: #475569;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.clear-tool-search:hover {
+    background: #334155;
 }
 
 .category-pills {
@@ -88,6 +112,16 @@ p {
 .tool-search-status {
     color: #cbd5e1;
     font-size: 14px;
+}
+
+.no-tools-found {
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 12px;
+    background: #334155;
+    color: #e5e7eb;
+    font-weight: 700;
+    text-align: center;
 }
 
 .category-title {
@@ -267,6 +301,17 @@ button:hover {
 
     .tool-counter {
         font-size: 19px;
+    }
+
+    .tool-search-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .clear-tool-search {
+        width: 100%;
+        min-width: 0;
+        padding: 10px 12px;
     }
 
     .category-title {
