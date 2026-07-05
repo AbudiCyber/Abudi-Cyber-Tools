@@ -3,6 +3,7 @@
 // ===== Inputs =====
 const textInput = document.getElementById("textInput");
 const passwordInput = document.getElementById("passwordInput");
+const passwordCheckerResult = document.getElementById("passwordCheckerResult");
 const passwordLength = document.getElementById("passwordLength");
 const passwordGeneratorResult = document.getElementById("passwordGeneratorResult");
 const linkInput = document.getElementById("linkInput");
@@ -38,6 +39,8 @@ const clearFileHashBtn = document.getElementById("clearFileHashBtn");
 // ===== Buttons =====
 const analyzeTextBtn = document.getElementById("analyzeTextBtn");
 const checkPasswordBtn = document.getElementById("checkPasswordBtn");
+const copyPasswordCheckBtn = document.getElementById("copyPasswordCheckBtn");
+const clearPasswordCheckBtn = document.getElementById("clearPasswordCheckBtn");
 const generatePasswordBtn = document.getElementById("generatePasswordBtn");
 const copyPasswordBtn = document.getElementById("copyPasswordBtn");
 const clearPasswordBtn = document.getElementById("clearPasswordBtn");
@@ -47,6 +50,7 @@ const clearResultsBtn = document.getElementById("clearResultsBtn");
 // ===== Results =====
 const results = document.getElementById("results");
 let generatedPassword = "";
+let lastPasswordCheckResult = "";
 let lastHashResult = "";
 let lastFileHash = "";
 let lastFileName = "";
@@ -130,23 +134,97 @@ function analyzeText() {
   `;
 }
 
-// ===== Password Checker =====
+// ===== Password Checker Pro =====
 function checkPassword() {
   const password = passwordInput.value;
-  let strength = "Weak ❌";
-  const hasNumbers = /\d/.test(password);
-  const hasLetters = /[a-zA-Z]/.test(password);
-  const hasSymbols = /[!@#$%^&*()_\-+={}\[\]|;:'",.<>/?`~]/.test(password);
-  if (password.length >= 8 && hasNumbers && hasLetters && hasSymbols) {
-    strength = "Strong 💪";
-  } else if (password.length >= 6 && hasNumbers && hasLetters) {
-    strength = "Medium ⚠";
+
+  if (!password) {
+    passwordCheckerResult.innerHTML = "⚠ Enter a password to check.";
+    lastPasswordCheckResult = "";
+    return;
   }
-  results.innerHTML = `
+
+  const hasLower = /[a-z]/.test(password);
+  const hasUpper = /[A-Z]/.test(password);
+  const hasNumbers = /\d/.test(password);
+  const hasSymbols = /[!@#$%^&*()_\-+={}\[\]|;:'",.<>/?`~]/.test(password);
+  const longEnough = password.length >= 8;
+
+  let score = 0;
+  if (longEnough) score++;
+  if (hasLower) score++;
+  if (hasUpper) score++;
+  if (hasNumbers) score++;
+  if (hasSymbols) score++;
+
+  let status = "❌ Weak Password";
+  let advice = "Use at least 8 characters with uppercase, lowercase, numbers, and symbols.";
+
+  if (score >= 5) {
+    status = "✅ Strong Password";
+    advice = "Good structure. This password uses all main complexity categories.";
+  } else if (score >= 3) {
+    status = "⚠ Medium Password";
+    advice = "Better than weak, but add more length or more character types.";
+  }
+
+  lastPasswordCheckResult =
+`Password Strength
+
+Status: ${status}
+Length: ${password.length} characters
+Lowercase: ${hasLower ? "Yes" : "No"}
+Uppercase: ${hasUpper ? "Yes" : "No"}
+Numbers: ${hasNumbers ? "Yes" : "No"}
+Symbols: ${hasSymbols ? "Yes" : "No"}
+Advice: ${advice}`;
+
+  passwordCheckerResult.innerHTML = `
     🔐 Password Strength
     <br><br>
-    ${strength}
+    <b>Status:</b> ${status}
+    <br>
+    <b>Length:</b> ${password.length} characters
+    <br><br>
+    <b>Checks:</b>
+    <br>
+    ${longEnough ? "✅" : "❌"} 8+ characters
+    <br>
+    ${hasLower ? "✅" : "❌"} Lowercase letters
+    <br>
+    ${hasUpper ? "✅" : "❌"} Uppercase letters
+    <br>
+    ${hasNumbers ? "✅" : "❌"} Numbers
+    <br>
+    ${hasSymbols ? "✅" : "❌"} Symbols
+    <br><br>
+    <b>Advice:</b> ${sanitize(advice)}
   `;
+}
+
+// ===== Copy Password Check Result =====
+async function copyPasswordCheckResult() {
+  if (!lastPasswordCheckResult) {
+    passwordCheckerResult.innerHTML = "⚠ No password check result to copy.";
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(lastPasswordCheckResult);
+    passwordCheckerResult.innerHTML += "<br><br>✅ Password check result copied.";
+  } catch {
+    if (copyTextWithFallback(lastPasswordCheckResult)) {
+      passwordCheckerResult.innerHTML += "<br><br>✅ Password check result copied (fallback).";
+    } else {
+      passwordCheckerResult.innerHTML += "<br><br>❌ Copy failed.";
+    }
+  }
+}
+
+// ===== Clear Password Check Result =====
+function clearPasswordCheckResult() {
+  passwordInput.value = "";
+  passwordCheckerResult.innerHTML = "Waiting for password check...";
+  lastPasswordCheckResult = "";
 }
 
 // ===== Password Generator Pro =====
@@ -580,6 +658,8 @@ function clearResults() {
 // ===== Event Listeners =====
 analyzeTextBtn.addEventListener("click", analyzeText);
 checkPasswordBtn.addEventListener("click", checkPassword);
+copyPasswordCheckBtn.addEventListener("click", copyPasswordCheckResult);
+clearPasswordCheckBtn.addEventListener("click", clearPasswordCheckResult);
 generatePasswordBtn.addEventListener("click", generatePassword);
 copyPasswordBtn.addEventListener("click", copyPassword);
 clearPasswordBtn.addEventListener("click", clearPasswordResult);
