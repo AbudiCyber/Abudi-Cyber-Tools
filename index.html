@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Abudi Cyber Tools</title>
-<link rel="stylesheet" href="style.css?v=tool-nav-1">
+<link rel="stylesheet" href="style.css?v=tool-nav-polish-1">
 </head>
 <body>
 <div class="container">
@@ -14,16 +14,20 @@
 <div class="platform-panel">
 <div class="tool-counter">🧰 9 Tools Available</div>
 <div class="tool-note">Privacy-first • Runs in your browser • Mobile-friendly</div>
+<div class="tool-search-row">
 <input type="search" id="toolSearch" class="tool-search" placeholder="Search tools... example: hash, password, url">
+<button id="clearToolSearch" class="clear-tool-search" type="button" hidden>Clear</button>
+</div>
 <div class="category-pills" aria-label="Tool categories">
-<button class="category-pill active" data-filter="all">All</button>
-<button class="category-pill" data-filter="text">Text</button>
-<button class="category-pill" data-filter="password">Password</button>
-<button class="category-pill" data-filter="web">Web / URL</button>
-<button class="category-pill" data-filter="hash">Hash</button>
-<button class="category-pill" data-filter="validation">Validation</button>
+<button type="button" class="category-pill active" data-filter="all">All</button>
+<button type="button" class="category-pill" data-filter="text">Text</button>
+<button type="button" class="category-pill" data-filter="password">Password</button>
+<button type="button" class="category-pill" data-filter="web">Web / URL</button>
+<button type="button" class="category-pill" data-filter="hash">Hash</button>
+<button type="button" class="category-pill" data-filter="validation">Validation</button>
 </div>
 <div id="toolSearchStatus" class="tool-search-status">Showing all tools.</div>
+<div id="noToolsFound" class="no-tools-found tool-hidden">🔎 No tools found. Try another keyword.</div>
 </div>
 
 <div class="category-title" data-category-title="text">📝 Text Tools</div>
@@ -153,6 +157,8 @@
 <script>
 (function () {
   const searchInput = document.getElementById("toolSearch");
+  const clearSearchBtn = document.getElementById("clearToolSearch");
+  const noToolsFound = document.getElementById("noToolsFound");
   const cards = Array.from(document.querySelectorAll(".tool-card"));
   const categoryTitles = Array.from(document.querySelectorAll(".category-title"));
   const pills = Array.from(document.querySelectorAll(".category-pill"));
@@ -161,6 +167,13 @@
 
   function normalize(value) {
     return String(value || "").toLowerCase().trim();
+  }
+
+  function setActiveCategory(category) {
+    activeCategory = category;
+    pills.forEach(item => {
+      item.classList.toggle("active", item.dataset.filter === category);
+    });
   }
 
   function updateVisibleTools() {
@@ -183,8 +196,13 @@
       title.classList.toggle("tool-hidden", !hasVisibleCard);
     });
 
+    clearSearchBtn.hidden = !query && activeCategory === "all";
+    noToolsFound.classList.toggle("tool-hidden", visibleCount !== 0);
+
     if (visibleCount === cards.length && activeCategory === "all" && !query) {
       status.textContent = "Showing all tools.";
+    } else if (visibleCount === 0) {
+      status.textContent = "No matching tools.";
     } else {
       status.textContent = `Showing ${visibleCount} of ${cards.length} tools.`;
     }
@@ -192,11 +210,16 @@
 
   searchInput.addEventListener("input", updateVisibleTools);
 
+  clearSearchBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    setActiveCategory("all");
+    updateVisibleTools();
+    searchInput.focus();
+  });
+
   pills.forEach(pill => {
     pill.addEventListener("click", () => {
-      activeCategory = pill.dataset.filter;
-      pills.forEach(item => item.classList.remove("active"));
-      pill.classList.add("active");
+      setActiveCategory(pill.dataset.filter);
       updateVisibleTools();
     });
   });
