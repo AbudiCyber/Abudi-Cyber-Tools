@@ -39,6 +39,7 @@ p {
 /* ===== Platform Panel ===== */
 
 .platform-panel {
+    position: relative;
     background: #1e293b;
     padding: 18px;
     margin-bottom: 25px;
@@ -46,11 +47,33 @@ p {
     box-shadow: 0 0 20px rgba(0,0,0,0.25);
 }
 
+.platform-panel::after {
+    content: "🚀 v1.8.1";
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    background: #0f172a;
+    color: #93c5fd;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    box-shadow: inset 0 0 0 1px rgba(147,197,253,0.18);
+}
+
 .tool-counter {
     color: #93c5fd;
-    font-size: 22px;
+    font-size: 0;
     font-weight: 700;
     margin-bottom: 6px;
+    padding-right: 92px;
+}
+
+.tool-counter::before {
+    content: "🧰 11 Browser Tools Available";
+    font-size: 22px;
+    line-height: 1.25;
 }
 
 .tool-note {
@@ -295,11 +318,22 @@ button:hover {
         padding:15px;
     }
 
+    .platform-panel::after {
+        top: 14px;
+        right: 15px;
+        font-size: 11px;
+        padding: 5px 9px;
+    }
+
     h1{
         font-size:26px;
     }
 
     .tool-counter {
+        padding-right: 82px;
+    }
+
+    .tool-counter::before {
         font-size: 19px;
     }
 
