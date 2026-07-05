@@ -12,10 +12,10 @@
 <p>Simple Cyber Security Tools</p>
 
 <div class="platform-panel">
-<div class="tool-counter">🧰 10 Tools Available</div>
+<div class="tool-counter">🧰 11 Tools Available</div>
 <div class="tool-note">Privacy-first • Runs in your browser • Mobile-friendly</div>
 <div class="tool-search-row">
-<input type="search" id="toolSearch" class="tool-search" placeholder="Search tools... example: hash, password, url, ip">
+<input type="search" id="toolSearch" class="tool-search" placeholder="Search tools... example: hash, password, url, ip, encode">
 <button id="clearToolSearch" class="clear-tool-search" type="button" hidden>Clear</button>
 </div>
 <div class="category-pills" aria-label="Tool categories">
@@ -110,6 +110,19 @@
 </div>
 </div>
 
+<div class="card tool-card" data-category="web" data-tool="url encoder decoder encode decode percent encoding decodeURIComponent encodeURIComponent query component">
+<h2>🧩 URL Encoder / Decoder Pro</h2>
+<textarea id="urlCodecInput" placeholder="Enter URL text or encoded value..."></textarea>
+<button id="urlEncodeBtn">Encode URL</button>
+<br><br>
+<button id="urlDecodeBtn">Decode URL</button>
+<div id="urlCodecResult" class="tool-result">Waiting for URL encode/decode input...</div>
+<div class="tool-actions">
+<button id="copyUrlCodecBtn" class="action-btn copy-btn">📋 Copy Result</button>
+<button id="clearUrlCodecBtn" class="action-btn clear-btn">🧹 Clear Result</button>
+</div>
+</div>
+
 <div class="card tool-card" data-category="web" data-tool="ip analyzer ipv4 ipv6 public private loopback network address">
 <h2>🌐 IP Analyzer Pro</h2>
 <input type="text" id="ipInput" placeholder="Example: 192.168.1.1 or 2001:db8::1">
@@ -164,7 +177,110 @@
 </div>
 
 </div>
-<script src="script.js?v=ip-analyzer-pro-2"></script>
+<script src="script.js?v=url-codec-pro-1"></script>
+<script>
+(function () {
+  const urlCodecInput = document.getElementById("urlCodecInput");
+  const urlEncodeBtn = document.getElementById("urlEncodeBtn");
+  const urlDecodeBtn = document.getElementById("urlDecodeBtn");
+  const urlCodecResult = document.getElementById("urlCodecResult");
+  const copyUrlCodecBtn = document.getElementById("copyUrlCodecBtn");
+  const clearUrlCodecBtn = document.getElementById("clearUrlCodecBtn");
+  if (!urlCodecInput || !urlEncodeBtn || !urlDecodeBtn || !urlCodecResult || !copyUrlCodecBtn || !clearUrlCodecBtn) return;
+
+  let lastUrlCodecResult = "";
+  const sanitizeUrlCodec = value => String(value).replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  function copyUrlCodecFallback(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    ta.style.top = "-9999px";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    let copied = false;
+    try { copied = document.execCommand("copy"); } catch { copied = false; }
+    ta.remove();
+    return copied;
+  }
+
+  async function copyUrlCodecValue() {
+    if (!lastUrlCodecResult) {
+      urlCodecResult.innerHTML += "<br><br>⚠ Nothing to copy.";
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(lastUrlCodecResult);
+      urlCodecResult.innerHTML += "<br><br>✅ URL result copied.";
+    } catch {
+      if (copyUrlCodecFallback(lastUrlCodecResult)) {
+        urlCodecResult.innerHTML += "<br><br>✅ URL result copied.";
+      } else {
+        urlCodecResult.innerHTML += "<br><br>❌ Copy failed.";
+      }
+    }
+  }
+
+  function showUrlCodecResult(mode, input, output) {
+    lastUrlCodecResult = output;
+    urlCodecResult.innerHTML = `
+      🧩 URL ${mode}
+      <br><br>
+      <b>Input:</b>
+      <br>
+      <code style="user-select:all; white-space:pre-wrap; word-break:break-word; background:#0b1220; padding:8px 12px; display:inline-block; border-radius:6px; max-width:100%;">${sanitizeUrlCodec(input)}</code>
+      <br><br>
+      <b>Result:</b>
+      <br>
+      <code style="user-select:all; white-space:pre-wrap; word-break:break-word; background:#0b1220; padding:8px 12px; display:inline-block; border-radius:6px; max-width:100%;">${sanitizeUrlCodec(output)}</code>
+    `;
+  }
+
+  function encodeUrlValue() {
+    const input = urlCodecInput.value.trim();
+    if (!input) {
+      urlCodecResult.innerHTML = "⚠ Enter text or URL to encode.";
+      lastUrlCodecResult = "";
+      return;
+    }
+    try {
+      showUrlCodecResult("Encoded", input, encodeURIComponent(input));
+    } catch {
+      urlCodecResult.innerHTML = "❌ Could not encode this value.";
+      lastUrlCodecResult = "";
+    }
+  }
+
+  function decodeUrlValue() {
+    const input = urlCodecInput.value.trim();
+    if (!input) {
+      urlCodecResult.innerHTML = "⚠ Enter encoded URL text to decode.";
+      lastUrlCodecResult = "";
+      return;
+    }
+    try {
+      showUrlCodecResult("Decoded", input, decodeURIComponent(input));
+    } catch {
+      urlCodecResult.innerHTML = "❌ Invalid encoded URL text.";
+      lastUrlCodecResult = "";
+    }
+  }
+
+  function clearUrlCodecResult() {
+    urlCodecInput.value = "";
+    urlCodecResult.innerHTML = "Waiting for URL encode/decode input...";
+    lastUrlCodecResult = "";
+  }
+
+  urlEncodeBtn.addEventListener("click", encodeUrlValue);
+  urlDecodeBtn.addEventListener("click", decodeUrlValue);
+  copyUrlCodecBtn.addEventListener("click", copyUrlCodecValue);
+  clearUrlCodecBtn.addEventListener("click", clearUrlCodecResult);
+})();
+</script>
 <script>
 (function () {
   const ipInput = document.getElementById("ipInput");
