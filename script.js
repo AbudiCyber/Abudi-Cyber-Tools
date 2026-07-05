@@ -2,6 +2,7 @@
 
 // ===== Inputs =====
 const textInput = document.getElementById("textInput");
+const textAnalyzerResult = document.getElementById("textAnalyzerResult");
 const passwordInput = document.getElementById("passwordInput");
 const passwordCheckerResult = document.getElementById("passwordCheckerResult");
 const passwordLength = document.getElementById("passwordLength");
@@ -38,6 +39,8 @@ const clearFileHashBtn = document.getElementById("clearFileHashBtn");
 
 // ===== Buttons =====
 const analyzeTextBtn = document.getElementById("analyzeTextBtn");
+const copyTextAnalysisBtn = document.getElementById("copyTextAnalysisBtn");
+const clearTextAnalysisBtn = document.getElementById("clearTextAnalysisBtn");
 const checkPasswordBtn = document.getElementById("checkPasswordBtn");
 const copyPasswordCheckBtn = document.getElementById("copyPasswordCheckBtn");
 const clearPasswordCheckBtn = document.getElementById("clearPasswordCheckBtn");
@@ -49,6 +52,7 @@ const clearResultsBtn = document.getElementById("clearResultsBtn");
 
 // ===== Results =====
 const results = document.getElementById("results");
+let lastTextAnalysisResult = "";
 let generatedPassword = "";
 let lastPasswordCheckResult = "";
 let lastHashResult = "";
@@ -109,29 +113,80 @@ function copyTextWithFallback(text) {
     return copied;
 }
 
-// ===== Text Analyzer =====
+// ===== Text Analyzer Pro =====
 function analyzeText() {
-  let text = textInput.value.trim();
-  if (text.length > 5000) {
-    results.innerHTML = "⚠ Max 5000 characters";
+  const rawText = textInput.value.trim();
+
+  if (!rawText) {
+    textAnalyzerResult.innerHTML = "⚠ Enter text to analyze.";
+    lastTextAnalysisResult = "";
     return;
   }
-  text = sanitize(text);
-  const characters = text.length;
-  const words = text === "" ? 0 : text.split(/\s+/).length;
-  const numbers = (text.match(/\d/g) || []).length;
-  const symbols = (text.match(/[^a-zA-Z0-9\s]/g) || []).length;
-  results.innerHTML = `
+
+  if (rawText.length > 5000) {
+    textAnalyzerResult.innerHTML = "⚠ Max 5000 characters.";
+    lastTextAnalysisResult = "";
+    return;
+  }
+
+  const characters = rawText.length;
+  const words = rawText === "" ? 0 : rawText.split(/\s+/).length;
+  const numbers = (rawText.match(/\d/g) || []).length;
+  const symbols = (rawText.match(/[^\p{L}\p{N}\s]/gu) || []).length;
+  const lines = rawText.split(/\r\n|\r|\n/).length;
+  const spaces = (rawText.match(/\s/g) || []).length;
+
+  lastTextAnalysisResult =
+`Text Analysis
+
+Characters: ${characters}
+Words: ${words}
+Numbers: ${numbers}
+Symbols: ${symbols}
+Lines: ${lines}
+Spaces: ${spaces}`;
+
+  textAnalyzerResult.innerHTML = `
     📝 Text Analysis
     <br><br>
-    Characters: ${characters}
+    <b>Characters:</b> ${characters}
     <br>
-    Words: ${words}
+    <b>Words:</b> ${words}
     <br>
-    Numbers: ${numbers}
+    <b>Numbers:</b> ${numbers}
     <br>
-    Symbols: ${symbols}
+    <b>Symbols:</b> ${symbols}
+    <br>
+    <b>Lines:</b> ${lines}
+    <br>
+    <b>Spaces:</b> ${spaces}
   `;
+}
+
+// ===== Copy Text Analysis Result =====
+async function copyTextAnalysisResult() {
+  if (!lastTextAnalysisResult) {
+    textAnalyzerResult.innerHTML = "⚠ No text analysis result to copy.";
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(lastTextAnalysisResult);
+    textAnalyzerResult.innerHTML += "<br><br>✅ Text analysis copied.";
+  } catch {
+    if (copyTextWithFallback(lastTextAnalysisResult)) {
+      textAnalyzerResult.innerHTML += "<br><br>✅ Text analysis copied (fallback).";
+    } else {
+      textAnalyzerResult.innerHTML += "<br><br>❌ Copy failed.";
+    }
+  }
+}
+
+// ===== Clear Text Analysis Result =====
+function clearTextAnalysisResult() {
+  textInput.value = "";
+  textAnalyzerResult.innerHTML = "Waiting for text analysis...";
+  lastTextAnalysisResult = "";
 }
 
 // ===== Password Checker Pro =====
@@ -657,6 +712,8 @@ function clearResults() {
 
 // ===== Event Listeners =====
 analyzeTextBtn.addEventListener("click", analyzeText);
+copyTextAnalysisBtn.addEventListener("click", copyTextAnalysisResult);
+clearTextAnalysisBtn.addEventListener("click", clearTextAnalysisResult);
 checkPasswordBtn.addEventListener("click", checkPassword);
 copyPasswordCheckBtn.addEventListener("click", copyPasswordCheckResult);
 clearPasswordCheckBtn.addEventListener("click", clearPasswordCheckResult);
