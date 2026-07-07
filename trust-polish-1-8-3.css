@@ -1,0 +1,46 @@
+/* Abudi Cyber Tools — v1.8.3 Stability & Trust Polish */
+.platform-panel::after {
+  content: "🚀 v1.8.3" !important;
+}
+
+.privacy-note {
+  margin-top: 12px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #cbd5e1;
+  font-size: 13px;
+  line-height: 1.55;
+  border: 1px solid rgba(147, 197, 253, 0.12);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.version-badge {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #93c5fd;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  box-shadow: inset 0 0 0 1px rgba(147,197,253,0.18);
+}
+
+@media(max-width:600px){
+  .version-badge {
+    top: 14px;
+    right: 15px;
+    font-size: 11px;
+    padding: 5px 9px;
+  }
+
+  .privacy-note {
+    font-size: 12px;
+    padding: 9px 10px;
+  }
+}
