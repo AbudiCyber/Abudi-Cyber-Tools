@@ -1,2 +1,192 @@
 <!DOCTYPE html>
-<html><head><title>Test</title></head><body>test</body></html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abudi Cyber Tools</title>
+<link rel="stylesheet" href="style.css?v=trust-polish-1-8-3">
+</head>
+<body>
+<div class="container">
+<h1>🛡️ Abudi Cyber Tools</h1>
+<p>Simple Cyber Security Tools</p>
+
+<div class="platform-panel">
+<div class="tool-counter">🧰 11 Tools Available</div>
+<div class="tool-note">Privacy-first • Runs in your browser • Mobile-friendly</div>
+<div class="tool-search-row">
+<input type="search" id="toolSearch" class="tool-search" placeholder="Search tools... example: hash, password, url, ip, encode">
+<button id="clearToolSearch" class="clear-tool-search" type="button" hidden>Clear</button>
+</div>
+<div class="category-pills" aria-label="Tool categories">
+<button type="button" class="category-pill active" data-filter="all">All</button>
+<button type="button" class="category-pill" data-filter="text">Text</button>
+<button type="button" class="category-pill" data-filter="password">Password</button>
+<button type="button" class="category-pill" data-filter="web">Web / URL</button>
+<button type="button" class="category-pill" data-filter="hash">Hash</button>
+<button type="button" class="category-pill" data-filter="validation">Validation</button>
+</div>
+<div id="toolSearchStatus" class="tool-search-status">Showing all tools.</div>
+<div id="noToolsFound" class="no-tools-found tool-hidden">🔎 No tools found. Try another keyword.</div>
+</div>
+
+<div class="category-title" data-category-title="text">📝 Text Tools</div>
+
+<div class="card tool-card" data-category="text" data-tool="text analyzer text analysis words characters symbols lines spaces">
+<h2>📝 Text Analyzer Pro</h2>
+<textarea id="textInput" placeholder="Enter text here..."></textarea>
+<button id="analyzeTextBtn">Analyze Text</button>
+<div id="textAnalyzerResult" class="tool-result">Waiting for text input...</div>
+<div class="tool-actions">
+<button id="copyTextAnalysisBtn" class="action-btn copy-btn">📋 Copy Result</button>
+<button id="clearTextAnalysisBtn" class="action-btn clear-btn">🧹 Clear Result</button>
+</div>
+</div>
+
+<div class="card tool-card" data-category="text" data-tool="base64 encoder decoder encode decode text unicode">
+<h2>🔢 Base64 Encoder / Decoder Pro</h2>
+<textarea id="base64Input" placeholder="Enter text..."></textarea>
+<button id="encodeBtn">Encode Base64</button>
+<br><br>
+<button id="decodeBtn">Decode Base64</button>
+<div id="base64Result" class="tool-result">Waiting for Base64 input...</div>
+<div class="tool-actions">
+<button id="copyBase64Btn" class="action-btn copy-btn">📋 Copy Result</button>
+<button id="clearBase64Btn" class="action-btn clear-btn">🧹 Clear Result</button>
+</div>
+</div>
+
+<div class="category-title" data-category-title="password">🔐 Password Tools</div>
+
+<div class="card tool-card" data-category="password" data-tool="password checker strength weak medium strong security">
+<h2>🔐 Password Checker Pro</h2>
+<input type="text" id="passwordInput" placeholder="Enter password">
+<button id="checkPasswordBtn">Check Password</button>
+<div class="privacy-note">🛡️ Runs locally in your browser. Nothing is uploaded.</div>
+<div id="passwordCheckerResult" class="tool-result">Waiting for password input...</div>
+<div class="tool-actions">
+<button id="copyPasswordCheckBtn" class="action-btn copy-btn">📋 Copy Result</button>
+<button id="clearPasswordCheckBtn" class="action-btn clear-btn">🧹 Clear Result</button>
+</div>
+</div>
+
+<div class="card tool-card" data-category="password" data-tool="password generator random generate symbols numbers uppercase lowercase">
+<h2>🎲 Password Generator Pro</h2>
+<select id="passwordLength">
+<option value="8">8</option>
+<option value="12" selected>12</option>
+<option value="16">16</option>
+<option value="20">20</option>
+<option value="24">24</option>
+</select>
+<button id="generatePasswordBtn">Generate Password</button>
+<div class="privacy-note">🛡️ Generated locally in your browser. No password is uploaded.</div>
+<div id="passwordGeneratorResult" class="tool-result">Waiting for password generation...</div>
+<div class="tool-actions">
+<button id="copyPasswordBtn" class="action-btn copy-btn">📋 Copy Password</button>
+<button id="clearPasswordBtn" class="action-btn clear-btn">🧹 Clear Result</button>
+</div>
+</div>
+
+<div class="category-title" data-category-title="web">🌐 Web & URL Tools</div>
+
+<div class="card tool-card" data-category="web" data-tool="link analyzer url domain status protocol hostname path query">
+<h2>🔗 Link Analyzer Pro</h2>
+<input type="text" id="linkInput" placeholder="https://example.com">
+<button id="analyzeLinkBtn">Analyze Link</button>
+<div id="linkAnalyzerResult" class="tool-result">Waiting for link input...</div>
+<div class="tool-actions">
+<button id="copyLinkAnalysisBtn" class="action-btn copy-btn">📋 Copy Result</button>
+<button id="clearLinkAnalysisBtn" class="action-btn clear-btn">🧹 Clear Result</button>
+</div>
+</div>
+
+<div class="card tool-card" data-category="web" data-tool="url parser analyze protocol hostname pathname query hash params">
+<h2>📊 URL Parser Pro</h2>
+<input type="text" id="urlParserInput" placeholder="https://example.com/path?query=test#section">
+<button id="parseUrlBtn">Analyze URL</button>
+<div id="urlParserResult" class="tool-result">Waiting for URL input...</div>
+<div class="tool-actions">
+<button id="copyUrlParserBtn" class="action-btn copy-btn">📋 Copy Result</button>
+<button id="clearUrlParserBtn" class="action-btn clear-btn">🧹 Clear Result</button>
+</div>
+</div>
+
+<div class="card tool-card" data-category="web" data-tool="url encoder decoder encode decode percent encoding decodeURIComponent encodeURIComponent query component">
+<h2>🧩 URL Encoder / Decoder Pro</h2>
+<textarea id="urlCodecInput" placeholder="Enter URL text or encoded value..."></textarea>
+<button id="urlEncodeBtn">Encode URL</button>
+<br><br>
+<button id="urlDecodeBtn">Decode URL</button>
+<div id="urlCodecResult" class="tool-result">Waiting for URL encode/decode input...</div>
+<div class="tool-actions">
+<button id="copyUrlCodecBtn" class="action-btn copy-btn">📋 Copy Result</button>
+<button id="clearUrlCodecBtn" class="action-btn clear-btn">🧹 Clear Result</button>
+</div>
+</div>
+
+<div class="card tool-card" data-category="web" data-tool="ip analyzer ipv4 ipv6 public private loopback network address">
+<h2>🌐 IP Analyzer Pro</h2>
+<input type="text" id="ipInput" placeholder="Example: 192.168.1.1 or 2001:db8::1">
+<button id="analyzeIpBtn">Analyze IP</button>
+<div id="ipAnalyzerResult" class="tool-result">Waiting for IP input...</div>
+<div class="tool-actions">
+<button id="copyIpAnalysisBtn" class="action-btn copy-btn">📋 Copy Result</button>
+<button id="clearIpAnalysisBtn" class="action-btn clear-btn">🧹 Clear Result</button>
+</div>
+</div>
+
+<div class="category-title" data-category-title="hash">🔐 Hash Tools</div>
+
+<div class="card tool-card" data-category="hash" data-tool="hash generator sha sha-1 sha-256 digest text checksum">
+<h2>🔐 Hash Generator Pro</h2>
+<input type="text" id="hashInput" placeholder="Enter text to hash">
+<select id="hashType">
+<option value="SHA-256">SHA-256</option>
+<option value="SHA-1">SHA-1</option>
+</select>
+<button id="generateHashBtn">Generate Hash</button>
+<div class="privacy-note">🛡️ Runs locally in your browser. Nothing is uploaded.</div>
+<div id="hashResult" class="tool-result">Waiting for hash input...</div>
+<div class="tool-actions">
+<button id="copyHashBtn" class="action-btn copy-btn">📋 Copy Hash</button>
+<button id="clearHashBtn" class="action-btn clear-btn">🧹 Clear Result</button>
+</div>
+</div>
+
+<div class="card tool-card" data-category="hash" data-tool="file hash checker sha-256 file checksum integrity report">
+<h2>📁 File Hash Checker Pro</h2>
+<input type="file" id="fileHashInput">
+<button id="generateFileHashBtn">Generate File Hash</button>
+<div class="privacy-note">🛡️ Local-only hash analysis. Files are not uploaded or executed.</div>
+<div id="fileHashResult" class="tool-result">Waiting for file input...</div>
+<div class="tool-actions three-actions">
+<button id="copyFileHashBtn" class="action-btn copy-btn">📋 Copy SHA-256</button>
+<button id="downloadReportBtn" class="action-btn download-btn">⬇️ Download Report</button>
+<button id="clearFileHashBtn" class="action-btn clear-btn">🧹 Clear Result</button>
+</div>
+</div>
+
+<div class="category-title" data-category-title="validation">📧 Validation Tools</div>
+
+<div class="card tool-card" data-category="validation" data-tool="email validator validate address mail gmail format valid invalid">
+<h2>📧 Email Validator Pro</h2>
+<input type="text" id="emailInput" placeholder="Enter email">
+<button id="validateEmailBtn">Validate Email</button>
+<div id="emailResult" class="tool-result">Waiting for email input...</div>
+<div class="tool-actions">
+<button id="copyEmailBtn" class="action-btn copy-btn">📋 Copy Result</button>
+<button id="clearEmailBtn" class="action-btn clear-btn">🧹 Clear Result</button>
+</div>
+</div>
+
+<footer class="site-footer">
+<div class="footer-brand">🛡️ Abudi</div>
+<div class="footer-made">Built with 💖 in Iraq 🇮🇶</div>
+<div class="footer-note">Privacy-first browser tools</div>
+</footer>
+
+</div>
+<script src="script.js?v=trust-polish-1-8-3"></script>
+</body>
+</html>
