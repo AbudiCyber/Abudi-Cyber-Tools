@@ -48,7 +48,7 @@ p {
 }
 
 .platform-panel::after {
-    content: "🚀 v1.8.2";
+    content: "🧠 v1.8.3";
     position: absolute;
     top: 16px;
     right: 18px;
@@ -147,11 +147,13 @@ p {
     text-align: center;
 }
 
+/* ===== Category Titles ===== */
+
 .category-title {
     color: #93c5fd;
     font-size: 23px;
     font-weight: 900;
-    margin: 34px 0 16px;
+    margin: 38px 0 18px;
     padding-left: 4px;
     letter-spacing: 0.2px;
 }
@@ -175,15 +177,13 @@ p {
 .card {
     background: #1e293b;
     padding: 22px;
-    margin-bottom: 32px;
+    margin-bottom: 36px;
     border-radius: 17px;
     box-shadow: 0 0 20px rgba(0,0,0,0.3);
 }
 
-/* ===== Titles ===== */
-
 .card h2 {
-    margin-bottom: 18px;
+    margin-bottom: 20px;
     color: #93c5fd;
     line-height: 1.25;
 }
@@ -207,8 +207,6 @@ select {
     word-break: break-word;
 }
 
-/* ===== Textarea ===== */
-
 textarea {
     min-height: 120px;
     resize: vertical;
@@ -229,23 +227,30 @@ button {
     transition: 0.3s;
 }
 
-/* ===== Hover ===== */
-
 button:hover {
     background: #1d4ed8;
 }
 
+/* ===== Privacy Notes ===== */
+
+.privacy-note {
+    margin: 12px 0 4px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.45);
+    color: #dbeafe;
+    font-size: 13px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
 /* ===== Tool Results ===== */
 
-.tool-result,
-#results {
+.tool-result {
     max-width: 100%;
     overflow-wrap: anywhere;
     word-break: break-word;
     white-space: normal;
-}
-
-.tool-result {
     margin-top: 16px;
     line-height: 1.75;
     color: #f8fafc;
@@ -255,8 +260,7 @@ button:hover {
     display: none;
 }
 
-.tool-result code,
-#results code {
+.tool-result code {
     display: inline-block;
     max-width: 100%;
     overflow-x: auto;
@@ -272,16 +276,6 @@ button:hover {
 
 .tool-result b {
     color: #ffffff;
-}
-
-/* ===== Results ===== */
-
-#results {
-    background: #334155;
-    min-height: 80px;
-    padding: 15px;
-    border-radius: 10px;
-    line-height: 1.8;
 }
 
 /* ===== Tool Action Buttons ===== */
@@ -328,17 +322,11 @@ button:hover {
     background: #b91c1c;
 }
 
-/* ===== Space Between Buttons ===== */
-
-#copyPasswordBtn {
-    margin-top: 12px;
-}
-
 /* ===== Footer ===== */
 
 .site-footer {
-    margin: 36px 0 12px;
-    padding: 22px 18px;
+    margin: 40px 0 12px;
+    padding: 24px 18px;
     border-radius: 17px;
     background: #1e293b;
     box-shadow: 0 0 20px rgba(0,0,0,0.25);
@@ -373,7 +361,7 @@ button:hover {
     }
 
     .card {
-        margin-bottom: 36px;
+        margin-bottom: 40px;
         border-radius: 16px;
     }
 
@@ -409,7 +397,7 @@ button:hover {
 
     .category-title {
         font-size: 20px;
-        margin: 36px 0 14px;
+        margin: 40px 0 16px;
     }
 
     .category-pill {
@@ -422,12 +410,16 @@ button:hover {
         line-height: 1.7;
     }
 
-    .tool-result code,
-    #results code {
+    .tool-result code {
         width: auto;
         max-width: 100%;
         padding: 9px 11px;
         font-size: 14px;
+    }
+
+    .privacy-note {
+        font-size: 12px;
+        padding: 9px 10px;
     }
 
     .tool-actions {
@@ -440,10 +432,12 @@ button:hover {
         font-size: 13px;
     }
 
+    .three-actions .action-btn {
+        min-width: 95px;
+    }
+
     .site-footer {
-        margin-top: 40px;
+        margin-top: 44px;
         padding: 20px 14px;
     }
 }
-
-/* deployment retry: polish v1.8.2 */
