@@ -11,11 +11,4 @@
 
     const limit = Math.floor(0x100000000 / max) * max;
     const buffer = new Uint32Array(1);
-    let value;
-
-    do {
-      crypto.getRandomValues(buffer);
-      value = buffer[0];
-    } while (value >= limit);
-
-    return
+    let
