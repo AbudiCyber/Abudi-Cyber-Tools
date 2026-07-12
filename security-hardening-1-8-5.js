@@ -1,9 +1,8 @@
-// Abudi Cyber Tools v1.8.5 — Password Security Engine
+// Abudi Cyber Tools v1.8.6 — Password Security Engine
 (() => {
   "use strict";
 
   const $ = id => document.getElementById(id);
-
   const CHARSETS = {
     lower: "abcdefghijklmnopqrstuvwxyz",
     upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -12,4 +11,4 @@
   };
 
   const COMMON_PASSWORDS = new Set([
-    "123456", "123456789", "password", "qwerty", "abc123",
+    "123456", "123456789", "password", "qwerty", "abc123", "
