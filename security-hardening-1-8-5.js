@@ -3,13 +3,11 @@
 (() => {
   "use strict";
 
+  const $ = id => document.getElementById(id);
   const VERSION = "1.8.6";
 
   const CHARSETS = {
     lower: "abcdefghijklmnopqrstuvwxyz",
     upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
     numbers: "0123456789",
-    symbols: "!@#$%^&*()_+-=[]{}|;:,.<>/?~"
-  };
-
-  const COMMON_PASSWORDS =
+    symbols: "!@#$%^&*()_+-=[]{}|;:
