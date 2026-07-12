@@ -4,12 +4,12 @@
 
   const $ = id => document.getElementById(id);
 
-  let secureGeneratedPassword = "";
-  let securePasswordReport = "";
-
   const CHARSETS = {
     lower: "abcdefghijklmnopqrstuvwxyz",
     upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
     numbers: "0123456789",
     symbols: "!@#$%^&*()_+-=[]{}|;:,.<>/?~"
   };
+
+  const COMMON_PASSWORDS = new Set([
+    "123456", "123456789", "password", "qwerty", "abc123", "111
