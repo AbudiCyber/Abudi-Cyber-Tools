@@ -15,4 +15,13 @@
 
   function isIPv4(hostname) {
     const parts = hostname.split(".");
-    return parts.length === 4 && parts.every(part => /^\d+$/.test(part) && Number(part) >= 0 && Number(part) <= 255
+    return parts.length === 4 && parts.every(part => /^\d+$/.test(part) && Number(part) >= 0 && Number(part) <= 255);
+  }
+
+  function isIPv6(hostname) {
+    return hostname.includes(":") && /^[0-9a-f:]+$/i.test(hostname);
+  }
+
+  function splitDomain(hostname) {
+    const host = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+    if (isIPv4(host) || is
