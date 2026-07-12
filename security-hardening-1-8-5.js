@@ -3,12 +3,14 @@
   "use strict";
 
   const $ = id => document.getElementById(id);
+  const encoder = new TextEncoder();
   let secureGeneratedPassword = "";
   let securePasswordReport = "";
 
-  function secureRandomInt(max) {
-    if (!Number.isInteger(max) || max <= 0) {
-      throw new Error("Invalid secure random range.");
-    }
+  function sanitize(value) {
+    return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
 
-    const limit = Math.floor(0x100000000 / max) * max;
+  function secureRandomInt(max) {
+    if (!Number.isInteger(max) || max <= 0) throw new Error("Invalid secure random range.");
+    const limit = Math.floor(
