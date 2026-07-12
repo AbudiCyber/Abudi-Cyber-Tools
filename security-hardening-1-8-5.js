@@ -1,8 +1,10 @@
 // Abudi Cyber Tools v1.8.6 — Password Security Engine
+// Browser-only module. No network requests. No password is uploaded.
 (() => {
   "use strict";
 
-  const $ = id => document.getElementById(id);
+  const VERSION = "1.8.6";
+
   const CHARSETS = {
     lower: "abcdefghijklmnopqrstuvwxyz",
     upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -10,5 +12,4 @@
     symbols: "!@#$%^&*()_+-=[]{}|;:,.<>/?~"
   };
 
-  const COMMON_PASSWORDS = new Set([
-    "123456", "123456789", "password", "qwerty", "abc123", "
+  const COMMON_PASSWORDS =
