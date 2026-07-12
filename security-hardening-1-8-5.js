@@ -3,6 +3,8 @@
   "use strict";
 
   const $ = id => document.getElementById(id);
+  let secureGeneratedPassword = "";
+  let securePasswordReport = "";
 
   function secureRandomInt(max) {
     if (!Number.isInteger(max) || max <= 0) {
@@ -10,5 +12,3 @@
     }
 
     const limit = Math.floor(0x100000000 / max) * max;
-    const buffer = new Uint32Array(1);
-    let
