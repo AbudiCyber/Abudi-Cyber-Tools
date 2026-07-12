@@ -1,5 +1,4 @@
-// Abudi Cyber Tools v1.9
-// Browser-only utilities. No network requests.
+// Abudi Cyber Tools v1.9 — Browser-only utilities
 (() => {
   "use strict";
 
@@ -20,11 +19,4 @@
     return hostname.includes(":") && /^[0-9a-f:]+$/i.test(hostname);
   }
 
-  function extractDomain(input) {
-    const normalized = normalizeInput(input);
-    let parsed;
-
-    try {
-      parsed = new URL(normalized);
-    } catch {
-      throw new Error
+  function splitDomain
