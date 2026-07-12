@@ -12,4 +12,4 @@
   };
 
   const COMMON_PASSWORDS = new Set([
-    "123456", "123456789", "password", "qwerty", "abc123", "111
+    "123456", "123456789", "password", "qwerty", "abc123",
