@@ -15,4 +15,12 @@
     return {
       protocol: url.protocol.replace(":", ""),
       hostname: url.hostname,
-      port: url.port
+      port: url.port || "default",
+      path: url.pathname || "/",
+      query: url.search || "none",
+      fragment: url.hash || "none"
+    };
+  }
+
+  window.AbudiV19 = { version: "1.9.0", extractDomain };
+})();
