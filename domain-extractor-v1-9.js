@@ -2,19 +2,12 @@
 (() => {
   "use strict";
 
-  function normalizeInput(input) {
-    const value = String(input || "").trim();
-    if (!value) throw new Error("EMPTY_INPUT");
-    return /^[a-z][a-z0-9+.-]*:\/\//i.test(value)
-      ? value
-      : `https://${value}`;
-  }
-
   function extractDomain(input) {
-    const url = new URL(normalizeInput(input));
+    const raw = String(input || "").trim();
+    if (!raw) throw new Error("EMPTY_INPUT");
+    const url = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`);
     return Object.freeze({
       protocol: url.protocol.replace(":", ""),
       hostname: url.hostname.toLowerCase(),
       port: url.port || "default",
-      path: url.pathname || "/",
-      query: url
+      path: url.pathname ||
