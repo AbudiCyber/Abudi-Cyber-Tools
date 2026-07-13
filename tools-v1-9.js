@@ -13,3 +13,6 @@
   function extractDomain(input) {
     const url = new URL(normalizeInput(input));
     return {
+      protocol: url.protocol.replace(":", ""),
+      hostname: url.hostname,
+      port: url.port
