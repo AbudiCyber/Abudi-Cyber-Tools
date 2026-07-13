@@ -2,6 +2,10 @@
 (() => {
   "use strict";
 
+  const COMMON_SECOND_LEVEL = new Set([
+    "co.uk", "org.uk", "gov.uk", "com.au", "net.au", "co.jp", "com.br", "com.tr"
+  ]);
+
   function normalizeInput(input) {
     const value = String(input || "").trim();
     if (!value) throw new Error("EMPTY_INPUT");
@@ -10,17 +14,4 @@
       : `https://${value}`;
   }
 
-  function extractDomain(input) {
-    const url = new URL(normalizeInput(input));
-    return {
-      protocol: url.protocol.replace(":", ""),
-      hostname: url.hostname,
-      port: url.port || "default",
-      path: url.pathname || "/",
-      query: url.search || "none",
-      fragment: url.hash || "none"
-    };
-  }
-
-  window.AbudiV19 = { version: "1.9.0", extractDomain };
-})();
+  function split
