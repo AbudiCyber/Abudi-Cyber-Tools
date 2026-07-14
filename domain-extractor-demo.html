@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Domain Extractor Pro Test</title>
+<style>body{font-family:system-ui;margin:24px;max-width:760px}input,button,pre{font:inherit}input{width:100%;padding:12px;margin:10px 0}button{padding:10px 14px}pre{white-space:pre-wrap;background:#111;color:#eee;padding:14px;border-radius:12px}</style>
+</head>
+<body>
+<h1>🌐 Domain Extractor Pro Test</h1>
+<p>Local-only test page for Abudi Cyber Tools v1.9.</p>
+<input id="domainInput" placeholder="example.com/path?x=1#top">
+<button id="analyzeBtn">Analyze Domain</button>
+<pre id="resultBox">Waiting for input...</pre>
+<script src="domain-extractor-v1-9.js?v=1-9-0"></script>
+<script>
+(() => {
+  const input = document.getElementById("domainInput");
+  const output = document.getElementById("resultBox");
+  document.getElementById("analyzeBtn").addEventListener("click", () => {
+    try {
+      const api = window.AbudiDomainExtractor;
+      if (!api) throw new Error("DOMAIN_EXTRACTOR_NOT_LOADED");
+      output.textContent = JSON.stringify(api.extractDomain(input.value), null, 2);
+    } catch (error) {
+      output.textContent = "Error: " + error.message;
+    }
+  });
+})();
+</script>
+</body>
+</html>
