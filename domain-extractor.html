@@ -8,22 +8,6 @@
 </head>
 <body>
 <div class="container">
+<p><a href="index.html">← Back to Abudi Cyber Tools</a></p>
 <h1>🌐 Domain Extractor Pro</h1>
-<p>Privacy-first browser tool. Nothing is uploaded.</p>
-<div class="card">
-<input id="domainInput" type="text" placeholder="example.com/path?x=1#top">
-<button id="domainAnalyzeBtn">Analyze Domain</button>
-<div id="domainResult" class="tool-result">Waiting for domain input...</div>
-<div class="tool-actions"><button id="domainCopyBtn" class="action-btn copy-btn">📋 Copy Result</button><button id="domainClearBtn" class="action-btn clear-btn">🧹 Clear</button></div>
-</div>
-</div>
-<script src="domain-extractor-v1-9.js?v=1-9-0"></script>
-<script>
-const $=id=>document.getElementById(id);
-function run(){try{const r=window.AbudiDomainExtractor.extractDomain($('domainInput').value);$('domainResult').textContent=JSON.stringify(r,null,2);}catch(e){$('domainResult').textContent='Error: '+e.message;}}
-$('domainAnalyzeBtn').onclick=run;
-$('domainClearBtn').onclick=()=>{$('domainInput').value='';$('domainResult').textContent='Waiting for domain input...';};
-$('domainCopyBtn').onclick=()=>navigator.clipboard?.writeText($('domainResult').textContent);
-</script>
-</body>
-</html>
+<p>Privacy-first browser tool. Nothing is uploaded
