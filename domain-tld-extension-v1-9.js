@@ -1,0 +1,2 @@
+// Abudi Domain TLD Extension v1.9
+(()=>{"use strict";function getTLD(input){const raw=String(input||"").trim();if(!raw)throw Error("EMPTY_INPUT");const u=new URL(raw.includes("://")?raw:"https://"+raw);const parts=u.hostname.toLowerCase().split(".").filter(Boolean);return parts.length>1?parts.at(-1):"none"}window.AbudiDomainTLD=Object.freeze({version:"1.9.0",getTLD})})();
