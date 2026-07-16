@@ -1,0 +1,2 @@
+// Abudi Domain Subdomain Extension v1.9
+(()=>{"use strict";function getSubdomain(input){const raw=String(input||"").trim();if(!raw)throw Error("EMPTY_INPUT");const u=new URL(raw.includes("://")?raw:"https://"+raw);const p=u.hostname.toLowerCase().split(".").filter(Boolean);return p.length>2?p.slice(0,-2).join("."):"none"}window.AbudiDomainSubdomain=Object.freeze({version:"1.9.0",getSubdomain})})();
