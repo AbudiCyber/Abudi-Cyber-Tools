@@ -1,0 +1,2 @@
+// Abudi Domain Extension v1.9
+(()=>{"use strict";function getOrigin(input){const raw=String(input||"").trim();if(!raw)throw Error("EMPTY_INPUT");const u=new URL(raw.includes("://")?raw:"https://"+raw);return u.origin}window.AbudiDomainExtension=Object.freeze({version:"1.9.0",getOrigin})})();
