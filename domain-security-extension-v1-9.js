@@ -1,0 +1,2 @@
+// Abudi Domain Security Extension v1.9
+(()=>{"use strict";function isSecure(input){const raw=String(input||"").trim();if(!raw)throw Error("EMPTY_INPUT");const u=new URL(raw.includes("://")?raw:"https://"+raw);return u.protocol==="https:"}window.AbudiDomainSecurity=Object.freeze({version:"1.9.0",isSecure})})();
