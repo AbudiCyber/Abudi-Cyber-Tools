@@ -7,14 +7,15 @@
     "domain-security-extension-v1-9.js",
     "domain-tld-extension-v1-9.js",
     "domain-subdomain-extension-v1-9.js",
-    "domain-extractor-ui-v1-9.js"
+    "domain-extractor-ui-v1-9.js",
+    "domain-extractor-actions-v1-9.js"
   ];
 
   function load(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
 
-      script.src = src + "?v=1-9-1";
+      script.src = src + "?v=1-9-2";
 
       script.onload = () => {
         resolve(src);
@@ -42,10 +43,13 @@
       !result ||
       !analyzeButton ||
       !window.AbudiDomainExtractor ||
-      !window.AbudiDomainUI
+      !window.AbudiDomainUI ||
+      !window.AbudiDomainActions
     ) {
       throw new Error("DOM_OR_ENGINE_NOT_READY");
     }
+
+    window.AbudiDomainActions.bindClearAction();
 
     analyzeButton.onclick = () => {
       try {
