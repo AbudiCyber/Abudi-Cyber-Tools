@@ -15,7 +15,7 @@
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
 
-      script.src = src + "?v=1-9-3";
+      script.src = src + "?v=1-9-4";
 
       script.onload = () => {
         resolve(src);
@@ -49,30 +49,9 @@
       throw new Error("DOM_OR_ENGINE_NOT_READY");
     }
 
+    window.AbudiDomainActions.bindAnalyzeAction();
     window.AbudiDomainActions.bindClearAction();
     window.AbudiDomainActions.bindCopyAction();
-
-    analyzeButton.onclick = () => {
-      try {
-        const base =
-          window.AbudiDomainExtractor.extractDomain(input.value);
-
-        result.textContent =
-          window.AbudiDomainUI.formatExtended(
-            base,
-            input.value
-          );
-      } catch (error) {
-        result.textContent =
-          "Please enter a valid domain or URL.\n" +
-          "Example: example.com";
-
-        console.error(
-          "[Abudi Domain Extractor] Analysis failed:",
-          error
-        );
-      }
-    };
   }
 
   start().catch(error => {
