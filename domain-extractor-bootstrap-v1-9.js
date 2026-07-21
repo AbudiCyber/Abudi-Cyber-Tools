@@ -3,6 +3,7 @@
   "use strict";
 
   const files = [
+    "domain-extractor-errors-v1-9.js",
     "domain-extractor-extension-v1-9.js",
     "domain-security-extension-v1-9.js",
     "domain-tld-extension-v1-9.js",
@@ -11,18 +12,11 @@
     "domain-extractor-actions-v1-9.js"
   ];
 
-  const STARTUP_ERROR_MESSAGES = Object.freeze({
-    DOM_NOT_READY: "Required page elements are unavailable.",
-    DOMAIN_EXTRACTOR_NOT_READY: "The domain extraction engine is unavailable.",
-    DOMAIN_UI_NOT_READY: "The result formatting module is unavailable.",
-    DOMAIN_ACTIONS_NOT_READY: "The user action module is unavailable."
-  });
-
   function load(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
 
-      script.src = src + "?v=1-9-7";
+      script.src = src + "?v=1-9-8";
 
       script.onload = () => {
         resolve(src);
@@ -46,6 +40,12 @@
     }
 
     if (
+      typeof window.AbudiDomainErrors?.getStartupErrorMessage !== "function"
+    ) {
+      throw new Error("DOMAIN_ERRORS_NOT_READY");
+    }
+
+    if (
       typeof window.AbudiDomainExtractor?.extractDomain !== "function"
     ) {
       throw new Error("DOMAIN_EXTRACTOR_NOT_READY");
@@ -64,13 +64,6 @@
     }
   }
 
-  function getStartupErrorMessage(error) {
-    return (
-      STARTUP_ERROR_MESSAGES[error.message] ||
-      `A required module failed to load: ${error.message}`
-    );
-  }
-
   async function start() {
     for (const file of files) {
       await load(file);
@@ -82,11 +75,18 @@
 
   start().catch(error => {
     const result = document.getElementById("r");
+    const getStartupErrorMessage =
+      window.AbudiDomainErrors?.getStartupErrorMessage;
+
+    const startupMessage =
+      typeof getStartupErrorMessage === "function"
+        ? getStartupErrorMessage(error)
+        : `A required module failed to load: ${error.message}`;
 
     if (result) {
       result.textContent =
         "Application startup failed:\n" +
-        getStartupErrorMessage(error);
+        startupMessage;
     }
 
     console.error(
