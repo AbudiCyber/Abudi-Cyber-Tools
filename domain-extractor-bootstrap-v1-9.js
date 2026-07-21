@@ -15,7 +15,7 @@
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
 
-      script.src = src + "?v=1-9-2";
+      script.src = src + "?v=1-9-3";
 
       script.onload = () => {
         resolve(src);
@@ -50,6 +50,7 @@
     }
 
     window.AbudiDomainActions.bindClearAction();
+    window.AbudiDomainActions.bindCopyAction();
 
     analyzeButton.onclick = () => {
       try {
