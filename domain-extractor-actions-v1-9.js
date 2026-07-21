@@ -17,7 +17,6 @@
     clearButton.onclick = () => {
       input.value = "";
       result.textContent = WAITING_MESSAGE;
-      input.focus();
     };
   }
 
@@ -90,7 +89,7 @@
   }
 
   window.AbudiDomainActions = Object.freeze({
-    version: "1.9.1",
+    version: "1.9.2",
     bindClearAction,
     bindCopyAction
   });
