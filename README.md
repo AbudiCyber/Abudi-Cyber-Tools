@@ -1,58 +1,30 @@
-# Abudi-Cyber-Tools
+# 🛡️ Abudi Cyber Tools
 
-```python
-def clean_result(value):
-    if value == int(value):  
-        return int(value)    
-    return value             
+A privacy-first collection of lightweight cybersecurity, OSINT, and developer utilities that run directly in the browser.
 
-def add(a, b):
-    return a + b
+## Current Tools
 
-def subtract(a, b):
-    return a - b
+- Text Analyzer
+- Password Checker
+- Password Generator
+- Link Analyzer
+- Hash Generator
+- Base64 Encoder / Decoder
+- Email Validator
+- Domain Extractor Pro
 
-def multiply(a, b):
-    return a * b
+## Principles
 
-def divide(a, b):
-    if b == 0:
-        return "Error! Division by zero."
-    return a / b
+- No unnecessary uploads
+- Simple and fast interface
+- Mobile-friendly design
+- Incremental, test-driven development
 
+## Live Website
 
-while True:
-    print("\n===== Simple Calculator =====")
-    print("1. Add")
-    print("2. Subtract")
-    print("3. Multiply")
-    print("4. Divide")
-    print("5. Exit")
+https://abudicyber.github.io/Abudi-Cyber-Tools/
 
-    choice = input("Enter your choice (1-5): ")
+---
 
-    if choice == "5":
-        print("Thank you for using the calculator!")
-        break
-
-    if choice not in ["1", "2", "3", "4"]:
-        print("Invalid choice. Please try again.")
-        continue
-
-    try:
-        num1 = float(input("Enter first number: "))
-        num2 = float(input("Enter second number: "))
-
-        # هنا تم تعديل أسطر الطباعة لاستخدام دالة clean_result
-        if choice == "1":
-            print("Result =", clean_result(add(num1, num2)))
-        elif choice == "2":
-            print("Result =", clean_result(subtract(num1, num2)))
-        elif choice == "3":
-            print("Result =", clean_result(multiply(num1, num2)))
-        elif choice == "4":
-            print("Result =", clean_result(divide(num1, num2)))
-
-    except ValueError:
-        print("Please enter valid numbers.")
-```
+🛡️ **Abudi**  
+Built with 💖 in Iraq 🇮🇶
