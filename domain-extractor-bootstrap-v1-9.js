@@ -15,7 +15,7 @@
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
 
-      script.src = src + "?v=1-9-4";
+      script.src = src + "?v=1-9-5";
 
       script.onload = () => {
         resolve(src);
@@ -49,9 +49,7 @@
       throw new Error("DOM_OR_ENGINE_NOT_READY");
     }
 
-    window.AbudiDomainActions.bindAnalyzeAction();
-    window.AbudiDomainActions.bindClearAction();
-    window.AbudiDomainActions.bindCopyAction();
+    window.AbudiDomainActions.bindAllActions();
   }
 
   start().catch(error => {
