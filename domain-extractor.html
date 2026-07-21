@@ -70,61 +70,6 @@
   </div>
 
   <script src="domain-extractor-v1-9.js?v=1-9-0"></script>
-  <script src="domain-extractor-bootstrap-v1-9.js?v=1-9-1"></script>
-  <script>
-    const q = id => document.getElementById(id);
-
-    const i = q("i");
-    const r = q("r");
-
-    q("c").onclick = async () => {
-      const text = r.textContent.trim();
-
-      if (
-        !text ||
-        text === "Waiting for domain input..."
-      ) {
-        r.textContent = "Analyze a domain before copying the result.";
-        return;
-      }
-
-      try {
-        await navigator.clipboard.writeText(text);
-
-        const originalText = q("c").textContent;
-        q("c").textContent = "✅ Copied";
-
-        setTimeout(() => {
-          q("c").textContent = originalText;
-        }, 1500);
-      } catch (error) {
-        const textarea = document.createElement("textarea");
-
-        textarea.value = text;
-        textarea.setAttribute("readonly", "");
-        textarea.style.position = "fixed";
-        textarea.style.opacity = "0";
-
-        document.body.appendChild(textarea);
-
-        textarea.select();
-        textarea.setSelectionRange(0, textarea.value.length);
-
-        const copied = document.execCommand("copy");
-
-        document.body.removeChild(textarea);
-
-        const originalText = q("c").textContent;
-
-        q("c").textContent = copied
-          ? "✅ Copied"
-          : "❌ Copy failed";
-
-        setTimeout(() => {
-          q("c").textContent = originalText;
-        }, 1500);
-      }
-    };
-  </script>
+  <script src="domain-extractor-bootstrap-v1-9.js?v=1-9-3"></script>
 </body>
 </html>
