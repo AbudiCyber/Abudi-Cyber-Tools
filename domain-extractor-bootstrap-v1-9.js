@@ -1,2 +1,92 @@
 // Abudi Domain Extractor Bootstrap v1.9
-(()=>{"use strict";const files=["domain-extractor-extension-v1-9.js","domain-security-extension-v1-9.js","domain-tld-extension-v1-9.js","domain-subdomain-extension-v1-9.js","domain-extractor-ui-v1-9.js"];function load(src){return new Promise((ok,fail)=>{const s=document.createElement("script");s.src=src+"?v=1-9-0";s.onload=ok;s.onerror=fail;document.head.appendChild(s)})}async function start(){for(const file of files)await load(file);const i=document.getElementById("i"),r=document.getElementById("r"),a=document.getElementById("a");if(!i||!r||!a||!window.AbudiDomainUI)return;a.onclick=()=>{try{const base=window.AbudiDomainExtractor.extractDomain(i.value);r.textContent=window.AbudiDomainUI.formatExtended(base,i.value)}catch(e){r.textContent="Please enter a valid domain or URL. Example: example.com"}}}start().catch(()=>{})})();
+(() => {
+  "use strict";
+
+  const files = [
+    "domain-extractor-extension-v1-9.js",
+    "domain-security-extension-v1-9.js",
+    "domain-tld-extension-v1-9.js",
+    "domain-subdomain-extension-v1-9.js",
+    "domain-extractor-ui-v1-9.js"
+  ];
+
+  function load(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+
+      script.src = src + "?v=1-9-1";
+
+      script.onload = () => {
+        resolve(src);
+      };
+
+      script.onerror = () => {
+        reject(new Error(src));
+      };
+
+      document.head.appendChild(script);
+    });
+  }
+
+  async function start() {
+    for (const file of files) {
+      await load(file);
+    }
+
+    const input = document.getElementById("i");
+    const result = document.getElementById("r");
+    const analyzeButton = document.getElementById("a");
+
+    if (
+      !input ||
+      !result ||
+      !analyzeButton ||
+      !window.AbudiDomainExtractor ||
+      !window.AbudiDomainUI
+    ) {
+      throw new Error("DOM_OR_ENGINE_NOT_READY");
+    }
+
+    analyzeButton.onclick = () => {
+      try {
+        const base =
+          window.AbudiDomainExtractor.extractDomain(input.value);
+
+        result.textContent =
+          window.AbudiDomainUI.formatExtended(
+            base,
+            input.value
+          );
+      } catch (error) {
+        result.textContent =
+          "Please enter a valid domain or URL.\n" +
+          "Example: example.com";
+
+        console.error(
+          "[Abudi Domain Extractor] Analysis failed:",
+          error
+        );
+      }
+    };
+  }
+
+  start().catch(error => {
+    const result = document.getElementById("r");
+
+    const failedFile =
+      error.message === "DOM_OR_ENGINE_NOT_READY"
+        ? "Required DOM element or engine"
+        : error.message;
+
+    if (result) {
+      result.textContent =
+        "Extension loading failed:\n" +
+        failedFile;
+    }
+
+    console.error(
+      "[Abudi Domain Extractor] Bootstrap failed:",
+      error
+    );
+  });
+})();
