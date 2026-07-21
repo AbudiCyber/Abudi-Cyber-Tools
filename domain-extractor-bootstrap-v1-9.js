@@ -15,7 +15,7 @@
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
 
-      script.src = src + "?v=1-9-5";
+      script.src = src + "?v=1-9-6";
 
       script.onload = () => {
         resolve(src);
@@ -29,26 +29,40 @@
     });
   }
 
+  function validateRuntime() {
+    const input = document.getElementById("i");
+    const result = document.getElementById("r");
+    const analyzeButton = document.getElementById("a");
+
+    if (!input || !result || !analyzeButton) {
+      throw new Error("DOM_NOT_READY");
+    }
+
+    if (
+      typeof window.AbudiDomainExtractor?.extractDomain !== "function"
+    ) {
+      throw new Error("DOMAIN_EXTRACTOR_NOT_READY");
+    }
+
+    if (
+      typeof window.AbudiDomainUI?.formatExtended !== "function"
+    ) {
+      throw new Error("DOMAIN_UI_NOT_READY");
+    }
+
+    if (
+      typeof window.AbudiDomainActions?.bindAllActions !== "function"
+    ) {
+      throw new Error("DOMAIN_ACTIONS_NOT_READY");
+    }
+  }
+
   async function start() {
     for (const file of files) {
       await load(file);
     }
 
-    const input = document.getElementById("i");
-    const result = document.getElementById("r");
-    const analyzeButton = document.getElementById("a");
-
-    if (
-      !input ||
-      !result ||
-      !analyzeButton ||
-      !window.AbudiDomainExtractor ||
-      !window.AbudiDomainUI ||
-      !window.AbudiDomainActions
-    ) {
-      throw new Error("DOM_OR_ENGINE_NOT_READY");
-    }
-
+    validateRuntime();
     window.AbudiDomainActions.bindAllActions();
   }
 
