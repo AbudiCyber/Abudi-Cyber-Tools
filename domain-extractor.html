@@ -77,22 +77,6 @@
     const i = q("i");
     const r = q("r");
 
-    q("a").onclick = () => {
-      try {
-        const d = AbudiDomainExtractor.extractDomain(i.value);
-
-        r.textContent =
-          "Protocol: " + d.protocol + "\n" +
-          "Hostname: " + d.hostname + "\n" +
-          "Port: " + d.port + "\n" +
-          "Path: " + d.path + "\n" +
-          "Query: " + d.query + "\n" +
-          "Fragment: " + d.fragment;
-      } catch (e) {
-        r.textContent =
-          "Please enter a valid domain or URL. Example: example.com";
-      }
-    };
 
     q("x").onclick = () => {
       i.value = "";
