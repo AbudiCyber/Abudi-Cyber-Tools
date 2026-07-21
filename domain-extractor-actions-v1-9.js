@@ -2,6 +2,9 @@
 (() => {
   "use strict";
 
+  const WAITING_MESSAGE = "Waiting for domain input...";
+  const COPY_PROMPT_MESSAGE = "Analyze a domain before copying the result.";
+
   function bindClearAction() {
     const input = document.getElementById("i");
     const result = document.getElementById("r");
@@ -13,13 +16,82 @@
 
     clearButton.onclick = () => {
       input.value = "";
-      result.textContent = "Waiting for domain input...";
+      result.textContent = WAITING_MESSAGE;
       input.focus();
     };
   }
 
+  function setTemporaryButtonText(button, text) {
+    const originalText = button.textContent;
+    button.textContent = text;
+
+    window.setTimeout(() => {
+      button.textContent = originalText;
+    }, 1500);
+  }
+
+  function copyWithFallback(text) {
+    const textarea = document.createElement("textarea");
+
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+
+    document.body.appendChild(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+
+    const copied = document.execCommand("copy");
+    document.body.removeChild(textarea);
+
+    return copied;
+  }
+
+  function bindCopyAction() {
+    const result = document.getElementById("r");
+    const copyButton = document.getElementById("c");
+
+    if (!result || !copyButton) {
+      throw new Error("COPY_ACTION_DOM_NOT_READY");
+    }
+
+    copyButton.onclick = async () => {
+      const text = result.textContent.trim();
+
+      if (!text || text === WAITING_MESSAGE) {
+        result.textContent = COPY_PROMPT_MESSAGE;
+        return;
+      }
+
+      try {
+        if (!navigator.clipboard?.writeText) {
+          throw new Error("CLIPBOARD_API_UNAVAILABLE");
+        }
+
+        await navigator.clipboard.writeText(text);
+        setTemporaryButtonText(copyButton, "✅ Copied");
+      } catch (error) {
+        const copied = copyWithFallback(text);
+
+        setTemporaryButtonText(
+          copyButton,
+          copied ? "✅ Copied" : "❌ Copy failed"
+        );
+
+        if (!copied) {
+          console.error(
+            "[Abudi Domain Extractor] Copy failed:",
+            error
+          );
+        }
+      }
+    };
+  }
+
   window.AbudiDomainActions = Object.freeze({
-    version: "1.9.0",
-    bindClearAction
+    version: "1.9.1",
+    bindClearAction,
+    bindCopyAction
   });
 })();
