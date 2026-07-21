@@ -11,11 +11,18 @@
     "domain-extractor-actions-v1-9.js"
   ];
 
+  const STARTUP_ERROR_MESSAGES = Object.freeze({
+    DOM_NOT_READY: "Required page elements are unavailable.",
+    DOMAIN_EXTRACTOR_NOT_READY: "The domain extraction engine is unavailable.",
+    DOMAIN_UI_NOT_READY: "The result formatting module is unavailable.",
+    DOMAIN_ACTIONS_NOT_READY: "The user action module is unavailable."
+  });
+
   function load(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
 
-      script.src = src + "?v=1-9-6";
+      script.src = src + "?v=1-9-7";
 
       script.onload = () => {
         resolve(src);
@@ -57,6 +64,13 @@
     }
   }
 
+  function getStartupErrorMessage(error) {
+    return (
+      STARTUP_ERROR_MESSAGES[error.message] ||
+      `A required module failed to load: ${error.message}`
+    );
+  }
+
   async function start() {
     for (const file of files) {
       await load(file);
@@ -69,15 +83,10 @@
   start().catch(error => {
     const result = document.getElementById("r");
 
-    const failedFile =
-      error.message === "DOM_OR_ENGINE_NOT_READY"
-        ? "Required DOM element or engine"
-        : error.message;
-
     if (result) {
       result.textContent =
-        "Extension loading failed:\n" +
-        failedFile;
+        "Application startup failed:\n" +
+        getStartupErrorMessage(error);
     }
 
     console.error(
