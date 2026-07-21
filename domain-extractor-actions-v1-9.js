@@ -127,8 +127,15 @@
     };
   }
 
+  function bindAllActions() {
+    bindAnalyzeAction();
+    bindCopyAction();
+    bindClearAction();
+  }
+
   window.AbudiDomainActions = Object.freeze({
-    version: "1.9.3",
+    version: "1.9.4",
+    bindAllActions,
     bindAnalyzeAction,
     bindClearAction,
     bindCopyAction
