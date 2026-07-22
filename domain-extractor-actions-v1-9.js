@@ -47,9 +47,11 @@
   }
 
   function bindClearAction() {
-    const input = document.getElementById("i");
-    const result = document.getElementById("r");
-    const clearButton = document.getElementById("x");
+    const {
+      input,
+      result,
+      clearButton
+    } = window.AbudiDomainDOM.getElements();
 
     if (!input || !result || !clearButton) {
       throw new Error("CLEAR_ACTION_DOM_NOT_READY");
@@ -136,7 +138,7 @@
   }
 
   window.AbudiDomainActions = Object.freeze({
-    version: "1.9.5",
+    version: "1.9.6",
     bindAllActions,
     bindAnalyzeAction,
     bindClearAction,
