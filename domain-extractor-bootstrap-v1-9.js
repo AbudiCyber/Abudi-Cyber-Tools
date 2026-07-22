@@ -17,7 +17,7 @@
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
 
-      script.src = src + "?v=1-9-9";
+      script.src = src + "?v=1-9-10";
 
       script.onload = () => {
         resolve(src);
@@ -31,52 +31,11 @@
     });
   }
 
-  function validateRuntime() {
-    const input = document.getElementById("i");
-    const result = document.getElementById("r");
-    const analyzeButton = document.getElementById("a");
-
-    if (!input || !result || !analyzeButton) {
-      throw new Error("DOM_NOT_READY");
-    }
-
-    if (
-      typeof window.AbudiDomainErrors?.getStartupErrorMessage !== "function"
-    ) {
-      throw new Error("DOMAIN_ERRORS_NOT_READY");
-    }
-
-    if (
-      typeof window.AbudiDomainRuntime?.validate !== "function"
-    ) {
-      throw new Error("DOMAIN_RUNTIME_NOT_READY");
-    }
-
-    if (
-      typeof window.AbudiDomainExtractor?.extractDomain !== "function"
-    ) {
-      throw new Error("DOMAIN_EXTRACTOR_NOT_READY");
-    }
-
-    if (
-      typeof window.AbudiDomainUI?.formatExtended !== "function"
-    ) {
-      throw new Error("DOMAIN_UI_NOT_READY");
-    }
-
-    if (
-      typeof window.AbudiDomainActions?.bindAllActions !== "function"
-    ) {
-      throw new Error("DOMAIN_ACTIONS_NOT_READY");
-    }
-  }
-
   async function start() {
     for (const file of files) {
       await load(file);
     }
 
-    validateRuntime();
     window.AbudiDomainRuntime.validate();
     window.AbudiDomainActions.bindAllActions();
   }
