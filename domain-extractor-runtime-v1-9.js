@@ -3,9 +3,17 @@
   "use strict";
 
   function validate() {
-    const input = document.getElementById("i");
-    const result = document.getElementById("r");
-    const analyzeButton = document.getElementById("a");
+    if (
+      typeof window.AbudiDomainDOM?.getElements !== "function"
+    ) {
+      throw new Error("DOMAIN_DOM_NOT_READY");
+    }
+
+    const {
+      input,
+      result,
+      analyzeButton
+    } = window.AbudiDomainDOM.getElements();
 
     if (!input || !result || !analyzeButton) {
       throw new Error("DOM_NOT_READY");
@@ -37,7 +45,7 @@
   }
 
   window.AbudiDomainRuntime = Object.freeze({
-    version: "1.9.0",
+    version: "1.9.1",
     validate
   });
 })();
