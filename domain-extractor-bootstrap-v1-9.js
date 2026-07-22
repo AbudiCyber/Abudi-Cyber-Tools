@@ -4,6 +4,7 @@
 
   const files = [
     "domain-extractor-errors-v1-9.js",
+    "domain-extractor-runtime-v1-9.js",
     "domain-extractor-extension-v1-9.js",
     "domain-security-extension-v1-9.js",
     "domain-tld-extension-v1-9.js",
@@ -16,7 +17,7 @@
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
 
-      script.src = src + "?v=1-9-8";
+      script.src = src + "?v=1-9-9";
 
       script.onload = () => {
         resolve(src);
@@ -46,6 +47,12 @@
     }
 
     if (
+      typeof window.AbudiDomainRuntime?.validate !== "function"
+    ) {
+      throw new Error("DOMAIN_RUNTIME_NOT_READY");
+    }
+
+    if (
       typeof window.AbudiDomainExtractor?.extractDomain !== "function"
     ) {
       throw new Error("DOMAIN_EXTRACTOR_NOT_READY");
@@ -70,6 +77,7 @@
     }
 
     validateRuntime();
+    window.AbudiDomainRuntime.validate();
     window.AbudiDomainActions.bindAllActions();
   }
 
