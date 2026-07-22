@@ -9,9 +9,11 @@
     "Example: example.com";
 
   function bindAnalyzeAction() {
-    const input = document.getElementById("i");
-    const result = document.getElementById("r");
-    const analyzeButton = document.getElementById("a");
+    const {
+      input,
+      result,
+      analyzeButton
+    } = window.AbudiDomainDOM.getElements();
 
     if (
       !input ||
@@ -134,7 +136,7 @@
   }
 
   window.AbudiDomainActions = Object.freeze({
-    version: "1.9.4",
+    version: "1.9.5",
     bindAllActions,
     bindAnalyzeAction,
     bindClearAction,
