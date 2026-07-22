@@ -91,8 +91,10 @@
   }
 
   function bindCopyAction() {
-    const result = document.getElementById("r");
-    const copyButton = document.getElementById("c");
+    const {
+      result,
+      copyButton
+    } = window.AbudiDomainDOM.getElements();
 
     if (!result || !copyButton) {
       throw new Error("COPY_ACTION_DOM_NOT_READY");
@@ -138,7 +140,7 @@
   }
 
   window.AbudiDomainActions = Object.freeze({
-    version: "1.9.6",
+    version: "1.9.7",
     bindAllActions,
     bindAnalyzeAction,
     bindClearAction,
