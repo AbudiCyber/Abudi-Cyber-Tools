@@ -10,20 +10,11 @@
     }
 
     window.AbudiDomainContracts.validateModules();
-
-    const {
-      input,
-      result,
-      analyzeButton
-    } = window.AbudiDomainDOM.getElements();
-
-    if (!input || !result || !analyzeButton) {
-      throw new Error("DOM_NOT_READY");
-    }
+    window.AbudiDomainDOM.validateElements();
   }
 
   window.AbudiDomainRuntime = Object.freeze({
-    version: "1.9.2",
+    version: "1.9.3",
     validate
   });
 })();
