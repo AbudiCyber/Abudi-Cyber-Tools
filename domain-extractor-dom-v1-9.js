@@ -12,8 +12,29 @@
     });
   }
 
+  function validateElements() {
+    const {
+      input,
+      result,
+      analyzeButton,
+      copyButton,
+      clearButton
+    } = getElements();
+
+    if (
+      !input ||
+      !result ||
+      !analyzeButton ||
+      !copyButton ||
+      !clearButton
+    ) {
+      throw new Error("DOM_NOT_READY");
+    }
+  }
+
   window.AbudiDomainDOM = Object.freeze({
-    version: "1.9.0",
-    getElements
+    version: "1.9.1",
+    getElements,
+    validateElements
   });
 })();
