@@ -72,32 +72,18 @@
     }, 1500);
   }
 
-  function copyWithFallback(text) {
-    const textarea = document.createElement("textarea");
-
-    textarea.value = text;
-    textarea.setAttribute("readonly", "");
-    textarea.style.position = "fixed";
-    textarea.style.opacity = "0";
-
-    document.body.appendChild(textarea);
-    textarea.select();
-    textarea.setSelectionRange(0, textarea.value.length);
-
-    const copied = document.execCommand("copy");
-    document.body.removeChild(textarea);
-
-    return copied;
-  }
-
   function bindCopyAction() {
     const {
       result,
       copyButton
     } = window.AbudiDomainDOM.getElements();
 
-    if (!result || !copyButton) {
-      throw new Error("COPY_ACTION_DOM_NOT_READY");
+    if (
+      !result ||
+      !copyButton ||
+      typeof window.AbudiDomainClipboardService?.copy !== "function"
+    ) {
+      throw new Error("COPY_ACTION_NOT_READY");
     }
 
     copyButton.onclick = async () => {
@@ -109,14 +95,8 @@
       }
 
       try {
-        if (!navigator.clipboard?.writeText) {
-          throw new Error("CLIPBOARD_API_UNAVAILABLE");
-        }
-
-        await navigator.clipboard.writeText(text);
-        setTemporaryButtonText(copyButton, "✅ Copied");
-      } catch (error) {
-        const copied = copyWithFallback(text);
+        const copied =
+          await window.AbudiDomainClipboardService.copy(text);
 
         setTemporaryButtonText(
           copyButton,
@@ -125,10 +105,16 @@
 
         if (!copied) {
           console.error(
-            "[Abudi Domain Extractor] Copy failed:",
-            error
+            "[Abudi Domain Extractor] Copy failed: clipboard service returned false."
           );
         }
+      } catch (error) {
+        setTemporaryButtonText(copyButton, "❌ Copy failed");
+
+        console.error(
+          "[Abudi Domain Extractor] Copy failed:",
+          error
+        );
       }
     };
   }
@@ -140,7 +126,7 @@
   }
 
   window.AbudiDomainActions = Object.freeze({
-    version: "1.9.7",
+    version: "1.9.8",
     bindAllActions,
     bindAnalyzeAction,
     bindClearAction,
