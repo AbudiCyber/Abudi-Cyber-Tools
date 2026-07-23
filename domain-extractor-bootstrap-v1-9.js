@@ -5,6 +5,7 @@
   const files = [
     "domain-extractor-errors-v1-9.js",
     "domain-extractor-dom-v1-9.js",
+    "domain-extractor-contracts-v1-9.js",
     "domain-extractor-runtime-v1-9.js",
     "domain-extractor-extension-v1-9.js",
     "domain-security-extension-v1-9.js",
@@ -18,7 +19,7 @@
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
 
-      script.src = src + "?v=1-9-11";
+      script.src = src + "?v=1-9-12";
 
       script.onload = () => {
         resolve(src);
