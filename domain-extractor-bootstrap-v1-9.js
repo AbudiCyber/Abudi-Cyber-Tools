@@ -2,6 +2,8 @@
 (() => {
   "use strict";
 
+  const CACHE_VERSION = "1-9-13";
+
   const files = [
     "domain-extractor-errors-v1-9.js",
     "domain-extractor-dom-v1-9.js",
@@ -15,22 +17,61 @@
     "domain-extractor-actions-v1-9.js"
   ];
 
+  function createModuleLoadError(src) {
+    const error = new Error("MODULE_LOAD_FAILED");
+    error.moduleFile = src;
+
+    return error;
+  }
+
   function load(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
 
-      script.src = src + "?v=1-9-12";
+      script.src = `${src}?v=${CACHE_VERSION}`;
 
       script.onload = () => {
         resolve(src);
       };
 
       script.onerror = () => {
-        reject(new Error(src));
+        reject(createModuleLoadError(src));
       };
 
       document.head.appendChild(script);
     });
+  }
+
+  function getResultElement() {
+    try {
+      const getElements = window.AbudiDomainDOM?.getElements;
+
+      if (typeof getElements === "function") {
+        return getElements().result;
+      }
+    } catch (error) {
+      console.warn(
+        "[Abudi Domain Extractor] DOM module fallback activated:",
+        error
+      );
+    }
+
+    return document.getElementById("r");
+  }
+
+  function getStartupMessage(error) {
+    if (error?.message === "MODULE_LOAD_FAILED" && error.moduleFile) {
+      return `Failed to load required module: ${error.moduleFile}`;
+    }
+
+    const getStartupErrorMessage =
+      window.AbudiDomainErrors?.getStartupErrorMessage;
+
+    if (typeof getStartupErrorMessage === "function") {
+      return getStartupErrorMessage(error);
+    }
+
+    return `A required module failed to load: ${error?.message || "UNKNOWN_STARTUP_ERROR"}`;
   }
 
   async function start() {
@@ -43,14 +84,8 @@
   }
 
   start().catch(error => {
-    const result = document.getElementById("r");
-    const getStartupErrorMessage =
-      window.AbudiDomainErrors?.getStartupErrorMessage;
-
-    const startupMessage =
-      typeof getStartupErrorMessage === "function"
-        ? getStartupErrorMessage(error)
-        : `A required module failed to load: ${error.message}`;
+    const result = getResultElement();
+    const startupMessage = getStartupMessage(error);
 
     if (result) {
       result.textContent =
