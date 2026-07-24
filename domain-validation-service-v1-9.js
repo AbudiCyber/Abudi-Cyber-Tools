@@ -2,7 +2,7 @@
 (() => {
   "use strict";
 
-  const EMPTY_INPUT_MESSAGE =
+  const INVALID_DOMAIN_MESSAGE =
     "Please enter a valid domain or URL.\n" +
     "Example: example.com";
 
@@ -10,15 +10,19 @@
     return typeof value === "string" ? value.trim() : "";
   }
 
+  function createInvalidResult(value = "") {
+    return Object.freeze({
+      valid: false,
+      value,
+      message: INVALID_DOMAIN_MESSAGE
+    });
+  }
+
   function validateInput(value) {
     const normalizedValue = normalize(value);
 
     if (!normalizedValue) {
-      return Object.freeze({
-        valid: false,
-        value: "",
-        message: EMPTY_INPUT_MESSAGE
-      });
+      return createInvalidResult();
     }
 
     return Object.freeze({
@@ -29,7 +33,8 @@
   }
 
   window.AbudiDomainValidationService = Object.freeze({
-    version: "1.9.0",
+    version: "1.9.1",
+    createInvalidResult,
     validateInput
   });
 })();
