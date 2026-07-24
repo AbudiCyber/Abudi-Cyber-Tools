@@ -4,9 +4,6 @@
 
   const WAITING_MESSAGE = "Waiting for domain input...";
   const COPY_PROMPT_MESSAGE = "Analyze a domain before copying the result.";
-  const INVALID_DOMAIN_MESSAGE =
-    "Please enter a valid domain or URL.\n" +
-    "Example: example.com";
 
   function bindAnalyzeAction() {
     const {
@@ -21,7 +18,8 @@
       !analyzeButton ||
       !window.AbudiDomainExtractor ||
       !window.AbudiDomainUI ||
-      typeof window.AbudiDomainValidationService?.validateInput !== "function"
+      typeof window.AbudiDomainValidationService?.validateInput !== "function" ||
+      typeof window.AbudiDomainValidationService?.createInvalidResult !== "function"
     ) {
       throw new Error("ANALYZE_ACTION_NOT_READY");
     }
@@ -45,7 +43,12 @@
             validation.value
           );
       } catch (error) {
-        result.textContent = INVALID_DOMAIN_MESSAGE;
+        const invalidResult =
+          window.AbudiDomainValidationService.createInvalidResult(
+            validation.value
+          );
+
+        result.textContent = invalidResult.message;
 
         console.error(
           "[Abudi Domain Extractor] Analysis failed:",
@@ -135,7 +138,7 @@
   }
 
   window.AbudiDomainActions = Object.freeze({
-    version: "1.9.9",
+    version: "1.9.10",
     bindAllActions,
     bindAnalyzeAction,
     bindClearAction,
