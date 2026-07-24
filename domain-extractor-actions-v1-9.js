@@ -20,20 +20,29 @@
       !result ||
       !analyzeButton ||
       !window.AbudiDomainExtractor ||
-      !window.AbudiDomainUI
+      !window.AbudiDomainUI ||
+      typeof window.AbudiDomainValidationService?.validateInput !== "function"
     ) {
       throw new Error("ANALYZE_ACTION_NOT_READY");
     }
 
     analyzeButton.onclick = () => {
+      const validation =
+        window.AbudiDomainValidationService.validateInput(input.value);
+
+      if (!validation.valid) {
+        result.textContent = validation.message;
+        return;
+      }
+
       try {
         const base =
-          window.AbudiDomainExtractor.extractDomain(input.value);
+          window.AbudiDomainExtractor.extractDomain(validation.value);
 
         result.textContent =
           window.AbudiDomainUI.formatExtended(
             base,
-            input.value
+            validation.value
           );
       } catch (error) {
         result.textContent = INVALID_DOMAIN_MESSAGE;
@@ -126,7 +135,7 @@
   }
 
   window.AbudiDomainActions = Object.freeze({
-    version: "1.9.8",
+    version: "1.9.9",
     bindAllActions,
     bindAnalyzeAction,
     bindClearAction,
