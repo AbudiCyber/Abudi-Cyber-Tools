@@ -31,7 +31,14 @@
     Object.freeze({
       errorCode: "DOMAIN_VALIDATION_SERVICE_NOT_READY",
       checks: Object.freeze([
-        () => window.AbudiDomainValidationService?.validateInput
+        () => window.AbudiDomainValidationService?.validateInput,
+        () => window.AbudiDomainValidationService?.createInvalidResult
+      ])
+    }),
+    Object.freeze({
+      errorCode: "DOMAIN_RESULT_SERVICE_NOT_READY",
+      checks: Object.freeze([
+        () => window.AbudiDomainResultService?.setText
       ])
     }),
     Object.freeze({
@@ -63,7 +70,7 @@
   }
 
   window.AbudiDomainContracts = Object.freeze({
-    version: "1.9.3",
+    version: "1.9.4",
     validateModules
   });
 })();
