@@ -29,6 +29,12 @@
       ])
     }),
     Object.freeze({
+      errorCode: "DOMAIN_VALIDATION_SERVICE_NOT_READY",
+      checks: Object.freeze([
+        () => window.AbudiDomainValidationService?.validateInput
+      ])
+    }),
+    Object.freeze({
       errorCode: "DOMAIN_CLIPBOARD_SERVICE_NOT_READY",
       checks: Object.freeze([
         () => window.AbudiDomainClipboardService?.copy
@@ -57,7 +63,7 @@
   }
 
   window.AbudiDomainContracts = Object.freeze({
-    version: "1.9.2",
+    version: "1.9.3",
     validateModules
   });
 })();
