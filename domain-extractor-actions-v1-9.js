@@ -19,7 +19,8 @@
       !window.AbudiDomainExtractor ||
       !window.AbudiDomainUI ||
       typeof window.AbudiDomainValidationService?.validateInput !== "function" ||
-      typeof window.AbudiDomainValidationService?.createInvalidResult !== "function"
+      typeof window.AbudiDomainValidationService?.createInvalidResult !== "function" ||
+      typeof window.AbudiDomainResultService?.setText !== "function"
     ) {
       throw new Error("ANALYZE_ACTION_NOT_READY");
     }
@@ -29,7 +30,10 @@
         window.AbudiDomainValidationService.validateInput(input.value);
 
       if (!validation.valid) {
-        result.textContent = validation.message;
+        window.AbudiDomainResultService.setText(
+          result,
+          validation.message
+        );
         return;
       }
 
@@ -37,18 +41,26 @@
         const base =
           window.AbudiDomainExtractor.extractDomain(validation.value);
 
-        result.textContent =
+        const formattedResult =
           window.AbudiDomainUI.formatExtended(
             base,
             validation.value
           );
+
+        window.AbudiDomainResultService.setText(
+          result,
+          formattedResult
+        );
       } catch (error) {
         const invalidResult =
           window.AbudiDomainValidationService.createInvalidResult(
             validation.value
           );
 
-        result.textContent = invalidResult.message;
+        window.AbudiDomainResultService.setText(
+          result,
+          invalidResult.message
+        );
 
         console.error(
           "[Abudi Domain Extractor] Analysis failed:",
@@ -138,7 +150,7 @@
   }
 
   window.AbudiDomainActions = Object.freeze({
-    version: "1.9.10",
+    version: "1.9.11",
     bindAllActions,
     bindAnalyzeAction,
     bindClearAction,
