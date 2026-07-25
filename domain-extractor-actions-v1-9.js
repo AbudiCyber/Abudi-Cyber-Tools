@@ -113,7 +113,8 @@
     if (
       !result ||
       !copyButton ||
-      typeof window.AbudiDomainClipboardService?.copy !== "function"
+      typeof window.AbudiDomainClipboardService?.copy !== "function" ||
+      typeof window.AbudiDomainResultService?.setText !== "function"
     ) {
       throw new Error("COPY_ACTION_NOT_READY");
     }
@@ -122,7 +123,10 @@
       const text = result.textContent.trim();
 
       if (!text || text === WAITING_MESSAGE) {
-        result.textContent = COPY_PROMPT_MESSAGE;
+        window.AbudiDomainResultService.setText(
+          result,
+          COPY_PROMPT_MESSAGE
+        );
         return;
       }
 
@@ -158,7 +162,7 @@
   }
 
   window.AbudiDomainActions = Object.freeze({
-    version: "1.9.12",
+    version: "1.9.13",
     bindAllActions,
     bindAnalyzeAction,
     bindClearAction,
