@@ -77,13 +77,21 @@
       clearButton
     } = window.AbudiDomainDOM.getElements();
 
-    if (!input || !result || !clearButton) {
+    if (
+      !input ||
+      !result ||
+      !clearButton ||
+      typeof window.AbudiDomainResultService?.setText !== "function"
+    ) {
       throw new Error("CLEAR_ACTION_DOM_NOT_READY");
     }
 
     clearButton.onclick = () => {
       input.value = "";
-      result.textContent = WAITING_MESSAGE;
+      window.AbudiDomainResultService.setText(
+        result,
+        WAITING_MESSAGE
+      );
     };
   }
 
@@ -150,7 +158,7 @@
   }
 
   window.AbudiDomainActions = Object.freeze({
-    version: "1.9.11",
+    version: "1.9.12",
     bindAllActions,
     bindAnalyzeAction,
     bindClearAction,
