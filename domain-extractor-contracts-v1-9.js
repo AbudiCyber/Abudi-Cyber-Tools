@@ -38,6 +38,7 @@
     Object.freeze({
       errorCode: "DOMAIN_RESULT_SERVICE_NOT_READY",
       checks: Object.freeze([
+        () => window.AbudiDomainResultService?.getText,
         () => window.AbudiDomainResultService?.setText
       ])
     }),
@@ -70,7 +71,7 @@
   }
 
   window.AbudiDomainContracts = Object.freeze({
-    version: "1.9.4",
+    version: "1.9.5",
     validateModules
   });
 })();
