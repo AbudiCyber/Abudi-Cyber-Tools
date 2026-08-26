@@ -114,13 +114,15 @@
       !result ||
       !copyButton ||
       typeof window.AbudiDomainClipboardService?.copy !== "function" ||
+      typeof window.AbudiDomainResultService?.getText !== "function" ||
       typeof window.AbudiDomainResultService?.setText !== "function"
     ) {
       throw new Error("COPY_ACTION_NOT_READY");
     }
 
     copyButton.onclick = async () => {
-      const text = result.textContent.trim();
+      const text =
+        window.AbudiDomainResultService.getText(result);
 
       if (!text || text === WAITING_MESSAGE) {
         window.AbudiDomainResultService.setText(
@@ -162,7 +164,7 @@
   }
 
   window.AbudiDomainActions = Object.freeze({
-    version: "1.9.13",
+    version: "1.9.14",
     bindAllActions,
     bindAnalyzeAction,
     bindClearAction,
