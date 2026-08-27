@@ -28,7 +28,3 @@ https://abudicyber.github.io/Abudi-Cyber-Tools/
 
 🛡️ **Abudi**  
 Built with 💖 in Iraq 🇮🇶
-
-Hello Abudi
-
- Hello Abudi
