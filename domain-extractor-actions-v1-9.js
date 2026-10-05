@@ -95,15 +95,6 @@
     };
   }
 
-  function setTemporaryButtonText(button, text) {
-    const originalText = button.textContent;
-    button.textContent = text;
-
-    window.setTimeout(() => {
-      button.textContent = originalText;
-    }, 1500);
-  }
-
   function bindCopyAction() {
     const {
       result,
@@ -136,7 +127,7 @@
         const copied =
           await window.AbudiDomainClipboardService.copy(text);
 
-        setTemporaryButtonText(
+        window.AbudiDomainUI.setTemporaryButtonText(
           copyButton,
           copied ? "✅ Copied" : "❌ Copy failed"
         );
@@ -147,7 +138,7 @@
           );
         }
       } catch (error) {
-        setTemporaryButtonText(copyButton, "❌ Copy failed");
+        window.AbudiDomainUI.setTemporaryButtonText(copyButton, "❌ Copy failed");
 
         console.error(
           "[Abudi Domain Extractor] Copy failed:",
