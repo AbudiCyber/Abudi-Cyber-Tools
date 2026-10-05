@@ -2,7 +2,7 @@
 (() => {
   "use strict";
 
-  const CACHE_VERSION = "1-9-19";
+  const CACHE_VERSION = "1-9-20";
 
   const files = [
     "domain-extractor-errors-v1-9.js",
