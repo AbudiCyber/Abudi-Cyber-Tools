@@ -31,9 +31,12 @@ function waitFor(condition, timeout = 5000) {
     runScripts: "dangerously",
     resources: "usable",
     beforeParse(window) {
-      window.navigator.clipboard = {
-        writeText: async () => true
-      };
+      Object.defineProperty(window.navigator, "clipboard", {
+        configurable: true,
+        value: {
+          writeText: async () => true
+        }
+      });
     }
   });
 
