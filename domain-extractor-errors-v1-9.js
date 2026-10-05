@@ -10,7 +10,10 @@
     DOMAIN_RUNTIME_NOT_READY: "The runtime validation module is unavailable.",
     DOMAIN_EXTRACTOR_NOT_READY: "The domain extraction engine is unavailable.",
     DOMAIN_UI_NOT_READY: "The result formatting module is unavailable.",
-    DOMAIN_ACTIONS_NOT_READY: "The user action module is unavailable."
+    DOMAIN_ACTIONS_NOT_READY: "The user action module is unavailable.",
+    DOMAIN_VALIDATION_SERVICE_NOT_READY: "The input validation module is unavailable.",
+    DOMAIN_RESULT_SERVICE_NOT_READY: "The result service is unavailable.",
+    DOMAIN_CLIPBOARD_SERVICE_NOT_READY: "The clipboard service is unavailable."
   });
 
   function getStartupErrorMessage(error) {
