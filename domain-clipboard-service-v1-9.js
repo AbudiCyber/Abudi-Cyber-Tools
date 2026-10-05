@@ -11,13 +11,15 @@
     textarea.style.opacity = "0";
 
     document.body.appendChild(textarea);
-    textarea.select();
-    textarea.setSelectionRange(0, textarea.value.length);
 
-    const copied = document.execCommand("copy");
-    document.body.removeChild(textarea);
+    try {
+      textarea.select();
+      textarea.setSelectionRange(0, textarea.value.length);
 
-    return copied;
+      return document.execCommand("copy");
+    } finally {
+      textarea.remove();
+    }
   }
 
   async function copy(text) {
@@ -41,7 +43,7 @@
   }
 
   window.AbudiDomainClipboardService = Object.freeze({
-    version: "1.9.0",
+    version: "1.9.1",
     copy
   });
 })();
