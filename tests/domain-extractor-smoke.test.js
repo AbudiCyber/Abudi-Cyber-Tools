@@ -58,7 +58,7 @@ function waitFor(condition, timeout = 5000) {
     assert.ok(copyButton);
     assert.ok(clearButton);
 
-    input.value = "https://sub.example.com:8443/path/to?q=1#top";
+    input.value = "https://SUB.Example.COM:8443/path/to?q=1#top";
     analyzeButton.click();
 
     assert.match(result.textContent, /Protocol: https/);
@@ -80,9 +80,34 @@ function waitFor(condition, timeout = 5000) {
     assert.equal(input.value, "");
     assert.equal(result.textContent, "Waiting for domain input...");
 
+    input.value = "http://example.com";
+    analyzeButton.click();
+
+    assert.match(result.textContent, /Protocol: http/);
+    assert.match(result.textContent, /Hostname: example\.com/);
+    assert.match(result.textContent, /Port: default/);
+    assert.match(result.textContent, /Path: \/$/);
+    assert.match(result.textContent, /Query: none/);
+    assert.match(result.textContent, /Fragment: none/);
+    assert.match(result.textContent, /Secure: No/);
+    assert.match(result.textContent, /Subdomain: none/);
+
+    input.value = "https://";
+    analyzeButton.click();
+    assert.match(result.textContent, /Please enter a valid domain or URL/);
+
     input.value = "";
     analyzeButton.click();
     assert.match(result.textContent, /Please enter a valid domain or URL/);
+
+    const originalButtonText = copyButton.textContent;
+    window.AbudiDomainUI.setTemporaryButtonText(copyButton, "first", 20);
+    await new Promise(resolve => setTimeout(resolve, 10));
+    window.AbudiDomainUI.setTemporaryButtonText(copyButton, "second", 30);
+    await new Promise(resolve => setTimeout(resolve, 15));
+    assert.equal(copyButton.textContent, "second");
+    await new Promise(resolve => setTimeout(resolve, 25));
+    assert.equal(copyButton.textContent, originalButtonText);
 
     console.log("Domain Extractor smoke test: PASS");
   } finally {
