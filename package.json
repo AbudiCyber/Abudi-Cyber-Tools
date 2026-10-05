@@ -1,0 +1,10 @@
+{
+  "name": "abudi-cyber-tools",
+  "private": true,
+  "scripts": {
+    "test:domain-extractor": "node tests/domain-extractor-smoke.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  }
+}
