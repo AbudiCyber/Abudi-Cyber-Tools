@@ -25,7 +25,8 @@
     Object.freeze({
       errorCode: "DOMAIN_UI_NOT_READY",
       checks: Object.freeze([
-        () => window.AbudiDomainUI?.formatExtended
+        () => window.AbudiDomainUI?.formatExtended,
+        () => window.AbudiDomainUI?.setTemporaryButtonText
       ])
     }),
     Object.freeze({
