@@ -25,6 +25,20 @@
       return createInvalidResult();
     }
 
+    try {
+      const candidate = normalizedValue.includes("://")
+        ? normalizedValue
+        : "https://" + normalizedValue;
+
+      const url = new URL(candidate);
+
+      if (!url.hostname) {
+        return createInvalidResult(normalizedValue);
+      }
+    } catch {
+      return createInvalidResult(normalizedValue);
+    }
+
     return Object.freeze({
       valid: true,
       value: normalizedValue,
@@ -33,7 +47,7 @@
   }
 
   window.AbudiDomainValidationService = Object.freeze({
-    version: "1.9.1",
+    version: "1.9.2",
     createInvalidResult,
     validateInput
   });
