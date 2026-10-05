@@ -7,6 +7,7 @@
   const files = [
     "domain-extractor-errors-v1-9.js",
     "domain-extractor-dom-v1-9.js",
+    "domain-extractor-v1-9.js",
     "domain-extractor-contracts-v1-9.js",
     "domain-extractor-runtime-v1-9.js",
     "domain-extractor-extension-v1-9.js",
