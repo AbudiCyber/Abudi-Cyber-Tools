@@ -46,6 +46,9 @@
     }
 
     const originalText = button.textContent;
+
+    button.textContent = text;
+
     const timeoutId = window.setTimeout(() => {
       if (button.textContent === text) {
         button.textContent = originalText;
