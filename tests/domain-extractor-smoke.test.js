@@ -89,7 +89,7 @@ function waitFor(condition, timeout = 5000) {
     assert.match(result.textContent, /Protocol: http/);
     assert.match(result.textContent, /Hostname: example\.com/);
     assert.match(result.textContent, /Port: default/);
-    assert.match(result.textContent, /Path: \/$/);
+    assert.match(result.textContent, /Path: \/\n/);
     assert.match(result.textContent, /Query: none/);
     assert.match(result.textContent, /Fragment: none/);
     assert.match(result.textContent, /Secure: No/);
