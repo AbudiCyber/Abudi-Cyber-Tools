@@ -46,16 +46,17 @@
     }
 
     const originalText = button.textContent;
-
-    button.textContent = text;
-
-    window.setTimeout(() => {
-      button.textContent = originalText;
+    const timeoutId = window.setTimeout(() => {
+      if (button.textContent === text) {
+        button.textContent = originalText;
+      }
     }, duration);
+
+    return timeoutId;
   }
 
   window.AbudiDomainUI = Object.freeze({
-    version: "1.9.1",
+    version: "1.9.2",
     formatExtended,
     setTemporaryButtonText
   });
