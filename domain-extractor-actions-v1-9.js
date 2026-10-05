@@ -18,6 +18,7 @@
       !analyzeButton ||
       !window.AbudiDomainExtractor ||
       !window.AbudiDomainUI ||
+      typeof window.AbudiDomainUI.formatExtended !== "function" ||
       typeof window.AbudiDomainValidationService?.validateInput !== "function" ||
       typeof window.AbudiDomainValidationService?.createInvalidResult !== "function" ||
       typeof window.AbudiDomainResultService?.setText !== "function"
@@ -106,7 +107,8 @@
       !copyButton ||
       typeof window.AbudiDomainClipboardService?.copy !== "function" ||
       typeof window.AbudiDomainResultService?.getText !== "function" ||
-      typeof window.AbudiDomainResultService?.setText !== "function"
+      typeof window.AbudiDomainResultService?.setText !== "function" ||
+      typeof window.AbudiDomainUI?.setTemporaryButtonText !== "function"
     ) {
       throw new Error("COPY_ACTION_NOT_READY");
     }
@@ -155,7 +157,7 @@
   }
 
   window.AbudiDomainActions = Object.freeze({
-    version: "1.9.14",
+    version: "1.9.15",
     bindAllActions,
     bindAnalyzeAction,
     bindClearAction,
