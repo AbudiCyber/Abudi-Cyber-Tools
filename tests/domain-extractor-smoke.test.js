@@ -61,6 +61,8 @@ function waitFor(condition, timeout = 5000) {
     assert.ok(copyButton);
     assert.ok(clearButton);
 
+    const baselineButtonText = copyButton.textContent;
+
     input.value = "https://SUB.Example.COM:8443/path/to?q=1#top";
     analyzeButton.click();
 
@@ -103,14 +105,13 @@ function waitFor(condition, timeout = 5000) {
     analyzeButton.click();
     assert.match(result.textContent, /Please enter a valid domain or URL/);
 
-    const originalButtonText = copyButton.textContent;
     window.AbudiDomainUI.setTemporaryButtonText(copyButton, "first", 20);
     await new Promise(resolve => setTimeout(resolve, 10));
     window.AbudiDomainUI.setTemporaryButtonText(copyButton, "second", 30);
     await new Promise(resolve => setTimeout(resolve, 15));
     assert.equal(copyButton.textContent, "second");
     await new Promise(resolve => setTimeout(resolve, 25));
-    assert.equal(copyButton.textContent, originalButtonText);
+    assert.equal(copyButton.textContent, baselineButtonText);
 
     console.log("Domain Extractor smoke test: PASS");
   } finally {
