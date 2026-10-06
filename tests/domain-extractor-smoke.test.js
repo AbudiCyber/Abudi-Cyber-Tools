@@ -37,11 +37,11 @@ function waitFor(condition, timeout = 5000) {
           writeText: async () => true
         }
       });
-      let fallbackCopyCalls = 0;
+      window.__fallbackCopyCalls = 0;
 
       window.document.execCommand = command => {
         assert.equal(command, "copy");
-        fallbackCopyCalls += 1;
+        window.__fallbackCopyCalls += 1;
         return true;
       };
     }
@@ -237,7 +237,7 @@ function waitFor(condition, timeout = 5000) {
     copyButton.click();
     await new Promise(resolve => setTimeout(resolve, 25));
     assert.equal(clipboardWrites, 2);
-    assert.equal(fallbackCopyCalls, 1);
+    assert.equal(window.__fallbackCopyCalls, 1);
     assert.equal(copyButton.textContent, "✅ Copied");
 
     shouldRejectClipboard = false;
