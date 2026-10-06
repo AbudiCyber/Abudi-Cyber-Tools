@@ -101,6 +101,14 @@ function waitFor(condition, timeout = 5000) {
     analyzeButton.click();
     assert.match(result.textContent, /Please enter a valid domain or URL/);
 
+    input.value = "ftp://example.com";
+    analyzeButton.click();
+    assert.match(result.textContent, /Please enter a valid domain or URL/);
+
+    input.value = "file://example.com";
+    analyzeButton.click();
+    assert.match(result.textContent, /Please enter a valid domain or URL/);
+
     input.value = "";
     analyzeButton.click();
     assert.match(result.textContent, /Please enter a valid domain or URL/);
