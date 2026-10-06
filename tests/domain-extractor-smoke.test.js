@@ -242,6 +242,18 @@ function waitFor(condition, timeout = 5000) {
 
     shouldRejectClipboard = false;
 
+    const originalNavigatorClipboard = window.navigator.clipboard;
+
+    delete window.navigator.clipboard;
+
+    assert.equal(
+      await window.AbudiDomainClipboardService.copy("fallback-only"),
+      true
+    );
+    assert.equal(window.__fallbackCopyCalls, 2);
+
+    window.navigator.clipboard = originalNavigatorClipboard;
+
     clearButton.click();
     assert.equal(input.value, "");
     assert.equal(result.textContent, "Waiting for domain input...");
