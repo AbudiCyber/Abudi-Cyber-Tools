@@ -116,6 +116,48 @@ function waitFor(condition, timeout = 5000) {
       "api.v1"
     );
 
+    const defaultPortCases = [
+      {
+        value: "https://example.com",
+        port: "default",
+        origin: "https://example.com"
+      },
+      {
+        value: "http://example.com:80",
+        port: "default",
+        origin: "http://example.com"
+      },
+      {
+        value: "https://example.com:443",
+        port: "default",
+        origin: "https://example.com"
+      },
+      {
+        value: "https://example.com:8443",
+        port: "8443",
+        origin: "https://example.com:8443"
+      }
+    ];
+
+    for (const testCase of defaultPortCases) {
+      const base = window.AbudiDomainExtractor.extractDomain(testCase.value);
+
+      assert.equal(base.port, testCase.port);
+      assert.equal(
+        window.AbudiDomainExtension.getOrigin(testCase.value),
+        testCase.origin
+      );
+    }
+
+    assert.equal(
+      window.AbudiDomainSecurity.isSecure("https://example.com"),
+      true
+    );
+    assert.equal(
+      window.AbudiDomainSecurity.isSecure("http://example.com"),
+      false
+    );
+
     const specialHostCases = [
       {
         value: "https://localhost:3000",
