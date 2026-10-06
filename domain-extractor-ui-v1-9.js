@@ -40,20 +40,43 @@
     return lines.join("\n");
   }
 
+  const temporaryButtonStates = new WeakMap();
+
   function setTemporaryButtonText(button, text, duration = 1500) {
     if (!button) {
       throw new Error("UI_BUTTON_NOT_READY");
     }
 
-    const originalText = button.textContent;
+    const previousState = temporaryButtonStates.get(button);
+
+    if (previousState) {
+      window.clearTimeout(previousState.timeoutId);
+    }
+
+    const originalText =
+      previousState?.originalText ?? button.textContent;
 
     button.textContent = text;
 
     const timeoutId = window.setTimeout(() => {
-      if (button.textContent === text) {
+      const currentState = temporaryButtonStates.get(button);
+
+      if (
+        currentState?.timeoutId === timeoutId &&
+        button.textContent === text
+      ) {
         button.textContent = originalText;
+        temporaryButtonStates.delete(button);
       }
     }, duration);
+
+    temporaryButtonStates.set(
+      button,
+      Object.freeze({
+        originalText,
+        timeoutId
+      })
+    );
 
     return timeoutId;
   }
