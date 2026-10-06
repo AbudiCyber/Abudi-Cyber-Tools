@@ -6,6 +6,11 @@
     "Please enter a valid domain or URL.\n" +
     "Example: example.com";
 
+  const SUPPORTED_PROTOCOLS = Object.freeze([
+    "http:",
+    "https:"
+  ]);
+
   function normalize(value) {
     return typeof value === "string" ? value.trim() : "";
   }
@@ -32,7 +37,10 @@
 
       const url = new URL(candidate);
 
-      if (!url.hostname) {
+      if (
+        !url.hostname ||
+        !SUPPORTED_PROTOCOLS.includes(url.protocol)
+      ) {
         return createInvalidResult(normalizedValue);
       }
     } catch {
@@ -47,7 +55,7 @@
   }
 
   window.AbudiDomainValidationService = Object.freeze({
-    version: "1.9.2",
+    version: "1.9.3",
     createInvalidResult,
     validateInput
   });
