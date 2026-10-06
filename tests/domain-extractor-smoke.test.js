@@ -128,8 +128,8 @@ function waitFor(condition, timeout = 5000) {
       {
         value: "https://127.0.0.1:8080",
         hostname: "127.0.0.1",
-        tld: "1",
-        subdomain: "127.0"
+        tld: "none",
+        subdomain: "none"
       }
     ];
 
