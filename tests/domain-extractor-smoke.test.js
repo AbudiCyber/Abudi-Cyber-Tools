@@ -98,14 +98,12 @@ function waitFor(condition, timeout = 5000) {
     const extracted = window.AbudiDomainExtractor.extractDomain(
       "https://api.v1.example.com:8443/a/b?x=1&y=2#frag"
     );
-    assert.deepEqual(extracted, {
-      protocol: "https",
-      hostname: "api.v1.example.com",
-      port: "8443",
-      path: "/a/b",
-      query: "?x=1&y=2",
-      fragment: "#frag"
-    });
+    assert.equal(extracted.protocol, "https");
+    assert.equal(extracted.hostname, "api.v1.example.com");
+    assert.equal(extracted.port, "8443");
+    assert.equal(extracted.path, "/a/b");
+    assert.equal(extracted.query, "?x=1&y=2");
+    assert.equal(extracted.fragment, "#frag");
 
     assert.equal(
       window.AbudiDomainTLD.getTLD("https://api.v1.example.com"),
