@@ -37,6 +37,13 @@ function waitFor(condition, timeout = 5000) {
           writeText: async () => true
         }
       });
+      let fallbackCopyCalls = 0;
+
+      window.document.execCommand = command => {
+        assert.equal(command, "copy");
+        fallbackCopyCalls += 1;
+        return true;
+      };
     }
   });
 
@@ -230,7 +237,8 @@ function waitFor(condition, timeout = 5000) {
     copyButton.click();
     await new Promise(resolve => setTimeout(resolve, 25));
     assert.equal(clipboardWrites, 2);
-    assert.equal(copyButton.textContent, "❌ Copy failed");
+    assert.equal(fallbackCopyCalls, 1);
+    assert.equal(copyButton.textContent, "✅ Copied");
 
     shouldRejectClipboard = false;
 
@@ -268,7 +276,10 @@ function waitFor(condition, timeout = 5000) {
 
     copyButton.click();
     await new Promise(resolve => setTimeout(resolve, 25));
-    assert.equal(result.textContent, "Please enter a valid domain or URL.");
+    assert.equal(
+      result.textContent,
+      "Please enter a valid domain or URL.\nExample: example.com"
+    );
 
     window.AbudiDomainUI.setTemporaryButtonText(copyButton, "first", 20);
     await new Promise(resolve => setTimeout(resolve, 10));
