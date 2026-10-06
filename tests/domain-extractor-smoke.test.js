@@ -61,6 +61,63 @@ function waitFor(condition, timeout = 5000) {
     assert.ok(copyButton);
     assert.ok(clearButton);
 
+    const validHttp = window.AbudiDomainValidationService.validateInput("http://example.com:8080/a?b=2#c");
+    assert.equal(validHttp.valid, true);
+    assert.equal(validHttp.value, "http://example.com:8080/a?b=2#c");
+
+    const validBare = window.AbudiDomainValidationService.validateInput("Example.COM");
+    assert.equal(validBare.valid, true);
+
+    const unsupportedProtocols = [
+      "ftp://example.com",
+      "file://example.com",
+      "javascript://example.com"
+    ];
+
+    for (const value of unsupportedProtocols) {
+      const validation =
+        window.AbudiDomainValidationService.validateInput(value);
+
+      assert.equal(validation.valid, false);
+    }
+
+    const malformedInputs = [
+      "https://",
+      "https://?",
+      "https://#fragment",
+      "http://[invalid"
+    ];
+
+    for (const value of malformedInputs) {
+      const validation =
+        window.AbudiDomainValidationService.validateInput(value);
+
+      assert.equal(validation.valid, false);
+    }
+
+    const extracted = window.AbudiDomainExtractor.extractDomain(
+      "https://api.v1.example.com:8443/a/b?x=1&y=2#frag"
+    );
+    assert.deepEqual(extracted, {
+      protocol: "https",
+      hostname: "api.v1.example.com",
+      port: "8443",
+      path: "/a/b",
+      query: "?x=1&y=2",
+      fragment: "#frag"
+    });
+
+    assert.equal(
+      window.AbudiDomainTLD.getTLD("https://api.v1.example.com"),
+      "com"
+    );
+    assert.equal(
+      window.AbudiDomainSubdomain.getSubdomain(
+        "https://api.v1.example.com"
+      ),
+      "api.v1"
+    );
+
     const baselineButtonText = copyButton.textContent;
 
     input.value = "https://SUB.Example.COM:8443/path/to?q=1#top";
