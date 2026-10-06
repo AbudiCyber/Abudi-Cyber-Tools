@@ -118,6 +118,42 @@ function waitFor(condition, timeout = 5000) {
       "api.v1"
     );
 
+    const specialHostCases = [
+      {
+        value: "https://localhost:3000",
+        hostname: "localhost",
+        tld: "none",
+        subdomain: "none"
+      },
+      {
+        value: "https://127.0.0.1:8080",
+        hostname: "127.0.0.1",
+        tld: "1",
+        subdomain: "127.0"
+      }
+    ];
+
+    for (const testCase of specialHostCases) {
+      const validation =
+        window.AbudiDomainValidationService.validateInput(testCase.value);
+
+      assert.equal(validation.valid, true);
+
+      const base =
+        window.AbudiDomainExtractor.extractDomain(testCase.value);
+
+      assert.equal(base.hostname, testCase.hostname);
+      assert.equal(
+        window.AbudiDomainTLD.getTLD(testCase.value),
+        testCase.tld
+      );
+      assert.equal(
+        window.AbudiDomainSubdomain.getSubdomain(testCase.value),
+        testCase.subdomain
+      );
+    }
+
+
     const baselineButtonText = copyButton.textContent;
 
     input.value = "https://SUB.Example.COM:8443/path/to?q=1#top";
