@@ -43,6 +43,17 @@ function waitFor(condition, timeout = 5000) {
   try {
     const { window } = dom;
 
+    let clipboardWrites = 0;
+    let shouldRejectClipboard = false;
+
+    window.navigator.clipboard.writeText = async () => {
+      clipboardWrites += 1;
+
+      if (shouldRejectClipboard) {
+        throw new Error("CLIPBOARD_DENIED");
+      }
+    };
+
     await waitFor(
       () =>
         typeof window.AbudiDomainActions?.bindAllActions === "function" &&
@@ -212,7 +223,16 @@ function waitFor(condition, timeout = 5000) {
 
     copyButton.click();
     await new Promise(resolve => setTimeout(resolve, 25));
+    assert.equal(clipboardWrites, 1);
     assert.equal(copyButton.textContent, "✅ Copied");
+
+    shouldRejectClipboard = true;
+    copyButton.click();
+    await new Promise(resolve => setTimeout(resolve, 25));
+    assert.equal(clipboardWrites, 2);
+    assert.equal(copyButton.textContent, "❌ Copy failed");
+
+    shouldRejectClipboard = false;
 
     clearButton.click();
     assert.equal(input.value, "");
@@ -245,6 +265,10 @@ function waitFor(condition, timeout = 5000) {
     input.value = "";
     analyzeButton.click();
     assert.match(result.textContent, /Please enter a valid domain or URL/);
+
+    copyButton.click();
+    await new Promise(resolve => setTimeout(resolve, 25));
+    assert.equal(result.textContent, "Please enter a valid domain or URL.");
 
     window.AbudiDomainUI.setTemporaryButtonText(copyButton, "first", 20);
     await new Promise(resolve => setTimeout(resolve, 10));
