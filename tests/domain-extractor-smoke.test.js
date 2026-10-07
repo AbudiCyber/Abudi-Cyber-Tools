@@ -271,6 +271,15 @@ function waitFor(condition, timeout = 5000) {
 
     window.navigator.clipboard = originalNavigatorClipboard;
 
+    const invalidClipboardValues = ["", "   ", null, undefined, 42];
+
+    for (const value of invalidClipboardValues) {
+      await assert.rejects(
+        window.AbudiDomainClipboardService.copy(value),
+        error => error instanceof window.Error && error.message === "CLIPBOARD_TEXT_INVALID"
+      );
+    }
+
     clearButton.click();
     assert.equal(input.value, "");
     assert.equal(result.textContent, "Waiting for domain input...");
