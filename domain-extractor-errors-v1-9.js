@@ -13,7 +13,8 @@
     DOMAIN_ACTIONS_NOT_READY: "The user action module is unavailable.",
     DOMAIN_VALIDATION_SERVICE_NOT_READY: "The input validation module is unavailable.",
     DOMAIN_RESULT_SERVICE_NOT_READY: "The result service is unavailable.",
-    DOMAIN_CLIPBOARD_SERVICE_NOT_READY: "The clipboard service is unavailable."
+    DOMAIN_CLIPBOARD_SERVICE_NOT_READY: "The clipboard service is unavailable.",
+    MODULE_LOAD_FAILED: "A required module failed to load."
   });
 
   function getStartupErrorMessage(error) {
