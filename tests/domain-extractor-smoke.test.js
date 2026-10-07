@@ -73,11 +73,8 @@ function waitFor(condition, timeout = 5000) {
       window.AbudiDomainErrors.getStartupErrorMessage(
         new Error("MODULE_LOAD_FAILED")
       ),
-      "A required module failed to load."
+      "A required module failed to load: UNKNOWN_STARTUP_ERROR"
     );
-
-    const moduleLoadError = new Error("MODULE_LOAD_FAILED");
-    moduleLoadError.moduleFile = "missing-test-module.js";
 
     assert.equal(
       window.AbudiDomainBootstrap
