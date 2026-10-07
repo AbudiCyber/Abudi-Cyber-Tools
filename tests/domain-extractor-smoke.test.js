@@ -83,6 +83,18 @@ function waitFor(condition, timeout = 5000) {
       "present"
     );
 
+    const bootstrapModuleLoader = window.AbudiDomainBootstrap.load.bind(
+      window.AbudiDomainBootstrap
+    );
+
+    await assert.rejects(
+      bootstrapModuleLoader("missing-test-module.js"),
+      error =>
+        error &&
+        error.message === "MODULE_LOAD_FAILED" &&
+        error.moduleFile === "missing-test-module.js"
+    );
+
     window.AbudiDomainRuntime.validate();
     window.AbudiDomainActions.bindAllActions();
 
