@@ -276,7 +276,10 @@ function waitFor(condition, timeout = 5000) {
     for (const value of invalidClipboardValues) {
       await assert.rejects(
         window.AbudiDomainClipboardService.copy(value),
-        error => error instanceof window.Error && error.message === "CLIPBOARD_TEXT_INVALID"
+        error =>
+          error &&
+          typeof error.message === "string" &&
+          error.message === "CLIPBOARD_TEXT_INVALID"
       );
     }
 
