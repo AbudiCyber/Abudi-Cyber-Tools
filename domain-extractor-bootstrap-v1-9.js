@@ -87,6 +87,12 @@
     window.AbudiDomainActions.bindAllActions();
   }
 
+  window.AbudiDomainBootstrap = Object.freeze({
+    version: "1.9.1",
+    start,
+    load
+  });
+
   start().catch(error => {
     const result = getResultElement();
     const startupMessage = getStartupMessage(error);
