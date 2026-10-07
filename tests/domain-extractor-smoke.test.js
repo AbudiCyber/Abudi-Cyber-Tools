@@ -67,6 +67,25 @@ function waitFor(condition, timeout = 5000) {
         typeof window.AbudiDomainRuntime?.validate === "function"
     );
 
+    assert.ok(window.AbudiDomainBootstrap);
+    assert.equal(window.AbudiDomainBootstrap.version, "1.9.1");
+    assert.equal(
+      window.AbudiDomainErrors.getStartupErrorMessage(
+        new Error("MODULE_LOAD_FAILED")
+      ),
+      "A required module failed to load."
+    );
+
+    const moduleLoadError = new Error("MODULE_LOAD_FAILED");
+    moduleLoadError.moduleFile = "missing-test-module.js";
+
+    assert.equal(
+      window.AbudiDomainBootstrap
+        ? "present"
+        : "missing",
+      "present"
+    );
+
     window.AbudiDomainRuntime.validate();
     window.AbudiDomainActions.bindAllActions();
 
