@@ -212,6 +212,23 @@ function waitFor(condition, timeout = 5000) {
     }
 
 
+    input.value = " HTTPS://Example.COM:443/path ";
+    analyzeButton.click();
+    assert.match(result.textContent, /Protocol: https/);
+    assert.match(result.textContent, /Hostname: example\.com/);
+    assert.match(result.textContent, /Port: default/);
+    assert.match(result.textContent, /Path: \/path/);
+    assert.match(result.textContent, /Origin: https:\/\/example\.com/);
+    assert.match(result.textContent, /Secure: Yes/);
+
+    const whitespaceValidation =
+      window.AbudiDomainValidationService.validateInput(
+        "   example.com   "
+      );
+
+    assert.equal(whitespaceValidation.valid, true);
+    assert.equal(whitespaceValidation.value, "example.com");
+
     const baselineButtonText = copyButton.textContent;
 
     input.value = "https://SUB.Example.COM:8443/path/to?q=1#top";
