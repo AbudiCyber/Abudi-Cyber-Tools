@@ -295,6 +295,30 @@ function waitFor(condition, timeout = 5000) {
     assert.equal(extracted.fragment, "#frag");
     assert.equal(Object.isFrozen(extracted), true);
 
+    const queryAndFragmentCases = [
+      {
+        value: "https://example.com/path?",
+        query: "none",
+        fragment: "none"
+      },
+      {
+        value: "https://example.com/path#",
+        query: "none",
+        fragment: "none"
+      },
+      {
+        value: "https://example.com/path?x=1#part",
+        query: "?x=1",
+        fragment: "#part"
+      }
+    ];
+
+    for (const testCase of queryAndFragmentCases) {
+      const parsed = window.AbudiDomainExtractor.extractDomain(testCase.value);
+      assert.equal(parsed.query, testCase.query);
+      assert.equal(parsed.fragment, testCase.fragment);
+    }
+
     assert.throws(
       () => window.AbudiDomainExtractor.extractDomain(""),
       error => error && error.message === "EMPTY_INPUT"
