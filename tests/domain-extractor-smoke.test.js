@@ -219,6 +219,20 @@ function waitFor(condition, timeout = 5000) {
     assert.equal(extracted.path, "/a/b");
     assert.equal(extracted.query, "?x=1&y=2");
     assert.equal(extracted.fragment, "#frag");
+    assert.equal(Object.isFrozen(extracted), true);
+
+    assert.throws(
+      () => window.AbudiDomainExtractor.extractDomain(""),
+      error => error && error.message === "EMPTY_INPUT"
+    );
+    assert.throws(
+      () => window.AbudiDomainExtractor.extractDomain("   "),
+      error => error && error.message === "EMPTY_INPUT"
+    );
+    assert.throws(
+      () => window.AbudiDomainExtractor.extractDomain("https://[invalid"),
+      error => error instanceof window.TypeError || error.name === "TypeError"
+    );
 
     assert.equal(
       window.AbudiDomainTLD.getTLD("https://api.v1.example.com"),
