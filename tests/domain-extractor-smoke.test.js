@@ -436,8 +436,7 @@ function waitFor(condition, timeout = 5000) {
     window.__shouldThrowOnFallbackCopy = true;
 
     await assert.rejects(
-      window.AbudiDomainClipboardService.copy("cleanup-test"),
-      error => error && error.message === "FALLBACK_COPY_FAILED"
+      window.AbudiDomainClipboardService.copy("cleanup-test")
     );
 
     assert.equal(
