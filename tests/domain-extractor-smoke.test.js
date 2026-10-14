@@ -152,6 +152,38 @@ function waitFor(condition, timeout = 5000) {
       "<img src=x onerror=alert(1)>"
     );
 
+    const missingResultElement = window.document.createElement("div");
+
+    assert.throws(
+      () => window.AbudiDomainResultService.getText(null),
+      error => error && error.message === "DOMAIN_RESULT_ELEMENT_NOT_READY"
+    );
+    assert.throws(
+      () => window.AbudiDomainResultService.setText(null, "ignored"),
+      error => error && error.message === "DOMAIN_RESULT_ELEMENT_NOT_READY"
+    );
+
+    window.AbudiDomainResultService.setText(missingResultElement, "safe text");
+    assert.equal(
+      window.AbudiDomainResultService.getText(missingResultElement),
+      "safe text"
+    );
+
+    window.AbudiDomainResultService.setText(missingResultElement, 42);
+    assert.equal(missingResultElement.textContent, "");
+
+    const htmlLikeText = "<img src=x onerror=alert(1)>";
+    window.AbudiDomainResultService.setText(missingResultElement, htmlLikeText);
+    assert.equal(
+      missingResultElement.querySelector("img"),
+      null,
+      "Result service must write text rather than parse HTML."
+    );
+    assert.equal(
+      window.AbudiDomainResultService.getText(missingResultElement),
+      htmlLikeText
+    );
+
     const validHttp = window.AbudiDomainValidationService.validateInput("http://example.com:8080/a?b=2#c");
     assert.equal(validHttp.valid, true);
     assert.equal(validHttp.value, "http://example.com:8080/a?b=2#c");
