@@ -201,6 +201,10 @@ function waitFor(condition, timeout = 5000) {
     window.AbudiDomainResultService.setText(missingResultElement, "safe text");
     assert.equal(window.AbudiDomainResultService.getText(missingResultElement), "safe text");
 
+    window.AbudiDomainResultService.setText(missingResultElement, "");
+    assert.equal(missingResultElement.textContent, "");
+    assert.equal(window.AbudiDomainResultService.getText(missingResultElement), "");
+
     window.AbudiDomainResultService.setText(missingResultElement, 42);
     assert.equal(missingResultElement.textContent, "");
 
