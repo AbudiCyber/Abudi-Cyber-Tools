@@ -39,6 +39,7 @@ function waitFor(condition, timeout = 5000) {
       });
       window.__fallbackCopyCalls = 0;
       window.__shouldThrowOnFallbackCopy = false;
+      window.__fallbackCopyShouldReturnFalse = false;
 
       window.document.execCommand = command => {
         assert.equal(command, "copy");
@@ -48,7 +49,7 @@ function waitFor(condition, timeout = 5000) {
           throw new Error("FALLBACK_COPY_FAILED");
         }
 
-        return true;
+        return !window.__fallbackCopyShouldReturnFalse;
       };
     }
   });
@@ -502,6 +503,19 @@ function waitFor(condition, timeout = 5000) {
 
     window.__shouldThrowOnFallbackCopy = false;
     shouldRejectClipboard = false;
+
+    window.__fallbackCopyShouldReturnFalse = true;
+    assert.equal(
+      await window.AbudiDomainClipboardService.copy("fallback-rejected"),
+      false,
+      "Clipboard fallback must report false when execCommand rejects the copy."
+    );
+    assert.equal(
+      window.document.querySelectorAll("textarea").length,
+      0,
+      "Fallback returning false must still remove its temporary textarea."
+    );
+    window.__fallbackCopyShouldReturnFalse = false;
 
     clearButton.click();
     assert.equal(input.value, "");
