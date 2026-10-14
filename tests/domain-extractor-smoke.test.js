@@ -168,7 +168,7 @@ function waitFor(condition, timeout = 5000) {
       assert.equal(validation.value, "");
       assert.equal(
         validation.message,
-        "Please enter a valid domain or URL.\\nExample: example.com"
+        "Please enter a valid domain or URL.\nExample: example.com"
       );
       assert.equal(Object.isFrozen(validation), true);
     }
