@@ -445,6 +445,11 @@ function waitFor(condition, timeout = 5000) {
       window.AbudiDomainSecurity.isSecure("http://example.com"),
       false
     );
+    assert.equal(
+      window.AbudiDomainSecurity.isSecure("https://example.com\\\\@evil.com"),
+      false,
+      "Malformed backslash URL must not be considered secure."
+    );
 
     const specialHostCases = [
       {
