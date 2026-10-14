@@ -521,6 +521,19 @@ function waitFor(condition, timeout = 5000) {
     await new Promise(resolve => setTimeout(resolve, 25));
     assert.equal(copyButton.textContent, baselineButtonText);
 
+    window.AbudiDomainUI.setTemporaryButtonText(
+      unrelatedButton,
+      "timed text",
+      30
+    );
+    unrelatedButton.textContent = "Changed externally";
+    await new Promise(resolve => setTimeout(resolve, 40));
+    assert.equal(
+      unrelatedButton.textContent,
+      "Changed externally",
+      "Temporary feedback must not overwrite text changed by another action."
+    );
+
     console.log("Domain Extractor smoke test: PASS");
   } finally {
     dom.window.close();
