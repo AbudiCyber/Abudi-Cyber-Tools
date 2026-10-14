@@ -488,6 +488,18 @@ function waitFor(condition, timeout = 5000) {
       "Please enter a valid domain or URL.\nExample: example.com"
     );
 
+    assert.throws(
+      () => window.AbudiDomainUI.setTemporaryButtonText(null, "invalid"),
+      error => error && error.message === "UI_BUTTON_NOT_READY"
+    );
+
+    const unrelatedButton = window.document.createElement("button");
+    unrelatedButton.textContent = "Keep this text";
+    window.AbudiDomainUI.setTemporaryButtonText(unrelatedButton, "temporary", 20);
+    assert.equal(unrelatedButton.textContent, "temporary");
+    await new Promise(resolve => setTimeout(resolve, 30));
+    assert.equal(unrelatedButton.textContent, "Keep this text");
+
     window.AbudiDomainUI.setTemporaryButtonText(copyButton, "first", 20);
     await new Promise(resolve => setTimeout(resolve, 10));
     window.AbudiDomainUI.setTemporaryButtonText(copyButton, "second", 30);
