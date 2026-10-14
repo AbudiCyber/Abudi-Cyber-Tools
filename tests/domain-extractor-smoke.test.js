@@ -419,6 +419,8 @@ function waitFor(condition, timeout = 5000) {
 
     assert.equal(whitespaceValidation.valid, true);
     assert.equal(whitespaceValidation.value, "example.com");
+    assert.equal(whitespaceValidation.message, "");
+    assert.equal(Object.isFrozen(whitespaceValidation), true);
 
     const baselineButtonText = copyButton.textContent;
 
