@@ -190,6 +190,13 @@ function waitFor(condition, timeout = 5000) {
       window.AbudiDomainResultService.getText(missingResultElement),
       "<img src=x onerror=alert(1)>"
     );
+    assert.equal(Object.isFrozen(window.AbudiDomainResultService), true);
+
+    missingResultElement.textContent = "  padded result  ";
+    assert.equal(
+      window.AbudiDomainResultService.getText(missingResultElement),
+      "padded result"
+    );
 
     const validHttp = window.AbudiDomainValidationService.validateInput("http://example.com:8080/a?b=2#c");
     assert.equal(validHttp.valid, true);
