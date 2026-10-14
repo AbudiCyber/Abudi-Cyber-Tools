@@ -313,6 +313,13 @@ function waitFor(condition, timeout = 5000) {
       false,
       "Extracted URL fields must not expose embedded credentials."
     );
+    assert.equal(
+      Object.values(credentialedUrl).some(value =>
+        String(value).includes("user")
+      ),
+      false,
+      "Extracted URL fields must not expose embedded usernames."
+    );
 
     const queryAndFragmentCases = [
       {
