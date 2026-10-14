@@ -274,7 +274,9 @@ function waitFor(condition, timeout = 5000) {
       "https://",
       "https://?",
       "https://#fragment",
-      "http://[invalid"
+      "http://[invalid",
+      "https:\\example.com",
+      "https://example.com\\@evil.com"
     ];
 
     for (const value of malformedInputs) {
