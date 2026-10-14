@@ -306,6 +306,13 @@ function waitFor(condition, timeout = 5000) {
       JSON.stringify(credentialedUrl).includes("secret"),
       false
     );
+    assert.equal(
+      Object.values(credentialedUrl).some(value =>
+        String(value).includes("secret")
+      ),
+      false,
+      "Extracted URL fields must not expose embedded credentials."
+    );
 
     const queryAndFragmentCases = [
       {
