@@ -383,6 +383,16 @@ function waitFor(condition, timeout = 5000) {
       error => error instanceof window.TypeError || error.name === "TypeError"
     );
 
+    for (const malformedDirectInput of [
+      "https://example.com\\\\@evil.com",
+      "example.com\\\\@evil.com"
+    ]) {
+      assert.throws(
+        () => window.AbudiDomainExtractor.extractDomain(malformedDirectInput),
+        error => error && error.message === "BACKSLASH_NOT_ALLOWED"
+      );
+    }
+
     assert.equal(
       window.AbudiDomainTLD.getTLD("https://api.v1.example.com"),
       "com"
