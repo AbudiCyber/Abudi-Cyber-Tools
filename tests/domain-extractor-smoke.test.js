@@ -107,6 +107,23 @@ function waitFor(condition, timeout = 5000) {
     assert.ok(copyButton);
     assert.ok(clearButton);
 
+    assert.equal(Object.isFrozen(window.AbudiDomainDOM.getElements()), true);
+    assert.doesNotThrow(() => window.AbudiDomainDOM.validateElements());
+
+    const originalClearButton = clearButton;
+    clearButton.remove();
+
+    assert.throws(
+      () => window.AbudiDomainDOM.validateElements(),
+      error => error && error.message === "DOM_NOT_READY"
+    );
+
+    assert.equal(window.AbudiDomainDOM.getElements().clearButton, null);
+    originalClearButton.remove();
+
+    window.document.body.appendChild(originalClearButton);
+    assert.doesNotThrow(() => window.AbudiDomainDOM.validateElements());
+
     const validHttp = window.AbudiDomainValidationService.validateInput("http://example.com:8080/a?b=2#c");
     assert.equal(validHttp.valid, true);
     assert.equal(validHttp.value, "http://example.com:8080/a?b=2#c");
