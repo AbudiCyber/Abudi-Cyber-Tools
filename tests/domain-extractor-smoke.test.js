@@ -38,10 +38,16 @@ function waitFor(condition, timeout = 5000) {
         }
       });
       window.__fallbackCopyCalls = 0;
+      window.__shouldThrowOnFallbackCopy = false;
 
       window.document.execCommand = command => {
         assert.equal(command, "copy");
         window.__fallbackCopyCalls += 1;
+
+        if (window.__shouldThrowOnFallbackCopy) {
+          throw new Error("FALLBACK_COPY_FAILED");
+        }
+
         return true;
       };
     }
@@ -426,6 +432,21 @@ function waitFor(condition, timeout = 5000) {
           error.message === "CLIPBOARD_TEXT_INVALID"
       );
     }
+
+    window.__shouldThrowOnFallbackCopy = true;
+
+    await assert.rejects(
+      window.AbudiDomainClipboardService.copy("cleanup-test"),
+      error => error && error.message === "FALLBACK_COPY_FAILED"
+    );
+
+    assert.equal(
+      window.document.querySelectorAll("textarea").length,
+      0,
+      "Clipboard fallback must remove its temporary textarea after an error."
+    );
+
+    window.__shouldThrowOnFallbackCopy = false;
 
     clearButton.click();
     assert.equal(input.value, "");
