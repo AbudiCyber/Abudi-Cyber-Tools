@@ -459,6 +459,26 @@ function waitFor(condition, timeout = 5000) {
       "Clipboard fallback must remove its temporary textarea after an error."
     );
 
+    input.value = "example.com";
+    analyzeButton.click();
+    assert.match(result.textContent, /Hostname: example\\.com/);
+
+    shouldRejectClipboard = true;
+    window.__shouldThrowOnFallbackCopy = true;
+    copyButton.click();
+    await new Promise(resolve => setTimeout(resolve, 25));
+
+    assert.equal(
+      copyButton.textContent,
+      "❌ Copy failed",
+      "Copy action must show failure feedback when both clipboard paths fail."
+    );
+    assert.equal(
+      window.document.querySelectorAll("textarea").length,
+      0,
+      "Failed copy action must clean up the fallback textarea."
+    );
+
     window.__shouldThrowOnFallbackCopy = false;
     shouldRejectClipboard = false;
 
