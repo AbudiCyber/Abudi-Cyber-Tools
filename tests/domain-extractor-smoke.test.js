@@ -155,9 +155,14 @@ function waitFor(condition, timeout = 5000) {
     const validHttp = window.AbudiDomainValidationService.validateInput("http://example.com:8080/a?b=2#c");
     assert.equal(validHttp.valid, true);
     assert.equal(validHttp.value, "http://example.com:8080/a?b=2#c");
+    assert.equal(validHttp.message, "");
+    assert.equal(Object.isFrozen(validHttp), true);
 
     const validBare = window.AbudiDomainValidationService.validateInput("Example.COM");
     assert.equal(validBare.valid, true);
+    assert.equal(validBare.value, "Example.COM");
+    assert.equal(validBare.message, "");
+    assert.equal(Object.isFrozen(validBare), true);
 
     const nonStringInputs = [null, undefined, 42, {}, []];
 
