@@ -450,6 +450,16 @@ function waitFor(condition, timeout = 5000) {
       error => error.message === "BACKSLASH_NOT_ALLOWED",
       "Malformed backslash URL must be rejected explicitly."
     );
+    assert.throws(
+      () => window.AbudiDomainExtractor.extractDomain("https://example.com\\\\@evil.com"),
+      error => error.message === "BACKSLASH_NOT_ALLOWED",
+      "Extractor and security extension must reject the same malformed URL."
+    );
+    assert.equal(
+      window.AbudiDomainValidationService.validateInput("https://example.com\\\\@evil.com").valid,
+      false,
+      "Validation service must reject malformed URLs before extraction."
+    );
 
     const specialHostCases = [
       {
