@@ -445,10 +445,10 @@ function waitFor(condition, timeout = 5000) {
       window.AbudiDomainSecurity.isSecure("http://example.com"),
       false
     );
-    assert.equal(
-      window.AbudiDomainSecurity.isSecure("https://example.com\\\\@evil.com"),
-      false,
-      "Malformed backslash URL must not be considered secure."
+    assert.throws(
+      () => window.AbudiDomainSecurity.isSecure("https://example.com\\\\@evil.com"),
+      error => error.message === "BACKSLASH_NOT_ALLOWED",
+      "Malformed backslash URL must be rejected explicitly."
     );
 
     const specialHostCases = [
