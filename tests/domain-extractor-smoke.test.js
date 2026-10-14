@@ -81,15 +81,15 @@ function waitFor(condition, timeout = 5000) {
 
     const startupErrorCases = [
       {
-        error: new Error("DOM_NOT_READY"),
+        error: new window.Error("DOM_NOT_READY"),
         message: "Required page elements are unavailable."
       },
       {
-        error: new Error("DOMAIN_RUNTIME_NOT_READY"),
+        error: new window.Error("DOMAIN_RUNTIME_NOT_READY"),
         message: "The runtime validation module is unavailable."
       },
       {
-        error: new Error("SOME_UNMAPPED_ERROR"),
+        error: new window.Error("SOME_UNMAPPED_ERROR"),
         message: "A required module failed to load: SOME_UNMAPPED_ERROR"
       },
       {
