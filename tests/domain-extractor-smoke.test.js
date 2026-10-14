@@ -504,6 +504,7 @@ function waitFor(condition, timeout = 5000) {
     window.__shouldThrowOnFallbackCopy = false;
     shouldRejectClipboard = false;
 
+    shouldRejectClipboard = true;
     window.__fallbackCopyShouldReturnFalse = true;
     assert.equal(
       await window.AbudiDomainClipboardService.copy("fallback-rejected"),
@@ -516,6 +517,7 @@ function waitFor(condition, timeout = 5000) {
       "Fallback returning false must still remove its temporary textarea."
     );
     window.__fallbackCopyShouldReturnFalse = false;
+    shouldRejectClipboard = false;
 
     clearButton.click();
     assert.equal(input.value, "");
