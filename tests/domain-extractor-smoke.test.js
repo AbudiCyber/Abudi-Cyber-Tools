@@ -321,6 +321,21 @@ function waitFor(condition, timeout = 5000) {
       "Extracted URL fields must not expose embedded usernames."
     );
 
+    const encodedCredentialUrl =
+      window.AbudiDomainExtractor.extractDomain(
+        "https://alice%40example.com:p%40ss%3Aword@example.com/secure"
+      );
+
+    assert.equal(encodedCredentialUrl.hostname, "example.com");
+    assert.equal(encodedCredentialUrl.path, "/secure");
+    assert.equal(
+      Object.values(encodedCredentialUrl).some(value =>
+        /alice|p%40ss|word/.test(String(value))
+      ),
+      false,
+      "Encoded URL credentials must not appear in extracted fields."
+    );
+
     const queryAndFragmentCases = [
       {
         value: "https://example.com/path?",
