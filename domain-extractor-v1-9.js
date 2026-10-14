@@ -9,6 +9,10 @@
       throw new Error("EMPTY_INPUT");
     }
 
+    if (raw.includes("\\")) {
+      throw new Error("BACKSLASH_NOT_ALLOWED");
+    }
+
     const url = new URL(
       raw.includes("://") ? raw : "https://" + raw
     );
