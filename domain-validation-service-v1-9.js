@@ -26,8 +26,8 @@
   function validateInput(value) {
     const normalizedValue = normalize(value);
 
-    if (!normalizedValue) {
-      return createInvalidResult();
+    if (!normalizedValue || normalizedValue.includes("\\")) {
+      return createInvalidResult(normalizedValue);
     }
 
     try {
