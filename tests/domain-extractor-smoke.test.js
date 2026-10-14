@@ -433,6 +433,7 @@ function waitFor(condition, timeout = 5000) {
       );
     }
 
+    shouldRejectClipboard = true;
     window.__shouldThrowOnFallbackCopy = true;
 
     await assert.rejects(
@@ -446,6 +447,7 @@ function waitFor(condition, timeout = 5000) {
     );
 
     window.__shouldThrowOnFallbackCopy = false;
+    shouldRejectClipboard = false;
 
     clearButton.click();
     assert.equal(input.value, "");
