@@ -461,7 +461,7 @@ function waitFor(condition, timeout = 5000) {
 
     input.value = "example.com";
     analyzeButton.click();
-    assert.match(result.textContent, /Hostname: example\\.com/);
+    assert.match(result.textContent, /Hostname: example\.com/);
 
     shouldRejectClipboard = true;
     window.__shouldThrowOnFallbackCopy = true;
