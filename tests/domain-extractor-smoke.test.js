@@ -79,6 +79,36 @@ function waitFor(condition, timeout = 5000) {
       "A required module failed to load: UNKNOWN_STARTUP_ERROR"
     );
 
+    const startupErrorCases = [
+      {
+        error: new Error("DOM_NOT_READY"),
+        message: "Required page elements are unavailable."
+      },
+      {
+        error: new Error("DOMAIN_RUNTIME_NOT_READY"),
+        message: "The runtime validation module is unavailable."
+      },
+      {
+        error: new Error("SOME_UNMAPPED_ERROR"),
+        message: "A required module failed to load: SOME_UNMAPPED_ERROR"
+      },
+      {
+        error: null,
+        message: "A required module failed to load: UNKNOWN_STARTUP_ERROR"
+      },
+      {
+        error: { message: "DOM_NOT_READY" },
+        message: "A required module failed to load: UNKNOWN_STARTUP_ERROR"
+      }
+    ];
+
+    for (const testCase of startupErrorCases) {
+      assert.equal(
+        window.AbudiDomainErrors.getStartupErrorMessage(testCase.error),
+        testCase.message
+      );
+    }
+
     assert.equal(
       window.AbudiDomainBootstrap
         ? "present"
