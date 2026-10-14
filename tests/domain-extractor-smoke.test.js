@@ -519,6 +519,25 @@ function waitFor(condition, timeout = 5000) {
     window.__fallbackCopyShouldReturnFalse = false;
     shouldRejectClipboard = false;
 
+    input.value = "example.com";
+    analyzeButton.click();
+    shouldRejectClipboard = true;
+    window.__fallbackCopyShouldReturnFalse = true;
+    copyButton.click();
+    await new Promise(resolve => setTimeout(resolve, 25));
+    assert.equal(
+      copyButton.textContent,
+      "❌ Copy failed",
+      "The copy action must report failure when the fallback returns false."
+    );
+    assert.equal(
+      window.document.querySelectorAll("textarea").length,
+      0,
+      "A rejected fallback copy must clean up its temporary textarea."
+    );
+    shouldRejectClipboard = false;
+    window.__fallbackCopyShouldReturnFalse = false;
+
     clearButton.click();
     assert.equal(input.value, "");
     assert.equal(result.textContent, "Waiting for domain input...");
