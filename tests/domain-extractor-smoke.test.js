@@ -336,6 +336,15 @@ function waitFor(condition, timeout = 5000) {
       false,
       "Encoded URL credentials must not appear in extracted fields."
     );
+    assert.equal(
+      Object.isFrozen(encodedCredentialUrl),
+      true,
+      "Credentialed URL results must retain the immutable result contract."
+    );
+    assert.deepEqual(
+      Object.keys(encodedCredentialUrl).sort(),
+      ["fragment", "hostname", "path", "port", "protocol", "query"].sort()
+    );
 
     const queryAndFragmentCases = [
       {
