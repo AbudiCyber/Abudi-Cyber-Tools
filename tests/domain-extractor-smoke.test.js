@@ -59,9 +59,11 @@ function waitFor(condition, timeout = 5000) {
 
     let clipboardWrites = 0;
     let shouldRejectClipboard = false;
+    const clipboardPayloads = [];
 
-    window.navigator.clipboard.writeText = async () => {
+    window.navigator.clipboard.writeText = async text => {
       clipboardWrites += 1;
+      clipboardPayloads.push(text);
 
       if (shouldRejectClipboard) {
         throw new Error("CLIPBOARD_DENIED");
@@ -433,6 +435,7 @@ function waitFor(condition, timeout = 5000) {
     copyButton.click();
     await new Promise(resolve => setTimeout(resolve, 25));
     assert.equal(clipboardWrites, 1);
+    assert.equal(clipboardPayloads[0], result.textContent);
     assert.equal(copyButton.textContent, "✅ Copied");
 
     shouldRejectClipboard = true;
