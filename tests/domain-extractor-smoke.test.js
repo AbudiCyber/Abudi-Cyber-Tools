@@ -159,6 +159,25 @@ function waitFor(condition, timeout = 5000) {
     const validBare = window.AbudiDomainValidationService.validateInput("Example.COM");
     assert.equal(validBare.valid, true);
 
+    const nonStringInputs = [null, undefined, 42, {}, []];
+
+    for (const value of nonStringInputs) {
+      const validation = window.AbudiDomainValidationService.validateInput(value);
+
+      assert.equal(validation.valid, false);
+      assert.equal(validation.value, "");
+      assert.equal(
+        validation.message,
+        "Please enter a valid domain or URL.\\nExample: example.com"
+      );
+      assert.equal(Object.isFrozen(validation), true);
+    }
+
+    const invalidResult = window.AbudiDomainValidationService.createInvalidResult("bad input");
+    assert.equal(invalidResult.valid, false);
+    assert.equal(invalidResult.value, "bad input");
+    assert.equal(Object.isFrozen(invalidResult), true);
+
     const unsupportedProtocols = [
       "ftp://example.com",
       "file://example.com",
