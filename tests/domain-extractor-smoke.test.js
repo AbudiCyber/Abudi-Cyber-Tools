@@ -85,6 +85,27 @@ function waitFor(condition, timeout = 5000) {
       "A required module failed to load: UNKNOWN_STARTUP_ERROR"
     );
 
+    const clipboardWritesBeforeInvalidInputs = clipboardWrites;
+    const fallbackCallsBeforeInvalidInputs = window.__fallbackCopyCalls;
+
+    for (const invalidClipboardInput of [null, "", "   ", 123]) {
+      await assert.rejects(
+        window.AbudiDomainClipboardService.copy(invalidClipboardInput),
+        error => error && error.message === "CLIPBOARD_TEXT_INVALID"
+      );
+    }
+
+    assert.equal(
+      clipboardWrites,
+      clipboardWritesBeforeInvalidInputs,
+      "Invalid clipboard input must not call the Clipboard API."
+    );
+    assert.equal(
+      window.__fallbackCopyCalls,
+      fallbackCallsBeforeInvalidInputs,
+      "Invalid clipboard input must not invoke the fallback copy command."
+    );
+
     const startupErrorCases = [
       {
         error: new window.Error("DOM_NOT_READY"),
