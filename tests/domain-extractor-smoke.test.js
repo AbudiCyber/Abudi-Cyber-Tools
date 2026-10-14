@@ -69,6 +69,9 @@ function waitFor(condition, timeout = 5000) {
 
     assert.ok(window.AbudiDomainBootstrap);
     assert.equal(window.AbudiDomainBootstrap.version, "1.9.1");
+    assert.equal(Object.isFrozen(window.AbudiDomainBootstrap), true);
+    assert.equal(typeof window.AbudiDomainBootstrap.start, "function");
+    assert.equal(typeof window.AbudiDomainBootstrap.load, "function");
     assert.equal(
       window.AbudiDomainErrors.getStartupErrorMessage(
         new Error("MODULE_LOAD_FAILED")
