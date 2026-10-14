@@ -295,6 +295,18 @@ function waitFor(condition, timeout = 5000) {
     assert.equal(extracted.fragment, "#frag");
     assert.equal(Object.isFrozen(extracted), true);
 
+    const credentialedUrl =
+      window.AbudiDomainExtractor.extractDomain(
+        "https://user:secret@example.com/private"
+      );
+
+    assert.equal(credentialedUrl.hostname, "example.com");
+    assert.equal(credentialedUrl.path, "/private");
+    assert.equal(
+      JSON.stringify(credentialedUrl).includes("secret"),
+      false
+    );
+
     const queryAndFragmentCases = [
       {
         value: "https://example.com/path?",
