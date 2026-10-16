@@ -404,6 +404,19 @@ function waitFor(condition, timeout = 5000) {
       "api.v1"
     );
 
+    const malformedExtensionInput = "https://example.com\\\\@evil.com";
+    for (const [label, operation] of [
+      ["TLD extension", () => window.AbudiDomainTLD.getTLD(malformedExtensionInput)],
+      ["Subdomain extension", () => window.AbudiDomainSubdomain.getSubdomain(malformedExtensionInput)],
+      ["Origin extension", () => window.AbudiDomainExtension.getOrigin(malformedExtensionInput)]
+    ]) {
+      assert.throws(
+        operation,
+        error => error && error.message === "BACKSLASH_NOT_ALLOWED",
+        label + " must reject malformed backslash URLs consistently."
+      );
+    }
+
     const defaultPortCases = [
       {
         value: "https://example.com",
