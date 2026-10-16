@@ -15,6 +15,9 @@
     if (!raw) {
       throw new Error("EMPTY_INPUT");
     }
+    if (raw.includes("\\")) {
+      throw new Error("BACKSLASH_NOT_ALLOWED");
+    }
 
     const u = new URL(
       raw.includes("://") ? raw : "https://" + raw
@@ -34,7 +37,7 @@
   }
 
   window.AbudiDomainSubdomain = Object.freeze({
-    version: "1.9.1",
+    version: "1.9.2",
     getSubdomain
   });
 })();
