@@ -10,7 +10,10 @@
   }
 
   function getSubdomain(input) {
-    const raw = String(input || "").trim();
+    if (typeof input !== "string") {
+      throw new Error("INVALID_INPUT_TYPE");
+    }
+    const raw = input.trim();
 
     if (!raw) {
       throw new Error("EMPTY_INPUT");
@@ -37,7 +40,7 @@
   }
 
   window.AbudiDomainSubdomain = Object.freeze({
-    version: "1.9.2",
+    version: "1.9.3",
     getSubdomain
   });
 })();
