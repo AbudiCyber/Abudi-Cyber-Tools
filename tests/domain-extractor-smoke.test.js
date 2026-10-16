@@ -285,6 +285,25 @@ function waitFor(condition, timeout = 5000) {
       assert.equal(validation.valid, false);
     }
 
+    const directInputTypeCases = [null, undefined, 42, {}, []];
+    const directParserCases = [
+      ["extractor", value => window.AbudiDomainExtractor.extractDomain(value)],
+      ["origin", value => window.AbudiDomainExtension.getOrigin(value)],
+      ["security", value => window.AbudiDomainSecurity.isSecure(value)],
+      ["TLD", value => window.AbudiDomainTLD.getTLD(value)],
+      ["subdomain", value => window.AbudiDomainSubdomain.getSubdomain(value)]
+    ];
+
+    for (const value of directInputTypeCases) {
+      for (const [label, parse] of directParserCases) {
+        assert.throws(
+          () => parse(value),
+          error => error && error.message === "INVALID_INPUT_TYPE",
+          label + " parser must reject non-string input."
+        );
+      }
+    }
+
     const extracted = window.AbudiDomainExtractor.extractDomain(
       "https://api.v1.example.com:8443/a/b?x=1&y=2#frag"
     );
