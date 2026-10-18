@@ -30,10 +30,14 @@ window.Math.random = () => { throw new Error("Math.random must not be used for p
 window.eval(script);
 window.document.getElementById("passwordLength").value = "24";
 window.document.getElementById("generatePasswordBtn").click();
-const result = window.document.getElementById("passwordGeneratorResult").textContent;
+const resultElement = window.document.getElementById("passwordGeneratorResult");
+const result = resultElement.textContent;
 assert.match(result, /Length: 24 characters/);
 const password = result.split("Password:")[1].trim();
 assert.equal(password.length, 24);
+const passwordOutput = resultElement.querySelector("code.generated-password");
+assert.ok(passwordOutput, "Generated password should use a dedicated styled code element");
+assert.equal(passwordOutput.textContent, password, "Password must be inserted as text, not parsed as HTML");
 assert.match(password, /[a-z]/);
 assert.match(password, /[A-Z]/);
 assert.match(password, /\d/);
