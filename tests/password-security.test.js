@@ -52,3 +52,24 @@ assert.doesNotMatch(checkResult, /ExampleSecret123!/, "Password checker output m
 
 dom.window.close();
 console.log("Password security regression test: PASS");
+
+// Rejection sampling must discard out-of-range bytes rather than introduce modulo bias.
+let samples = [255, 7];
+window.crypto.getRandomValues = array => {
+  const sample = samples.shift();
+  array[0] = sample;
+  return array;
+};
+assert.equal(window.secureRandomIndex(10), 7, "Out-of-range random bytes must be rejected");
+
+// If Web Crypto fails, generation must fail closed and expose no generated password.
+const failureDom = new JSDOM(html, { runScripts: "outside-only", url: "https://example.test/" });
+const failureWindow = failureDom.window;
+failureWindow.crypto.getRandomValues = () => { throw new Error("CRYPTO_UNAVAILABLE"); };
+failureWindow.eval(script);
+failureWindow.document.getElementById("generatePasswordBtn").click();
+const failureResult = failureWindow.document.getElementById("passwordGeneratorResult").textContent;
+assert.match(failureResult, /Secure password generation is unavailable/);
+assert.doesNotMatch(failureResult, /Password:\\s*[A-Za-z0-9!@#$%^&*()_+\\-=\\[\\]{}|;:,.<>/?]{8,}/);
+assert.equal(failureWindow.generatedPassword, "", "Failed generation must clear the generated password state");
+failureDom.window.close();
