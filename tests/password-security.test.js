@@ -71,5 +71,5 @@ failureWindow.document.getElementById("generatePasswordBtn").click();
 const failureResult = failureWindow.document.getElementById("passwordGeneratorResult").textContent;
 assert.match(failureResult, /Secure password generation is unavailable/);
 assert.equal(failureResult.includes("Password:"), false, "Failed generation must not render a password label or value");
-assert.equal(failureWindow.generatedPassword, "", "Failed generation must clear the generated password state");
+assert.equal(failureWindow.eval("generatedPassword"), "", "Failed generation must clear the generated password state");
 failureDom.window.close();
