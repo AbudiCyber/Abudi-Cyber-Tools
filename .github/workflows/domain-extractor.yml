@@ -23,3 +23,6 @@ jobs:
 
       - name: Run Domain Extractor smoke test
         run: npm run test:domain-extractor
+
+      - name: Run password security regression test
+        run: npm run test:password-security
