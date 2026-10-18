@@ -175,17 +175,66 @@ function clearPasswordCheckResult() {
 }
 
 // ===== Password Generator Pro =====
+function secureRandomIndex(max) {
+  if (!Number.isSafeInteger(max) || max < 1 || max > 256) {
+    throw new Error("INVALID_RANDOM_BOUND");
+  }
+
+  const cryptoProvider = globalThis.crypto;
+  if (!cryptoProvider || typeof cryptoProvider.getRandomValues !== "function") {
+    throw new Error("SECURE_RANDOM_UNAVAILABLE");
+  }
+
+  // Rejection sampling avoids modulo bias.
+  const limit = Math.floor(256 / max) * max;
+  const sample = new Uint8Array(1);
+  for (let attempts = 0; attempts < 128; attempts++) {
+    cryptoProvider.getRandomValues(sample);
+    if (sample[0] < limit) return sample[0] % max;
+  }
+  throw new Error("SECURE_RANDOM_FAILED");
+}
+
+function secureShuffle(value) {
+  const chars = value.split("");
+  for (let i = chars.length - 1; i > 0; i--) {
+    const j = secureRandomIndex(i + 1);
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
+  return chars.join("");
+}
+
 function generatePassword() {
-  const len = parseInt(passwordLength.value, 10) || 12;
+  const requestedLength = Number.parseInt(passwordLength.value, 10);
+  const len = Number.isInteger(requestedLength) && requestedLength >= 8 && requestedLength <= 64
+    ? requestedLength
+    : 12;
   const lower = "abcdefghijklmnopqrstuvwxyz";
   const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const numbers = "0123456789";
   const symbols = "!@#$%^&*()_+-=[]{}|;:,.<>/?";
   const all = lower + upper + numbers + symbols;
-  let pass = lower[Math.floor(Math.random() * lower.length)] + upper[Math.floor(Math.random() * upper.length)] + numbers[Math.floor(Math.random() * numbers.length)] + symbols[Math.floor(Math.random() * symbols.length)];
-  for (let i = pass.length; i < len; i++) pass += all[Math.floor(Math.random() * all.length)];
-  generatedPassword = pass.split("").sort(() => 0.5 - Math.random()).join("");
-  passwordGeneratorResult.innerHTML = `🎲 Generated Password<br><br><b>Length:</b> ${len} characters<br><b>Contains:</b> Uppercase, lowercase, numbers, symbols<br><br><b>Password:</b><br><br>${codeBlock(generatedPassword)}`;
+
+  try {
+    const required = [
+      lower[secureRandomIndex(lower.length)],
+      upper[secureRandomIndex(upper.length)],
+      numbers[secureRandomIndex(numbers.length)],
+      symbols[secureRandomIndex(symbols.length)]
+    ];
+    let pass = required.join("");
+    for (let i = pass.length; i < len; i++) {
+      pass += all[secureRandomIndex(all.length)];
+    }
+
+    generatedPassword = secureShuffle(pass);
+    passwordGeneratorResult.textContent =
+      `🎲 Generated Password\n\nLength: ${len} characters\nContains: Uppercase, lowercase, numbers, symbols\n\nPassword:\n${generatedPassword}`;
+  } catch {
+    generatedPassword = "";
+    passwordGeneratorResult.textContent =
+      "❌ Secure password generation is unavailable in this browser. No password was generated.";
+  }
 }
 function clearPasswordResult() {
   generatedPassword = "";
