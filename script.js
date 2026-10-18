@@ -228,8 +228,17 @@ function generatePassword() {
     }
 
     generatedPassword = secureShuffle(pass);
-    passwordGeneratorResult.textContent =
-      `🎲 Generated Password\n\nLength: ${len} characters\nContains: Uppercase, lowercase, numbers, symbols\n\nPassword:\n${generatedPassword}`;
+    passwordGeneratorResult.replaceChildren();
+    passwordGeneratorResult.style.whiteSpace = "pre-wrap";
+    passwordGeneratorResult.append(
+      document.createTextNode(
+        `🎲 Generated Password\n\nLength: ${len} characters\nContains: Uppercase, lowercase, numbers, symbols\n\nPassword:\n`
+      )
+    );
+    const passwordOutput = document.createElement("code");
+    passwordOutput.className = "generated-password";
+    passwordOutput.textContent = generatedPassword;
+    passwordGeneratorResult.append(passwordOutput);
   } catch {
     generatedPassword = "";
     passwordGeneratorResult.textContent =
