@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
 
+# This workflow only reads source files and runs tests.
+# Grant the minimum required repository permission.
+permissions:
+  contents: read
+
 jobs:
   domain-extractor:
     runs-on: ubuntu-latest
