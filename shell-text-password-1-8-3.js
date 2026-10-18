@@ -20,7 +20,7 @@ mount.insertAdjacentHTML('beforeend', `
 <div class="category-title" data-category-title="password">🔐 Password Tools</div>
 <div class="card tool-card" data-category="password" data-tool="password checker strength weak medium strong security">
 <h2>🔐 Password Checker Pro</h2>
-<input type="text" id="passwordInput" placeholder="Enter password">
+<input type="password" id="passwordInput" placeholder="Enter password" autocomplete="off" autocapitalize="none" spellcheck="false">
 <button id="checkPasswordBtn">Check Password</button>
 <div id="passwordCheckerResult" class="tool-result">Waiting for password input...</div>
 <div class="tool-actions"><button id="copyPasswordCheckBtn" class="action-btn copy-btn">📋 Copy Result</button><button id="clearPasswordCheckBtn" class="action-btn clear-btn">🧹 Clear Result</button></div>
