@@ -44,7 +44,7 @@ try {
     "https://",
     "https://example.com:99999",
     "https://exa mple.com",
-    "https://example.com\\u0001.evil"
+    "https://example.com\u0001.evil"
   ]) {
     input.value = invalid;
     window.parseURL();
