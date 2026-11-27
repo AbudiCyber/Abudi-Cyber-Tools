@@ -512,15 +512,19 @@ function inspectEmailAddress(email) {
   }
 
   const labels = asciiDomain.split(".");
-  if (labels.length < 2 || labels.some(label =>
-    label.length < 1 ||
-    label.length > 63 ||
-    !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i.test(label)
-  )) {
-    return { valid: false, reason: "The domain must contain valid labels and a top-level domain." };
+  if (
+    /^(?:\\d{1,3}\\.){3}\\d{1,3}$/.test(asciiDomain) ||
+    labels.length < 2 ||
+    labels.some(label =>
+      label.length < 1 ||
+      label.length > 63 ||
+      !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i.test(label)
+    )
+  ) {
+    return { valid: false, reason: "The domain must contain valid DNS labels, not an IP address literal." };
   }
 
-  if (labels[labels.length - 1].length < 2) {
+  if (labels[labels.length - 1].length < 2 || !/[a-z]/i.test(labels[labels.length - 1])) {
     return { valid: false, reason: "The top-level domain must contain at least two characters." };
   }
 
