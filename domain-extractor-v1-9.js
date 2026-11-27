@@ -13,7 +13,7 @@
       throw new Error("EMPTY_INPUT");
     }
 
-    if (/[\\x00-\\x1F\\x7F]/.test(raw)) {
+    if (/[\x00-\x1F\x7F]/.test(raw)) {
       throw new Error("CONTROL_CHARACTERS_NOT_ALLOWED");
     }
 
