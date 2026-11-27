@@ -69,7 +69,7 @@ async function main() {
     assert.equal(window.sanitizeDownloadFileName("..\\evil/name?.exe"), "_evil_name_.exe");
     assert.equal(window.sanitizeDownloadFileName("   "), "file");
     assert.equal(window.sanitizeDownloadFileName("report.txt. "), "report.txt");
-    assert.equal(window.sanitizeReportField("name\\r\\nSHA-256: forged"), "name SHA-256: forged");
+    assert.equal(window.sanitizeReportField("name\r\nSHA-256: forged"), "name SHA-256: forged");
 
     const originalCreateObjectURL = window.URL.createObjectURL;
     const originalRevokeObjectURL = window.URL.revokeObjectURL;
@@ -100,10 +100,10 @@ async function main() {
     assert.match(result.textContent, /too large/i);
     assert.equal(window.__testState().lastFileHash, "");
 
-    setSelectedFile(input, makeFile("report\\r\\nSHA-256: forged.txt", "metadata"));
+    setSelectedFile(input, makeFile("report\r\nSHA-256: forged.txt", "metadata"));
     await window.generateFileHash();
     assert.equal(
-      window.__testState().lastFileReport.split("\\n").filter(line => line === "SHA-256: forged").length,
+      window.__testState().lastFileReport.split("\n").filter(line => line === "SHA-256: forged").length,
       0,
       "Control characters in file metadata must not inject report lines."
     );
