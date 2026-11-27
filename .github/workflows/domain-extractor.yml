@@ -58,3 +58,6 @@ jobs:
 
       - name: Run Base64 data integrity regression test
         run: npm run test:base64-integrity
+
+      - name: Run URL codec data integrity regression test
+        run: npm run test:url-codec-integrity
