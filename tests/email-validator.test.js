@@ -41,6 +41,7 @@ try {
     "alice@example-.com",
     "alice@example.c",
     "alice@123.456",
+    "alice@192.168.1.200",
     "alice@example.123",
     "alice@example.com:25",
     "alice name@example.com",
