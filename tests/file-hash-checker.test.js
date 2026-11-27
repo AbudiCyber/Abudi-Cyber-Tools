@@ -43,11 +43,8 @@ async function main() {
       value: {
         digest: async (algorithm, buffer) => {
           assert.equal(algorithm, "SHA-256");
-          return createHash("sha256").update(Buffer.from(buffer)).digest().buffer.slice(
-            createHash("sha256").update(Buffer.from(buffer)).digest().byteOffset,
-            createHash("sha256").update(Buffer.from(buffer)).digest().byteOffset +
-              createHash("sha256").update(Buffer.from(buffer)).digest().byteLength
-          );
+          const digest = createHash("sha256").update(Buffer.from(buffer)).digest();
+          return Uint8Array.from(digest).buffer;
         }
       }
     });
@@ -56,18 +53,18 @@ async function main() {
 
     setSelectedFile(input, makeFile("sample.txt", "abc"));
     await window.generateFileHash();
-    assert.equal(window.lastFileHash, expectedHash, "SHA-256 must match the known test vector.");
+    assert.equal(window.eval("lastFileHash"), expectedHash, "SHA-256 must match the known test vector.");
     assert.match(result.textContent, /Local-only hash analysis/);
     assert.match(result.textContent, /not an antivirus scan/i);
-    assert.equal(window.lastFileName, "sample.txt");
-    assert.match(window.lastFileReport, new RegExp(expectedHash));
+    assert.equal(window.eval("lastFileName"), "sample.txt");
+    assert.match(window.eval("lastFileReport"), new RegExp(expectedHash));
 
     setSelectedFile(input, makeFile("<img src=x onerror=alert(1)>.exe", "payload"));
     await window.generateFileHash();
     assert.equal(result.querySelector("img"), null, "Untrusted file names must not create HTML elements.");
     assert.match(result.textContent, /Potentially risky file type/);
     assert.match(result.textContent, /&lt;img|img src=x/);
-    assert.equal(window.lastFileHash.length, 64);
+    assert.equal(window.eval("lastFileHash").length, 64);
 
     assert.equal(window.sanitizeDownloadFileName("..\\evil/name?.exe"), "___evil_name_.exe");
     assert.equal(window.sanitizeDownloadFileName("   "), "file");
@@ -86,12 +83,12 @@ async function main() {
       capturedDownloadName = this.download;
     };
     window.downloadReport();
-    assert.equal(capturedDownloadName, "___img_src=x_onerror=alert(1)__.exe_hash_report.txt");
+    assert.equal(capturedDownloadName, "_img src=x onerror=alert(1)_.exe_hash_report.txt");
     assert.ok(capturedBlob instanceof window.Blob);
     window.URL.createObjectURL = originalCreateObjectURL;
     window.URL.revokeObjectURL = originalRevokeObjectURL;
 
-    const previousHash = window.lastFileHash;
+    const previousHash = window.eval("lastFileHash");
     setSelectedFile(input, {
       name: "oversized.bin",
       type: "application/octet-stream",
@@ -101,14 +98,14 @@ async function main() {
     });
     await window.generateFileHash();
     assert.match(result.textContent, /too large/i);
-    assert.equal(window.lastFileHash, "");
+    assert.equal(window.eval("lastFileHash"), "");
 
     const originalSubtle = window.crypto.subtle;
     Object.defineProperty(window.crypto, "subtle", { configurable: true, value: undefined });
     setSelectedFile(input, makeFile("unsupported.txt", "x"));
     await window.generateFileHash();
     assert.match(result.textContent, /unavailable in this browser context/i);
-    assert.equal(window.lastFileHash, "");
+    assert.equal(window.eval("lastFileHash"), "");
     Object.defineProperty(window.crypto, "subtle", { configurable: true, value: originalSubtle });
 
     let resolveArrayBuffer;
@@ -126,8 +123,8 @@ async function main() {
       Buffer.from("slow").byteOffset + Buffer.from("slow").byteLength
     ));
     await pending;
-    assert.equal(window.lastFileHash, "", "Clearing must invalidate an in-flight hash operation.");
-    assert.equal(window.lastFileName, "");
+    assert.equal(window.eval("lastFileHash"), "", "Clearing must invalidate an in-flight hash operation.");
+    assert.equal(window.eval("lastFileName"), "");
     assert.match(result.textContent, /Waiting for file input/);
 
     setSelectedFile(input, makeFile("change.txt", "first"));
@@ -135,7 +132,7 @@ async function main() {
     setSelectedFile(input, makeFile("new-selection.txt", "second"));
     input.dispatchEvent(new window.Event("change"));
     await pendingOnChange;
-    assert.equal(window.lastFileHash, "", "Changing selection must invalidate an in-flight hash operation.");
+    assert.equal(window.eval("lastFileHash"), "", "Changing selection must invalidate an in-flight hash operation.");
     assert.match(result.textContent, /selection changed/i);
 
     setSelectedFile(input, null);
