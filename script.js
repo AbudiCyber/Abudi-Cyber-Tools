@@ -151,37 +151,91 @@ function clearTextAnalysisResult() {
 }
 
 // ===== Password Checker Pro =====
+const PASSWORD_CHECKER_MAX_CODE_POINTS = 1024;
+const KNOWN_WEAK_PASSWORD_EXAMPLES = new Set([
+  "password",
+  "password1",
+  "password123",
+  "123456",
+  "12345678",
+  "123456789",
+  "qwerty",
+  "qwerty123",
+  "letmein",
+  "admin",
+  "welcome",
+  "iloveyou"
+]);
+
+function handlePasswordInputChange() {
+  lastPasswordCheckResult = "";
+  passwordCheckerResult.textContent = "Password changed. Run the check again.";
+}
+
 function checkPassword() {
   const password = passwordInput.value;
   if (!password) {
-    passwordCheckerResult.innerHTML = "⚠ Please enter a password first.";
+    passwordCheckerResult.textContent = "⚠ Please enter a password first.";
     lastPasswordCheckResult = "";
     return;
   }
+
+  // Bound local analysis work while allowing passphrases far beyond 64 characters.
+  if (password.length > PASSWORD_CHECKER_MAX_CODE_POINTS * 2) {
+    passwordCheckerResult.textContent = "⚠ Password is too long for this local check. Maximum supported length is 1,024 Unicode characters.";
+    lastPasswordCheckResult = "";
+    return;
+  }
+
+  const characters = Array.from(password);
+  const length = characters.length;
   const hasLower = /[a-z]/.test(password);
   const hasUpper = /[A-Z]/.test(password);
   const hasNumbers = /\d/.test(password);
-  const hasSymbols = /[!@#$%^&*()_\-+={}\[\]|;:'",.<>/?`~]/.test(password);
-  const longEnough = password.length >= 8;
-  const score = [longEnough, hasLower, hasUpper, hasNumbers, hasSymbols].filter(Boolean).length;
-  let status = "❌ Weak Password";
-  let advice = "Use at least 8 characters with uppercase, lowercase, numbers, and symbols.";
-  if (score >= 5) {
-    status = "✅ Strong Password";
-    advice = "Good structure. This password uses all main complexity categories.";
-  } else if (score >= 3) {
-    status = "⚠ Medium Password";
-    advice = "Better than weak, but add more length or more character types.";
+  const hasSymbols = /[^\p{L}\p{N}\s]/u.test(password);
+  const normalized = password.toLowerCase();
+  const isRepeatedCharacter = characters.length > 1 && characters.every(character => character === characters[0]);
+  const isKnownWeakExample = KNOWN_WEAK_PASSWORD_EXAMPLES.has(normalized);
+  const isSimpleSequence = /^(?:0123456789|1234567890|abcdefghijklmnopqrstuvwxyz|qwertyuiop)$/i.test(password);
+  const hasPredictablePattern = isRepeatedCharacter || isKnownWeakExample || isSimpleSequence;
+
+  let status;
+  if (hasPredictablePattern) {
+    status = "⚠ Predictable pattern detected";
+  } else if (length < 8) {
+    status = "❌ Very short";
+  } else if (length < 15) {
+    status = "⚠ Below 15-character single-factor benchmark";
+  } else {
+    status = "✅ 15+ characters (length indicator only)";
   }
-  lastPasswordCheckResult = `Password Strength\nStatus: ${status}\nLength: ${password.length} characters\n8+ characters: ${longEnough ? "Yes" : "No"}\nLowercase letters: ${hasLower ? "Yes" : "No"}\nUppercase letters: ${hasUpper ? "Yes" : "No"}\nNumbers: ${hasNumbers ? "Yes" : "No"}\nSymbols: ${hasSymbols ? "Yes" : "No"}\nAdvice: ${advice}`;
-  passwordCheckerResult.innerHTML = `🔐 Password Strength<br><br><b>Status:</b> ${status}<br><b>Length:</b> ${password.length} characters<br><br><b>Checks:</b><br>${longEnough ? "✅" : "❌"} 8+ characters<br>${hasLower ? "✅" : "❌"} Lowercase letters<br>${hasUpper ? "✅" : "❌"} Uppercase letters<br>${hasNumbers ? "✅" : "❌"} Numbers<br>${hasSymbols ? "✅" : "❌"} Symbols<br><br><b>Advice:</b> ${sanitize(advice)}`;
-}
-function clearPasswordCheckResult() {
-  passwordInput.value = "";
-  passwordCheckerResult.innerHTML = "Waiting for password input...";
-  lastPasswordCheckResult = "";
+
+  const advice = hasPredictablePattern
+    ? "Avoid repeated characters, keyboard sequences, and well-known weak examples. Choose a unique passphrase."
+    : length < 15
+      ? "Consider a longer, unique passphrase. NIST sets a 15-character minimum for passwords used as a single authentication factor; multi-factor contexts have a different minimum."
+      : "This length is a useful indicator, not proof of strength. Use a unique password and avoid reuse. This tool does not check breached-password databases.";
+
+  const observations = [
+    `Length: ${length} Unicode characters`,
+    `15+ characters: ${length >= 15 ? "Yes" : "No"}`,
+    `Lowercase letters present: ${hasLower ? "Yes" : "No"}`,
+    `Uppercase letters present: ${hasUpper ? "Yes" : "No"}`,
+    `Numbers present: ${hasNumbers ? "Yes" : "No"}`,
+    `Symbols present: ${hasSymbols ? "Yes" : "No"}`,
+    `Predictable pattern detected: ${hasPredictablePattern ? "Yes" : "No"}`
+  ];
+
+  lastPasswordCheckResult = `Password Quality Check\nAssessment: ${status}\n${observations.join("\n")}\nAdvice: ${advice}\nLimitations: Local heuristic only; no breach database lookup and no guarantee of account security.`;
+
+  passwordCheckerResult.innerHTML = `🔐 Password Quality Check<br><br><b>Assessment:</b> ${sanitize(status)}<br><b>Length:</b> ${length} Unicode characters<br><br><b>Observations (not a composition score):</b><br>${observations.slice(1, 6).map(item => sanitize(item)).join("<br>")}<br><br><b>Predictable pattern:</b> ${hasPredictablePattern ? "⚠ Detected" : "No listed pattern detected"}<br><br><b>Advice:</b> ${sanitize(advice)}<br><br><small>Local heuristic only. No breached-password database lookup; a positive result does not prove a password is safe.</small>`;
 }
 
+function clearPasswordCheckResult() {
+  passwordInput.value = "";
+  passwordCheckerResult.textContent = "Waiting for password input...";
+  lastPasswordCheckResult = "";
+}
 // ===== Password Generator Pro =====
 function secureRandomIndex(max) {
   if (!Number.isSafeInteger(max) || max < 1 || max > 256) {
