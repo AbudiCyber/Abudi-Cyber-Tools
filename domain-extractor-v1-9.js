@@ -31,10 +31,6 @@
     }
 
     const url = new URL(hasHttpScheme ? raw : "https://" + raw);
-    if (url.username || url.password) {
-      throw new Error("URL_CREDENTIALS_NOT_ALLOWED");
-    }
-
     const redactSensitiveParameters = value =>
       value.replace(
         /([?&#])(access_token|refresh_token|token|api[_-]?key|password|passwd|secret|sessionid|authorization)=([^&#]*)/gi,
