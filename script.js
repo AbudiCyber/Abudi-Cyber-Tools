@@ -321,7 +321,7 @@ function handleHashAlgorithmChange() {
 async function generateHash() {
   const requestId = ++hashRequestId;
   const input = hashInput.value;
-  if (!input.trim()) {
+  if (input.length === 0) {
     lastHashResult = "";
     hashResult.textContent = "⚠ Please enter text to hash first.";
     return;
