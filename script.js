@@ -955,6 +955,8 @@ bindClick("clearLinkAnalysisBtn", clearLinkAnalysisResult);
 bindClick("generateHashBtn", generateHash);
 bindClick("copyHashBtn", () => copyLogicalValue(lastHashResult, hashResult, "Hash copied."));
 bindClick("clearHashBtn", clearHashResult);
+hashInput.addEventListener("input", handleHashInputChange);
+hashType.addEventListener("change", handleHashAlgorithmChange);
 bindClick("encodeBtn", encodeBase64);
 bindClick("decodeBtn", decodeBase64);
 bindClick("copyBase64Btn", () => copyLogicalValue(lastBase64Result, base64Result, "Base64 result copied."));
