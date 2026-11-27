@@ -666,32 +666,43 @@ function showUrlCodecResult(mode, input, output) {
   lastUrlCodecResult = output;
   urlCodecResult.innerHTML = `🧩 URL ${mode}<br><br><b>Input:</b><br>${codeBlock(input)}<br><br><b>Result:</b><br>${codeBlock(output)}`;
 }
+
 function encodeUrlValue() {
-  const input = urlCodecInput.value.trim();
-  if (!input) {
-    urlCodecResult.innerHTML = "⚠ Please enter text or URL to encode first.";
+  // encodeURIComponent treats whitespace as content; preserve it exactly.
+  const input = urlCodecInput.value;
+  if (input.length === 0) {
+    urlCodecResult.textContent = "⚠ Please enter text or URL to encode first.";
     lastUrlCodecResult = "";
     return;
   }
-  try { showUrlCodecResult("Encoded", input, encodeURIComponent(input)); }
-  catch { urlCodecResult.innerHTML = "❌ Could not encode this value."; lastUrlCodecResult = ""; }
-}
-function decodeUrlValue() {
-  const input = urlCodecInput.value.trim();
-  if (!input) {
-    urlCodecResult.innerHTML = "⚠ Please enter encoded URL text to decode first.";
+  try {
+    showUrlCodecResult("Encoded", input, encodeURIComponent(input));
+  } catch {
+    urlCodecResult.textContent = "❌ Could not encode this value. Check for malformed Unicode input.";
     lastUrlCodecResult = "";
-    return;
   }
-  try { showUrlCodecResult("Decoded", input, decodeURIComponent(input)); }
-  catch { urlCodecResult.innerHTML = "❌ Invalid encoded URL text."; lastUrlCodecResult = ""; }
-}
-function clearUrlCodecResult() {
-  urlCodecInput.value = "";
-  urlCodecResult.innerHTML = "Waiting for URL encode/decode input...";
-  lastUrlCodecResult = "";
 }
 
+function decodeUrlValue() {
+  const input = urlCodecInput.value;
+  if (!input.trim()) {
+    urlCodecResult.textContent = "⚠ Please enter encoded URL text to decode first.";
+    lastUrlCodecResult = "";
+    return;
+  }
+  try {
+    showUrlCodecResult("Decoded", input, decodeURIComponent(input));
+  } catch {
+    urlCodecResult.textContent = "❌ Invalid percent-encoded URL text.";
+    lastUrlCodecResult = "";
+  }
+}
+
+function clearUrlCodecResult() {
+  urlCodecInput.value = "";
+  urlCodecResult.textContent = "Waiting for URL encode/decode input...";
+  lastUrlCodecResult = "";
+}
 // ===== IP Analyzer Pro =====
 function isValidIPv4(ip) {
   if (typeof ip !== "string") return false;
