@@ -76,6 +76,11 @@ passwordField.value = "🛡".repeat(15);
 checkButton.click();
 assert.match(window.document.getElementById("passwordCheckerResult").textContent, /15 Unicode characters/);
 
+passwordField.value = "abcdefghijklmno";
+checkButton.click();
+assert.match(window.document.getElementById("passwordCheckerResult").textContent, /15\+ characters \(length indicator only\)/);
+assert.doesNotMatch(window.document.getElementById("passwordCheckerResult").textContent, /Strong Password/);
+
 passwordField.value = "LongUniquePassphraseExample";
 checkButton.click();
 assert.ok(window.eval("lastPasswordCheckResult").length > 0);
