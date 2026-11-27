@@ -691,69 +691,159 @@ function clearIpAnalysisResult() {
 // ===== File Hash Checker Pro =====
 const FILE_HASH_MAX_BYTES = 100 * 1024 * 1024;
 const RISKY_FILE_EXTENSIONS = new Set(["exe", "msi", "apk", "bat", "cmd", "sh", "ps1", "vbs", "js", "jar", "scr", "com", "dll", "deb", "rpm", "dmg", "pkg", "app", "run"]);
+let fileHashRequestId = 0;
+
 function getFileExtension(fileName) {
   const name = String(fileName || "").toLowerCase();
   const dotIndex = name.lastIndexOf(".");
-  if (dotIndex === -1 || dotIndex === name.length - 1) return "";
+  if (dotIndex <= 0 || dotIndex === name.length - 1) return "";
   return name.slice(dotIndex + 1);
 }
+
 function getFileSecurityNote(file) {
   const extension = getFileExtension(file.name);
-  if (RISKY_FILE_EXTENSIONS.has(extension)) return { icon: "⚠️", title: "Potentially risky file type", message: "This file type can be dangerous if opened. Abudi only generates its hash and does not execute it." };
-  return { icon: "🛡️", title: "Local-only hash analysis", message: "This file is processed inside your browser. It is not uploaded and not executed." };
+  if (RISKY_FILE_EXTENSIONS.has(extension)) {
+    return {
+      icon: "⚠️",
+      title: "Potentially risky file type",
+      message: "This file type can be dangerous if opened. Abudi only generates its hash and does not execute it."
+    };
+  }
+  return {
+    icon: "🛡️",
+    title: "Local-only hash analysis",
+    message: "This file is processed inside your browser. It is not uploaded and not executed."
+  };
 }
+
+function sanitizeDownloadFileName(fileName) {
+  const safeName = String(fileName || "")
+    .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "_")
+    .replace(/[. ]+$/g, "")
+    .trim()
+    .slice(0, 120);
+  return safeName || "file";
+}
+
+function invalidateFileHashRequest() {
+  fileHashRequestId += 1;
+  lastFileHash = "";
+  lastFileName = "";
+  lastFileReport = "";
+}
+
+function handleFileHashSelectionChange() {
+  invalidateFileHashRequest();
+  fileHashResult.innerHTML = fileHashInput.files && fileHashInput.files.length
+    ? "File selection changed. Generate a new hash to continue."
+    : "Waiting for file input...";
+}
+
 async function generateFileHash() {
-  const file = fileHashInput.files[0];
+  const requestId = ++fileHashRequestId;
+  const file = fileHashInput.files && fileHashInput.files[0];
+
+  // Never leave a previous file's hash available while a new request is running.
+  lastFileHash = "";
+  lastFileName = "";
+  lastFileReport = "";
+
   if (!file) {
     fileHashResult.innerHTML = "⚠ Please choose a file first.";
-    lastFileHash = ""; lastFileName = ""; lastFileReport = "";
     return;
   }
-  if (file.size > FILE_HASH_MAX_BYTES) {
-    fileHashResult.innerHTML = `⚠ File is too large.<br><br><b>Maximum supported size:</b> ${formatFileSize(FILE_HASH_MAX_BYTES)}<br><b>Your file size:</b> ${formatFileSize(file.size)}<br><br>🛡️ Size limits prevent browser freezing and keep the tool stable on mobile.`;
-    lastFileHash = ""; lastFileName = ""; lastFileReport = "";
+
+  if (!Number.isFinite(file.size) || file.size < 0 || file.size > FILE_HASH_MAX_BYTES) {
+    fileHashResult.innerHTML = `⚠ File is too large or has an invalid size.<br><br><b>Maximum supported size:</b> ${formatFileSize(FILE_HASH_MAX_BYTES)}<br><b>Your file size:</b> ${formatFileSize(file.size)}<br><br>🛡️ The limit helps reduce memory pressure and browser instability, especially on mobile devices.`;
     return;
   }
+
+  const cryptoApi = globalThis.crypto;
+  if (!cryptoApi || !cryptoApi.subtle || typeof cryptoApi.subtle.digest !== "function") {
+    fileHashResult.innerHTML = "❌ SHA-256 is unavailable in this browser context. Open Abudi over HTTPS or use a browser that supports Web Crypto.";
+    return;
+  }
+  if (typeof file.arrayBuffer !== "function") {
+    fileHashResult.innerHTML = "❌ This browser cannot read the selected file. Try a current browser.";
+    return;
+  }
+
   try {
     fileHashResult.innerHTML = "⏳ Generating SHA-256 locally...";
     const buffer = await file.arrayBuffer();
-    const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
-    const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+    if (requestId !== fileHashRequestId) return;
+
+    const hashBuffer = await cryptoApi.subtle.digest("SHA-256", buffer);
+    if (requestId !== fileHashRequestId) return;
+
+    const hashBytes = new Uint8Array(hashBuffer);
+    if (hashBytes.length !== 32) {
+      throw new Error("Unexpected SHA-256 digest length");
+    }
+    const hashHex = Array.from(hashBytes).map(byte => byte.toString(16).padStart(2, "0")).join("");
     const securityNote = getFileSecurityNote(file);
     const fileType = file.type || "Unknown";
     const fileSizeFormatted = formatFileSize(file.size);
     const lastModified = formatDate(file.lastModified);
+
     lastFileHash = hashHex;
     lastFileName = file.name;
-    lastFileReport = `File Hash Report\nGenerated: ${new Date().toLocaleString()}\nFile Name: ${file.name}\nFile Type: ${fileType}\nFile Size: ${fileSizeFormatted} (${file.size} bytes)\nLast Modified: ${lastModified}\nSHA-256: ${hashHex}\n\nSecurity Notes:\n- The file was processed locally in the browser.\n- The file was not uploaded.\n- The file was not executed.\n- This tool generates a hash only; it does not claim the file is virus-free.\n- Security warning: ${securityNote.title} - ${securityNote.message}`;
+    lastFileReport = `File Hash Report
+Generated: ${new Date().toLocaleString()}
+File Name: ${file.name}
+File Type: ${fileType}
+File Size: ${fileSizeFormatted} (${file.size} bytes)
+Last Modified: ${lastModified}
+SHA-256: ${hashHex}
+
+Security Notes:
+- The file was processed locally in the browser.
+- The file was not uploaded.
+- The file was not executed.
+- This tool generates a hash only; it does not claim the file is virus-free.
+- Security warning: ${securityNote.title} - ${securityNote.message}`;
+
     fileHashResult.innerHTML = `📂 File Hash<br><br><b>File Name:</b> ${sanitize(file.name)}<br><b>File Type:</b> ${sanitize(fileType)}<br><b>File Size:</b> ${sanitize(fileSizeFormatted)} (${file.size} bytes)<br><b>Last Modified:</b> ${sanitize(lastModified)}<br><br>${securityNote.icon} <b>${sanitize(securityNote.title)}:</b> ${sanitize(securityNote.message)}<br><br>🛡️ <b>Privacy:</b> Local-only. The file is not uploaded and not executed.<br>⚠️ <b>Important:</b> Hash generated successfully, but this is not an antivirus scan and does not prove the file is safe.<br><br><b>SHA-256:</b><br><br>${codeBlock(hashHex)}`;
   } catch {
-    fileHashResult.innerHTML = "❌ Failed to generate file hash.";
-    lastFileHash = ""; lastFileName = ""; lastFileReport = "";
+    if (requestId !== fileHashRequestId) return;
+    fileHashResult.innerHTML = "❌ Failed to generate file hash. The file could not be read or the browser's cryptographic operation failed.";
+    lastFileHash = "";
+    lastFileName = "";
+    lastFileReport = "";
   }
 }
+
 function downloadReport() {
   if (!lastFileReport || !lastFileName) {
     fileHashResult.innerHTML += "<br><br>⚠ No report to download. Generate a file hash first.";
     return;
   }
-  const blob = new Blob([lastFileReport], { type: "text/plain" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${lastFileName}_hash_report.txt`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  fileHashResult.innerHTML += "<br><br>✅ Report downloaded.";
-}
-function clearFileHashResult() {
-  fileHashResult.innerHTML = "Waiting for file input...";
-  lastFileHash = ""; lastFileName = ""; lastFileReport = "";
-  fileHashInput.value = "";
+
+  let objectUrl = "";
+  try {
+    const blob = new Blob([lastFileReport], { type: "text/plain;charset=utf-8" });
+    objectUrl = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = objectUrl;
+    anchor.download = `${sanitizeDownloadFileName(lastFileName)}_hash_report.txt`;
+    anchor.hidden = true;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    // Delay revocation so browsers have time to begin the download.
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    fileHashResult.innerHTML += "<br><br>✅ Report download started.";
+  } catch {
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+    fileHashResult.innerHTML += "<br><br>❌ Report download failed in this browser.";
+  }
 }
 
+function clearFileHashResult() {
+  invalidateFileHashRequest();
+  fileHashResult.innerHTML = "Waiting for file input...";
+  fileHashInput.value = "";
+}
 // ===== Search / Categories =====
 function initToolNavigation() {
   const searchInput = $("toolSearch");
