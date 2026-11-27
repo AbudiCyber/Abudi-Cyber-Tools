@@ -55,3 +55,6 @@ jobs:
 
       - name: Run text analyzer Unicode regression test
         run: npm run test:text-analyzer
+
+      - name: Run Base64 data integrity regression test
+        run: npm run test:base64-integrity
