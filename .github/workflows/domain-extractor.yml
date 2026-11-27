@@ -40,3 +40,6 @@ jobs:
 
       - name: Run IP analyzer regression test
         run: npm run test:ip-analyzer
+
+      - name: Run file hash checker regression test
+        run: npm run test:file-hash-checker
