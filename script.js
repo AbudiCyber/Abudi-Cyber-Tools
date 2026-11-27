@@ -299,7 +299,6 @@ function clearLinkAnalysisResult() {
 }
 
 // ===== Hash Generator Pro =====
-// ===== Hash Generator Pro =====
 const HASH_GENERATOR_MAX_BYTES = 1024 * 1024;
 const HASH_GENERATOR_ALGORITHMS = new Set(["SHA-1", "SHA-256"]);
 let hashRequestId = 0;
@@ -351,10 +350,14 @@ async function generateHash() {
     const hashBuffer = await cryptoApi.subtle.digest(algorithm, data);
     if (requestId !== hashRequestId) return;
 
-    const hashHex = Array.from(new Uint8Array(hashBuffer))
+    const hashBytes = new Uint8Array(hashBuffer);
+    const expectedDigestBytes = algorithm === "SHA-1" ? 20 : 32;
+    if (hashBytes.byteLength !== expectedDigestBytes) {
+      throw new Error("Unexpected digest length");
+    }
+    const hashHex = Array.from(hashBytes)
       .map(byte => byte.toString(16).padStart(2, "0"))
       .join("");
-    if (!hashHex) throw new Error("Empty digest returned");
 
     lastHashResult = hashHex;
     hashResult.innerHTML = `🔐 Hash Generated<br><br><b>Algorithm:</b> ${sanitize(algorithm)}<br><b>Input Length:</b> ${Array.from(input).length} characters<br><b>Input Size:</b> ${data.byteLength} UTF-8 bytes<br><br><b>Hash:</b><br><br>${codeBlock(hashHex)}`;
