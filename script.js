@@ -126,6 +126,7 @@ async function copyLogicalValue(value, resultBox, successMessage) {
 function analyzeText() {
   // Preserve the exact input: leading/trailing whitespace and line breaks are data.
   const rawText = textInput.value;
+  textAnalyzerResult.style.whiteSpace = "pre-line";
   if (!rawText.trim()) {
     textAnalyzerResult.textContent = "⚠ Please enter text first.";
     lastTextAnalysisResult = "";
@@ -135,7 +136,7 @@ function analyzeText() {
   // Bound analysis by Unicode code points to avoid UTF-16 surrogate-pair surprises.
   const codePoints = Array.from(rawText);
   if (codePoints.length > 5000) {
-    textAnalyzerResult.textContent = "⚠ Text is too long. Maximum supported length is 5000 Unicode characters.";
+    textAnalyzerResult.textContent = "⚠ Text is too long. Maximum supported length is 5000 Unicode code points.";
     lastTextAnalysisResult = "";
     return;
   }
