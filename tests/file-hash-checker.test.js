@@ -49,22 +49,22 @@ async function main() {
       }
     });
 
-    window.eval(script);
+    window.eval(script + `\nwindow.__testState = () => ({ lastFileHash, lastFileName, lastFileReport, maxBytes: FILE_HASH_MAX_BYTES });`);
 
     setSelectedFile(input, makeFile("sample.txt", "abc"));
     await window.generateFileHash();
-    assert.equal(window.eval("lastFileHash"), expectedHash, "SHA-256 must match the known test vector.");
+    assert.equal(window.__testState().lastFileHash, expectedHash, "SHA-256 must match the known test vector.");
     assert.match(result.textContent, /Local-only hash analysis/);
     assert.match(result.textContent, /not an antivirus scan/i);
-    assert.equal(window.eval("lastFileName"), "sample.txt");
-    assert.match(window.eval("lastFileReport"), new RegExp(expectedHash));
+    assert.equal(window.__testState().lastFileName, "sample.txt");
+    assert.match(window.__testState().lastFileReport, new RegExp(expectedHash));
 
     setSelectedFile(input, makeFile("<img src=x onerror=alert(1)>.exe", "payload"));
     await window.generateFileHash();
     assert.equal(result.querySelector("img"), null, "Untrusted file names must not create HTML elements.");
     assert.match(result.textContent, /Potentially risky file type/);
     assert.match(result.textContent, /&lt;img|img src=x/);
-    assert.equal(window.eval("lastFileHash").length, 64);
+    assert.equal(window.__testState().lastFileHash.length, 64);
 
     assert.equal(window.sanitizeDownloadFileName("..\\evil/name?.exe"), "_evil_name_.exe");
     assert.equal(window.sanitizeDownloadFileName("   "), "file");
@@ -91,20 +91,20 @@ async function main() {
     setSelectedFile(input, {
       name: "oversized.bin",
       type: "application/octet-stream",
-      size: window.eval("FILE_HASH_MAX_BYTES") + 1,
+      size: window.__testState().maxBytes + 1,
       lastModified: 0,
       arrayBuffer: async () => { throw new Error("must not read oversized files"); }
     });
     await window.generateFileHash();
     assert.match(result.textContent, /too large/i);
-    assert.equal(window.eval("lastFileHash"), "");
+    assert.equal(window.__testState().lastFileHash, "");
 
     const originalSubtle = window.crypto.subtle;
     Object.defineProperty(window.crypto, "subtle", { configurable: true, value: undefined });
     setSelectedFile(input, makeFile("unsupported.txt", "x"));
     await window.generateFileHash();
     assert.match(result.textContent, /unavailable in this browser context/i);
-    assert.equal(window.eval("lastFileHash"), "");
+    assert.equal(window.__testState().lastFileHash, "");
     Object.defineProperty(window.crypto, "subtle", { configurable: true, value: originalSubtle });
 
     let resolveArrayBuffer;
@@ -123,8 +123,8 @@ async function main() {
       slowBytes.byteOffset + slowBytes.byteLength
     ));
     await pending;
-    assert.equal(window.eval("lastFileHash"), "", "Clearing must invalidate an in-flight hash operation.");
-    assert.equal(window.eval("lastFileName"), "");
+    assert.equal(window.__testState().lastFileHash, "", "Clearing must invalidate an in-flight hash operation.");
+    assert.equal(window.__testState().lastFileName, "");
     assert.match(result.textContent, /Waiting for file input/);
 
     setSelectedFile(input, makeFile("change.txt", "first"));
@@ -132,7 +132,7 @@ async function main() {
     setSelectedFile(input, makeFile("new-selection.txt", "second"));
     input.dispatchEvent(new window.Event("change"));
     await pendingOnChange;
-    assert.equal(window.eval("lastFileHash"), "", "Changing selection must invalidate an in-flight hash operation.");
+    assert.equal(window.__testState().lastFileHash, "", "Changing selection must invalidate an in-flight hash operation.");
     assert.match(result.textContent, /selection changed/i);
 
     setSelectedFile(input, null);
