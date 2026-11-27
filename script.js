@@ -719,6 +719,7 @@ function getFileSecurityNote(file) {
 function sanitizeDownloadFileName(fileName) {
   const safeName = String(fileName || "")
     .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "_")
+    .replace(/^[. ]+/, "")
     .replace(/[. ]+$/g, "")
     .trim()
     .slice(0, 120);
