@@ -49,3 +49,6 @@ jobs:
 
       - name: Run email format checker regression test
         run: npm run test:email-validator
+
+      - name: Run link analyzer scope regression test
+        run: npm run test:link-analyzer

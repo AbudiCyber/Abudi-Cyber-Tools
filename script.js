@@ -321,42 +321,87 @@ function clearPasswordResult() {
 function analyzeLink() {
   const input = linkInput.value.trim();
   if (!input) {
-    linkAnalyzerResult.innerHTML = "⚠ Please enter a URL or domain first.";
+    linkAnalyzerResult.textContent = "⚠ Please enter a URL or domain first.";
     lastLinkAnalysisResult = "";
     return;
   }
+
   try {
-    const normalizedInput = input.startsWith("http://") || input.startsWith("https://") ? input : "https://" + input;
+    const isHttpUrl = /^https?:\/\//i.test(input);
+    const isBareHostWithPort = /^[^/:?#\s]+:\d+(?:[/?#]|$)/.test(input);
+    const hasExplicitScheme = /^[a-z][a-z0-9+.-]*:/i.test(input) && !isBareHostWithPort;
+    if (hasExplicitScheme && !isHttpUrl) {
+      throw new Error("UNSUPPORTED_URL_SCHEME");
+    }
+
+    const normalizedInput = isHttpUrl ? input : "https://" + input;
     const parsed = new URL(normalizedInput);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      throw new Error("UNSUPPORTED_URL_SCHEME");
+    }
+    if (!parsed.hostname) {
+      throw new Error("MISSING_HOSTNAME");
+    }
+
     const hostname = parsed.hostname;
     const protocol = parsed.protocol;
     const path = parsed.pathname || "/";
     const query = parsed.search || "None";
     const isHttps = protocol === "https:";
-    const suspiciousKeywords = ["login", "verify", "update", "secure", "account", "bank", "free", "gift", "password", "wallet"];
+    const suspiciousKeywords = ["login", "verify", "update", "account", "bank", "free", "gift", "password", "wallet"];
     const hasSuspiciousKeyword = suspiciousKeywords.some(keyword => normalizedInput.toLowerCase().includes(keyword));
-    const hasAtSymbol = normalizedInput.includes("@");
+    const hasCredentials = Boolean(parsed.username || parsed.password);
     const hasLongHost = hostname.length > 40;
     const hasManySubdomains = hostname.split(".").length > 4;
-    let riskLevel = "✅ Safe-looking Link";
-    let advice = "The link structure looks normal. Still verify the source before opening sensitive pages.";
-    if (!isHttps || hasAtSymbol || hasSuspiciousKeyword || hasLongHost || hasManySubdomains) {
-      riskLevel = "⚠ Suspicious Link";
-      advice = "Review the URL carefully before opening it, especially if it asks for login, payment, or personal data.";
-    }
-    lastLinkAnalysisResult = `Link Analysis\nStatus: ${riskLevel}\nOriginal Input: ${input}\nNormalized URL: ${parsed.href}\nProtocol: ${protocol}\nHostname: ${hostname}\nPath: ${path}\nQuery: ${query}\nHTTPS: ${isHttps ? "Yes" : "No"}\nSuspicious Keyword: ${hasSuspiciousKeyword ? "Yes" : "No"}\n@ Symbol: ${hasAtSymbol ? "Yes" : "No"}\nLong Hostname: ${hasLongHost ? "Yes" : "No"}\nMany Subdomains: ${hasManySubdomains ? "Yes" : "No"}\nAdvice: ${advice}`;
-    linkAnalyzerResult.innerHTML = `🔗 Link Analysis<br><br><b>Status:</b> ${riskLevel}<br><b>Original Input:</b> ${sanitize(input)}<br><b>Normalized URL:</b> ${sanitize(parsed.href)}<br><b>Protocol:</b> ${sanitize(protocol)}<br><b>Hostname:</b> ${sanitize(hostname)}<br><b>Path:</b> ${sanitize(path)}<br><b>Query:</b> ${sanitize(query)}<br><br><b>Checks:</b><br>${isHttps ? "✅" : "❌"} HTTPS<br>${hasSuspiciousKeyword ? "⚠" : "✅"} Suspicious keywords<br>${hasAtSymbol ? "⚠" : "✅"} @ symbol check<br>${hasLongHost ? "⚠" : "✅"} Hostname length<br>${hasManySubdomains ? "⚠" : "✅"} Subdomain count<br><br><b>Advice:</b> ${sanitize(advice)}`;
+    const hasSingleLabelHost = !hostname.includes(".");
+    const hasNonStandardPort = Boolean(parsed.port);
+    const flags = [
+      !isHttps,
+      hasCredentials,
+      hasSuspiciousKeyword,
+      hasLongHost,
+      hasManySubdomains,
+      hasSingleLabelHost,
+      hasNonStandardPort
+    ];
+    const hasIndicators = flags.some(Boolean);
+    const riskLevel = hasIndicators
+      ? "⚠ Potentially suspicious indicators"
+      : "ℹ No obvious heuristic indicators";
+    const advice = hasIndicators
+      ? "Review the address carefully. These are structural heuristics, not a malware or reputation verdict."
+      : "No listed structural indicators were detected. This does not establish that the destination is trustworthy or safe.";
+
+    lastLinkAnalysisResult = `Link Analysis
+Assessment: ${riskLevel}
+Original Input: ${input}
+Normalized URL: ${parsed.href}
+Protocol: ${protocol}
+Hostname: ${hostname}
+Path: ${path}
+Query: ${query}
+HTTPS: ${isHttps ? "Yes" : "No"}
+Embedded Credentials: ${hasCredentials ? "Yes" : "No"}
+Suspicious Keywords: ${hasSuspiciousKeyword ? "Yes" : "No"}
+Long Hostname: ${hasLongHost ? "Yes" : "No"}
+Many Subdomains: ${hasManySubdomains ? "Yes" : "No"}
+Single-label Host: ${hasSingleLabelHost ? "Yes" : "No"}
+Non-standard Port: ${hasNonStandardPort ? "Yes" : "No"}
+Advice: ${advice}
+Limitations: No DNS, redirect, content, malware, or domain-reputation lookup.`;
+
+    linkAnalyzerResult.innerHTML = `🔗 Link Analysis<br><br><b>Assessment:</b> ${sanitize(riskLevel)}<br><b>Original Input:</b> ${sanitize(input)}<br><b>Normalized URL:</b> ${sanitize(parsed.href)}<br><b>Protocol:</b> ${sanitize(protocol)}<br><b>Hostname:</b> ${sanitize(hostname)}<br><b>Path:</b> ${sanitize(path)}<br><b>Query:</b> ${sanitize(query)}<br><br><b>Structural checks:</b><br>${isHttps ? "✅" : "⚠"} HTTPS<br>${hasCredentials ? "⚠" : "✅"} Embedded credentials<br>${hasSuspiciousKeyword ? "⚠" : "✅"} Suspicious keywords<br>${hasLongHost ? "⚠" : "✅"} Hostname length<br>${hasManySubdomains ? "⚠" : "✅"} Subdomain count<br>${hasSingleLabelHost ? "⚠" : "✅"} Single-label hostname<br>${hasNonStandardPort ? "⚠" : "✅"} Non-standard port<br><br><b>Advice:</b> ${sanitize(advice)}<br><br><small>Heuristic only. No DNS, redirect, page-content, malware, or domain-reputation lookup. No result proves a URL is safe.</small>`;
   } catch {
-    linkAnalyzerResult.innerHTML = "❌ Invalid URL or domain.";
+    linkAnalyzerResult.textContent = "❌ Invalid URL or unsupported URL scheme. Only HTTP and HTTPS links are supported.";
     lastLinkAnalysisResult = "";
   }
 }
+
 function clearLinkAnalysisResult() {
   linkInput.value = "";
-  linkAnalyzerResult.innerHTML = "Waiting for link input...";
+  linkAnalyzerResult.textContent = "Waiting for link input...";
   lastLinkAnalysisResult = "";
 }
-
 // ===== Hash Generator Pro =====
 const HASH_GENERATOR_MAX_BYTES = 1024 * 1024;
 const HASH_GENERATOR_ALGORITHMS = new Set(["SHA-1", "SHA-256"]);
