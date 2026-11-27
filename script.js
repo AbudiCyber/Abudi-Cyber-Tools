@@ -716,6 +716,14 @@ function getFileSecurityNote(file) {
   };
 }
 
+function sanitizeReportField(value) {
+  return String(value == null ? "" : value)
+    .replace(/[\u0000-\u001F\u007F]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 255);
+}
+
 function sanitizeDownloadFileName(fileName) {
   const safeName = String(fileName || "")
     .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "_")
