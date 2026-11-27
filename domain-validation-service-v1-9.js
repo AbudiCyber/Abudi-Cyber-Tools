@@ -29,14 +29,14 @@
     if (
       !normalizedValue ||
       normalizedValue.includes("\\") ||
-      /[\\x00-\\x1F\\x7F]/.test(normalizedValue)
+      /[\x00-\x1F\x7F]/.test(normalizedValue)
     ) {
       return createInvalidResult(normalizedValue);
     }
 
     const hasHttpScheme = /^https?:\/\//i.test(normalizedValue);
+    const looksLikeHostPort =
       /^(?:localhost|[^:/?#.]+(?:\.[^:/?#.]+)+|\[[0-9a-f:.]+\]):\d+(?:[/?#]|$)/i.test(normalizedValue);
-      /^(?:localhost|[^:/?#.]+(?:\\.[^:/?#.]+)+|\\[[0-9a-f:.]+\\]):\\d+(?:[/?#]|$)/i.test(normalizedValue);
     const hasExplicitScheme = /^[a-z][a-z\d+.-]*:/i.test(normalizedValue);
 
     if (hasExplicitScheme && !hasHttpScheme && !looksLikeHostPort) {
