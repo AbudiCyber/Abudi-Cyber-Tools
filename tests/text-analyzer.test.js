@@ -52,7 +52,7 @@ try {
 
   input.value = "x".repeat(5001);
   window.analyzeText();
-  assert.match(result.textContent, /Maximum supported length is 5000 Unicode characters/);
+  assert.match(result.textContent, /Maximum supported length is 5000 Unicode code points/);
   assert.equal(window.__textState(), "");
 
   input.value = '<img src=x onerror="alert(1)">';
