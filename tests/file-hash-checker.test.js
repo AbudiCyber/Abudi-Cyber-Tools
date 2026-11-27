@@ -121,7 +121,7 @@ async function main() {
     originalSubtle.digest = () => new Promise(resolve => { resolveDigest = resolve; });
     setSelectedFile(input, makeFile("slow-digest.txt", "digest"));
     const pendingDigest = window.generateFileHash();
-    await Promise.resolve();
+    await new Promise(resolve => setImmediate(resolve));
     assert.equal(typeof resolveDigest, "function", "Digest operation should have started.");
     window.clearFileHashResult();
     resolveDigest(Uint8Array.from(Buffer.alloc(32, 7)).buffer);
