@@ -799,8 +799,8 @@ async function generateFileHash() {
     lastFileName = file.name;
     lastFileReport = `File Hash Report
 Generated: ${new Date().toLocaleString()}
-File Name: ${file.name}
-File Type: ${fileType}
+File Name: ${sanitizeReportField(file.name)}
+File Type: ${sanitizeReportField(fileType)}
 File Size: ${fileSizeFormatted} (${file.size} bytes)
 Last Modified: ${lastModified}
 SHA-256: ${hashHex}
