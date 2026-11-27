@@ -513,7 +513,7 @@ function inspectEmailAddress(email) {
 
   const labels = asciiDomain.split(".");
   if (
-    /^(?:\\d{1,3}\\.){3}\\d{1,3}$/.test(asciiDomain) ||
+    /^(?:\d{1,3}\.){3}\d{1,3}$/.test(asciiDomain) ||
     labels.length < 2 ||
     labels.some(label =>
       label.length < 1 ||
