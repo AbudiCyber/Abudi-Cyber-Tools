@@ -922,5 +922,6 @@ bindClick("generateFileHashBtn", generateFileHash);
 bindClick("copyFileHashBtn", () => copyLogicalValue(lastFileHash, fileHashResult, "SHA-256 copied."));
 bindClick("downloadReportBtn", downloadReport);
 bindClick("clearFileHashBtn", clearFileHashResult);
+fileHashInput.addEventListener("change", handleFileHashSelectionChange);
 
 initToolNavigation();
