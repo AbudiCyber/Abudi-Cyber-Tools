@@ -52,3 +52,6 @@ jobs:
 
       - name: Run link analyzer scope regression test
         run: npm run test:link-analyzer
+
+      - name: Run text analyzer Unicode regression test
+        run: npm run test:text-analyzer
