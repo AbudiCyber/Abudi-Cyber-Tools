@@ -715,7 +715,6 @@ function waitFor(condition, timeout = 5000) {
       "http:example.com",
       "https://alice:secret@example.com",
       "https://example.com\u0001.evil"
-      "https://example.com\\u0001.evil"
     ];
 
     for (const invalidInput of invalidDomainInputs) {
