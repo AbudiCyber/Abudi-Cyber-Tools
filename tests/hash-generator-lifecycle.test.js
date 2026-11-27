@@ -22,8 +22,9 @@ async function main() {
       configurable: true,
       value: {
         digest: async (name, data) => {
-          assert.equal(name, "SHA-256");
-          return Uint8Array.from(createHash("sha256").update(Buffer.from(data)).digest()).buffer;
+          const nodeAlgorithm = { "SHA-1": "sha1", "SHA-256": "sha256" }[name];
+          assert.ok(nodeAlgorithm, "Only the supported algorithms should reach Web Crypto.");
+          return Uint8Array.from(createHash(nodeAlgorithm).update(Buffer.from(data)).digest()).buffer;
         }
       }
     });
