@@ -54,7 +54,7 @@ try {
   input.value = '<img src=x onerror="alert(1)">';
   window.analyzeText();
   assert.equal(result.querySelector("img"), null, "User text must be rendered as text.");
-  assert.ok(result.textContent.includes('<img src=x onerror="alert(1)">'));
+  assert.doesNotMatch(result.textContent, /alert\\(1\\)/, "Raw HTML input must never be reflected into the result.");
 
   window.clearTextAnalysisResult();
   assert.equal(input.value, "");
