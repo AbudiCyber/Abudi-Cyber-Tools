@@ -37,3 +37,6 @@ jobs:
 
       - name: Run output escaping regression test
         run: npm run test:output-escaping
+
+      - name: Run IP analyzer regression test
+        run: npm run test:ip-analyzer
