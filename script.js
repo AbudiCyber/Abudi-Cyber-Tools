@@ -328,7 +328,7 @@ function analyzeLink() {
 
   try {
     const isHttpUrl = /^https?:\/\//i.test(input);
-    const isBareHostWithPort = /^[^/:?#\\s]+:\\d+(?:[/?#]|$)/.test(input);
+    const isBareHostWithPort = /^[^/:?#\s]+:\d+(?:[/?#]|$)/.test(input);
     const hasExplicitScheme = /^[a-z][a-z0-9+.-]*:/i.test(input) && !isBareHostWithPort;
     if (hasExplicitScheme && !isHttpUrl) {
       throw new Error("UNSUPPORTED_URL_SCHEME");
