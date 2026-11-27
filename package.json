@@ -13,7 +13,8 @@
     "test:link-analyzer": "node tests/link-analyzer.test.js",
     "test:text-analyzer": "node tests/text-analyzer.test.js",
     "test:base64-integrity": "node tests/base64-integrity.test.js",
-    "test:url-codec-integrity": "node tests/url-codec-integrity.test.js"
+    "test:url-codec-integrity": "node tests/url-codec-integrity.test.js",
+    "test:url-parser-security": "node tests/url-parser-security.test.js"
   },
   "devDependencies": {
     "jsdom": "26.1.0"

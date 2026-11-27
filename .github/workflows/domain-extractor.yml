@@ -61,3 +61,6 @@ jobs:
 
       - name: Run URL codec data integrity regression test
         run: npm run test:url-codec-integrity
+
+      - name: Run URL parser security regression test
+        run: npm run test:url-parser-security
