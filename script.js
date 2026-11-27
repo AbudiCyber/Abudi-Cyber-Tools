@@ -143,7 +143,7 @@ function analyzeText() {
   const characters = codePoints.length;
   const words = rawText.trim().split(/\s+/u).length;
   const numbers = (rawText.match(/\p{N}/gu) || []).length;
-  const symbols = (rawText.match(/[^\p{L}\p{N}\s]/gu) || []).length;
+  const symbols = (rawText.match(/[\p{P}\p{S}]/gu) || []).length;
   const lines = rawText.split(/\r\n|\r|\n/).length;
   const spaces = (rawText.match(/\s/gu) || []).length;
 
