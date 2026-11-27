@@ -64,11 +64,11 @@ passwordField.value = "aaaaaaaaaaaaaaaa";
 checkButton.click();
 assert.match(window.document.getElementById("passwordCheckerResult").textContent, /Predictable pattern detected/);
 
-passwordField.value = "a".repeat(14);
+passwordField.value = "UniquePassWord";
 checkButton.click();
 assert.match(window.document.getElementById("passwordCheckerResult").textContent, /Below 15-character single-factor benchmark/);
 
-passwordField.value = "a".repeat(15);
+passwordField.value = "UniquePassWord!";
 checkButton.click();
 assert.match(window.document.getElementById("passwordCheckerResult").textContent, /15\+ characters \(length indicator only\)/);
 
