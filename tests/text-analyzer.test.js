@@ -26,6 +26,10 @@ try {
   assert.match(result.textContent, /Characters: 3/);
   assert.match(result.textContent, /Symbols: 1/);
 
+  input.value = "مَرْحَبًا";
+  window.analyzeText();
+  assert.match(result.textContent, /Symbols: 0/);
+
   input.value = "١٢٣";
   window.analyzeText();
   assert.match(result.textContent, /Numbers: 3/);
