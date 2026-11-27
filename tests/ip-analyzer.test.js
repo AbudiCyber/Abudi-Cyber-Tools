@@ -158,6 +158,7 @@ try {
   analyzeButton.click();
   assert.match(result.textContent, /Invalid IP address/);
 
+  // Regression guard: Teredo is the full 2001::/32 prefix, not only 2001::/128.
   console.log("IP analyzer regression test: PASS");
 } finally {
   dom.window.close();
