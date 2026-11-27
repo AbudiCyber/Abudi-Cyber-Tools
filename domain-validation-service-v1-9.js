@@ -26,12 +26,25 @@
   function validateInput(value) {
     const normalizedValue = normalize(value);
 
-    if (!normalizedValue || normalizedValue.includes("\\")) {
+    if (
+      !normalizedValue ||
+      normalizedValue.includes("\\") ||
+      /[\\x00-\\x1F\\x7F]/.test(normalizedValue)
+    ) {
+      return createInvalidResult(normalizedValue);
+    }
+
+    const hasHttpScheme = /^https?:\\/\\//i.test(normalizedValue);
+    const looksLikeHostPort =
+      /^(?:localhost|[^:/?#.]+(?:\\.[^:/?#.]+)+|\\[[0-9a-f:.]+\\]):\\d+(?:[/?#]|$)/i.test(normalizedValue);
+    const hasExplicitScheme = /^[a-z][a-z\\d+.-]*:/i.test(normalizedValue);
+
+    if (hasExplicitScheme && !hasHttpScheme && !looksLikeHostPort) {
       return createInvalidResult(normalizedValue);
     }
 
     try {
-      const candidate = normalizedValue.includes("://")
+      const candidate = hasHttpScheme
         ? normalizedValue
         : "https://" + normalizedValue;
 
