@@ -444,33 +444,223 @@ function clearUrlCodecResult() {
 
 // ===== IP Analyzer Pro =====
 function isValidIPv4(ip) {
+  if (typeof ip !== "string") return false;
   const parts = ip.split(".");
-  return parts.length === 4 && parts.every(part => /^\d+$/.test(part) && !(part.length > 1 && part.startsWith("0")) && Number(part) >= 0 && Number(part) <= 255);
+  return parts.length === 4 && parts.every(part =>
+    /^\d+$/.test(part) &&
+    !(part.length > 1 && part.startsWith("0")) &&
+    Number(part) >= 0 &&
+    Number(part) <= 255
+  );
 }
+
+function parseIPv6(ip) {
+  if (typeof ip !== "string" || !ip || ip.includes("%") || ip.includes(":::")) {
+    return null;
+  }
+
+  let value = ip;
+
+  // IPv4-embedded IPv6 forms use the final 32 bits for a dotted-decimal address.
+  if (value.includes(".")) {
+    const lastColon = value.lastIndexOf(":");
+    if (lastColon < 0) return null;
+
+    const ipv4 = value.slice(lastColon + 1);
+    if (!isValidIPv4(ipv4)) return null;
+
+    const octets = ipv4.split(".").map(Number);
+    const high = ((octets[0] << 8) | octets[1]).toString(16);
+    const low = ((octets[2] << 8) | octets[3]).toString(16);
+    value = value.slice(0, lastColon) + ":" + high + ":" + low;
+  }
+
+  const compressionIndex = value.indexOf("::");
+  if (compressionIndex !== -1 && value.indexOf("::", compressionIndex + 2) !== -1) {
+    return null;
+  }
+
+  let groups;
+  if (compressionIndex === -1) {
+    groups = value.split(":");
+    if (groups.length !== 8) return null;
+  } else {
+    const leftText = value.slice(0, compressionIndex);
+    const rightText = value.slice(compressionIndex + 2);
+    const left = leftText ? leftText.split(":") : [];
+    const right = rightText ? rightText.split(":") : [];
+
+    if (left.some(group => !group) || right.some(group => !group)) return null;
+    const missingGroups = 8 - left.length - right.length;
+    if (missingGroups < 1) return null;
+    groups = [...left, ...Array(missingGroups).fill("0"), ...right];
+  }
+
+  if (
+    groups.length !== 8 ||
+    groups.some(group => !/^[0-9a-fA-F]{1,4}$/.test(group))
+  ) {
+    return null;
+  }
+
+  return groups.map(group => Number.parseInt(group, 16));
+}
+
 function isValidIPv6(ip) {
-  if (!ip || ip.includes(":::")) return false;
-  return /^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:)((:[0-9a-fA-F]{1,4}){1,6})|:(:[0-9a-fA-F]{1,4}){1,7}|::)$/.test(ip);
+  return parseIPv6(ip) !== null;
 }
+
 function classifyIPv4(ip) {
-  const [a, b, c] = ip.split(".").map(Number);
-  if (a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168)) return { scope: "Private", routable: "No", icon: "✅", note: "Used inside local networks." };
-  if (a === 127) return { scope: "Loopback", routable: "No", icon: "⚠", note: "Points back to the same device." };
-  if (a === 169 && b === 254) return { scope: "Link-local", routable: "No", icon: "⚠", note: "Automatic local address when DHCP fails." };
-  if (a >= 224 && a <= 239) return { scope: "Multicast", routable: "Special", icon: "⚠", note: "Used for multicast traffic." };
-  if (a === 100 && b >= 64 && b <= 127) return { scope: "Carrier-grade NAT", routable: "Limited", icon: "⚠", note: "Often used by ISPs for CGNAT." };
-  if ((a === 192 && b === 0 && c === 2) || (a === 198 && b === 51 && c === 100) || (a === 203 && b === 0 && c === 113)) return { scope: "Documentation", routable: "No", icon: "⚠", note: "Reserved for examples and documentation." };
-  if (a >= 240 || a === 0) return { scope: "Reserved", routable: "No", icon: "⚠", note: "Reserved special-use IPv4 range." };
-  return { scope: "Public", routable: "Yes", icon: "✅", note: "Public IP. GeoIP maps can be added later in v2." };
+  const [a, b, c, d] = ip.split(".").map(Number);
+
+  if (a === 255 && b === 255 && c === 255 && d === 255) {
+    return { scope: "Limited broadcast", routable: "No", icon: "⚠", note: "Limited broadcast address; not a unicast destination." };
+  }
+  if (a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168)) {
+    return { scope: "Private", routable: "No", icon: "✅", note: "Private-use address for internal networks." };
+  }
+  if (a === 127) {
+    return { scope: "Loopback", routable: "No", icon: "⚠", note: "Points back to the same device." };
+  }
+  if (a === 169 && b === 254) {
+    return { scope: "Link-local", routable: "No", icon: "⚠", note: "Link-local address used on the local network segment." };
+  }
+  if (a === 100 && b >= 64 && b <= 127) {
+    return { scope: "Carrier-grade NAT", routable: "Limited", icon: "⚠", note: "Shared address space commonly used by service providers." };
+  }
+  if (
+    (a === 192 && b === 0 && c === 2) ||
+    (a === 198 && b === 51 && c === 100) ||
+    (a === 203 && b === 0 && c === 113)
+  ) {
+    return { scope: "Documentation", routable: "No", icon: "⚠", note: "Reserved for examples and documentation." };
+  }
+  if (a === 198 && (b === 18 || b === 19)) {
+    return { scope: "Benchmarking", routable: "No", icon: "⚠", note: "Reserved for network benchmarking tests." };
+  }
+
+  // More-specific IANA assignments take precedence over the 192.0.0.0/24 parent block.
+  if (a === 192 && b === 0 && c === 0) {
+    if (d === 9) {
+      return { scope: "PCP anycast", routable: "Yes", icon: "⚠", note: "IANA-assigned Port Control Protocol anycast address." };
+    }
+    if (d === 10) {
+      return { scope: "TURN anycast", routable: "Yes", icon: "⚠", note: "IANA-assigned Traversal Using Relays around NAT anycast address." };
+    }
+    if (d <= 7) {
+      return { scope: "IPv4 service continuity", routable: "Limited", icon: "⚠", note: "Special-purpose service-continuity prefix; not globally reachable." };
+    }
+    if (d === 8) {
+      return { scope: "Dummy address", routable: "No", icon: "⚠", note: "Special-purpose dummy address; not a general destination." };
+    }
+    if (d === 170 || d === 171) {
+      return { scope: "NAT64/DNS64 discovery", routable: "No", icon: "⚠", note: "Reserved for NAT64/DNS64 discovery mechanisms." };
+    }
+    return { scope: "Unassigned protocol block", routable: "No", icon: "⚠", note: "Part of the IETF protocol-assignment block; usable only where a more-specific assignment exists." };
+  }
+
+  // 192.88.99.2/32 is a more-specific assignment within the deprecated 6to4 block.
+  if (a === 192 && b === 88 && c === 99) {
+    if (d === 2) {
+      return { scope: "6a44 relay anycast", routable: "Limited", icon: "⚠", note: "IANA-assigned 6a44 relay anycast address; not globally reachable." };
+    }
+    return { scope: "Deprecated 6to4 relay", routable: "No", icon: "⚠", note: "Deprecated 6to4 relay anycast block." };
+  }
+
+  if (a >= 224 && a <= 239) {
+    return { scope: "Multicast", routable: "Special", icon: "⚠", note: "Used for multicast traffic, not ordinary unicast hosts." };
+  }
+  if (a === 0 || a >= 240) {
+    return { scope: "Reserved", routable: "No", icon: "⚠", note: "Reserved or special-use IPv4 address space." };
+  }
+  return { scope: "Public", routable: "Yes", icon: "✅", note: "Globally reachable unicast range; this classification is not a reputation or safety check." };
 }
+
 function classifyIPv6(ip) {
-  const value = ip.toLowerCase();
-  if (value === "::1") return { scope: "Loopback", routable: "No", icon: "⚠", note: "Points back to the same device." };
-  if (value === "::") return { scope: "Unspecified", routable: "No", icon: "⚠", note: "Represents no specific address." };
-  if (value.startsWith("fe80:")) return { scope: "Link-local", routable: "No", icon: "⚠", note: "Used on the local network segment." };
-  if (/^f[cd][0-9a-f]{2}:/i.test(value)) return { scope: "Unique local", routable: "No", icon: "✅", note: "Private-style IPv6 address for local networks." };
-  if (value.startsWith("ff")) return { scope: "Multicast", routable: "Special", icon: "⚠", note: "Used for multicast traffic." };
-  if (value.startsWith("2001:db8:")) return { scope: "Documentation", routable: "No", icon: "⚠", note: "Reserved for examples and documentation." };
-  return { scope: "Global/Public", routable: "Yes", icon: "✅", note: "Global IPv6 address. GeoIP maps can be added later in v2." };
+  const groups = parseIPv6(ip);
+  if (!groups) {
+    return { scope: "Invalid", routable: "No", icon: "⚠", note: "The IPv6 address is invalid." };
+  }
+
+  const allZeroPrefix = groups.slice(0, 7).every(group => group === 0);
+  const first = groups[0];
+  const second = groups[1];
+  if (allZeroPrefix && groups[7] === 1) {
+    return { scope: "Loopback", routable: "No", icon: "⚠", note: "Points back to the same device." };
+  }
+  if (groups.every(group => group === 0)) {
+    return { scope: "Unspecified", routable: "No", icon: "⚠", note: "Represents no specific address." };
+  }
+  if (groups.slice(0, 5).every(group => group === 0) && groups[5] === 0xffff) {
+    return { scope: "IPv4-mapped", routable: "Special", icon: "⚠", note: "Embeds an IPv4 address; assess the embedded IPv4 address separately." };
+  }
+
+  // IANA IPv6 special-purpose assignments; specific allocations precede parent blocks.
+  if (first === 0x0064 && second === 0xff9b && groups.slice(2, 6).every(group => group === 0)) {
+    return { scope: "IPv4-translatable", routable: "Yes", icon: "⚠", note: "IANA IPv4/IPv6 translation prefix; global reachability is permitted by its registry entry." };
+  }
+  if (first === 0x0064 && second === 0xff9b && groups[2] === 1) {
+    return { scope: "IPv4-translatable", routable: "Limited", icon: "⚠", note: "Local-use IPv4/IPv6 translation prefix; not globally reachable." };
+  }
+  if (first === 0x0100 && second === 0 && groups[2] === 0 && groups[3] === 0) {
+    return { scope: "Discard-only", routable: "No", icon: "⚠", note: "Reserved discard-only IPv6 address block." };
+  }
+  if (first === 0x0100 && second === 0 && groups[2] === 0 && groups[3] === 1) {
+    return { scope: "Dummy prefix", routable: "No", icon: "⚠", note: "Special-purpose dummy IPv6 prefix." };
+  }
+  // TEREDO is registered for the entire 2001::/32 prefix.
+  if (first === 0x2001 && second === 0) {
+    return { scope: "Teredo", routable: "Special", icon: "⚠", note: "Teredo transition mechanism prefix; routing depends on the mechanism and network." };
+  }
+  if (first === 0x2001 && second === 1 && groups.slice(2, 7).every(group => group === 0) && [1, 2, 3].includes(groups[7])) {
+    return { scope: "IETF anycast", routable: "Yes", icon: "⚠", note: "Specific IANA-registered protocol anycast address." };
+  }
+  if (first === 0x2001 && second === 2 && groups[2] === 0) {
+    return { scope: "Benchmarking", routable: "Limited", icon: "⚠", note: "Reserved for IPv6 network benchmarking; not globally reachable." };
+  }
+  if (first === 0x2001 && second === 3) {
+    return { scope: "AMT", routable: "Yes", icon: "⚠", note: "IANA-registered Automatic Multicast Tunneling prefix." };
+  }
+  if (first === 0x2001 && second === 4 && groups[2] === 0x0112) {
+    return { scope: "AS112 service", routable: "Yes", icon: "⚠", note: "IANA-registered AS112 service prefix." };
+  }
+  if (first === 0x2001 && (second & 0xfff0) === 0x0010) {
+    return { scope: "Deprecated ORCHID", routable: "No", icon: "⚠", note: "Deprecated ORCHID prefix." };
+  }
+  if (first === 0x2001 && (second & 0xfff0) === 0x0020) {
+    return { scope: "ORCHIDv2", routable: "Yes", icon: "⚠", note: "IANA-registered ORCHIDv2 special-purpose prefix." };
+  }
+  if (first === 0x2001 && (second & 0xfff0) === 0x0030) {
+    return { scope: "Drone Remote ID", routable: "Yes", icon: "⚠", note: "IANA-registered Drone Remote ID protocol prefix." };
+  }
+  if (first === 0x2001 && second <= 0x01ff) {
+    return { scope: "Unassigned IETF protocol block", routable: "No", icon: "⚠", note: "Within the IETF protocol-assignment block; use only where a more-specific IANA allocation exists." };
+  }
+  if (first === 0x2001 && second === 0x0db8) {
+    return { scope: "Documentation", routable: "No", icon: "⚠", note: "Reserved for examples and documentation." };
+  }
+  if (first === 0x3fff && (second & 0xf000) === 0) {
+    return { scope: "Documentation", routable: "No", icon: "⚠", note: "Reserved for documentation and examples." };
+  }
+  if (first === 0x2002) {
+    return { scope: "6to4", routable: "Special", icon: "⚠", note: "Deprecated transition mechanism; do not interpret as a normal public endpoint." };
+  }
+  if (first === 0x5f00) {
+    return { scope: "Segment-routing SID", routable: "Limited", icon: "⚠", note: "Reserved for Segment Routing over IPv6 identifiers; not globally reachable." };
+  }
+  if ((first & 0xffc0) === 0xfe80) {
+    return { scope: "Link-local", routable: "No", icon: "⚠", note: "Link-local address used on the local network segment." };
+  }
+  if ((first & 0xfe00) === 0xfc00) {
+    return { scope: "Unique local", routable: "No", icon: "✅", note: "Private-style IPv6 address for local networks." };
+  }
+  if ((first & 0xff00) === 0xff00) {
+    return { scope: "Multicast", routable: "Special", icon: "⚠", note: "Used for multicast traffic, not ordinary unicast hosts." };
+  }
+  if ((first & 0xe000) === 0x2000) {
+    return { scope: "Global/Public", routable: "Yes", icon: "✅", note: "IPv6 global unicast range; this classification is not a reputation or safety check." };
+  }
+  return { scope: "Reserved / Special", routable: "No", icon: "⚠", note: "This address is outside the global unicast range." };
 }
 function analyzeIp() {
   const ip = ipInput.value.trim();
