@@ -7,7 +7,8 @@
     "check:js-syntax": "node scripts/check-js-syntax.js",
     "test:output-escaping": "node tests/output-escaping.test.js",
     "test:ip-analyzer": "node tests/ip-analyzer.test.js",
-    "test:file-hash-checker": "node tests/file-hash-checker.test.js"
+    "test:file-hash-checker": "node tests/file-hash-checker.test.js",
+    "test:hash-generator": "node tests/hash-generator-lifecycle.test.js"
   },
   "devDependencies": {
     "jsdom": "26.1.0"
