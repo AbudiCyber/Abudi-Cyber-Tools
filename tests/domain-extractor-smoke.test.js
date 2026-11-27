@@ -707,6 +707,48 @@ function waitFor(condition, timeout = 5000) {
     analyzeButton.click();
     assert.match(result.textContent, /Please enter a valid domain or URL/);
 
+    const invalidDomainInputs = [
+      "mailto:user@example.com",
+      "user@example.com",
+      "javascript:123",
+      "javascript:alert(1)",
+      "http:example.com",
+      "https://alice:secret@example.com",
+      "https://example.com\u0001.evil"
+    ];
+
+    for (const invalidInput of invalidDomainInputs) {
+      const validation =
+        window.AbudiDomainValidationService.validateInput(invalidInput);
+      assert.equal(
+        validation.valid,
+        false,
+        `Ambiguous or unsafe domain input must be rejected: ${JSON.stringify(invalidInput)}`
+      );
+    }
+
+    for (const validInput of [
+      "example.com",
+      "https://example.com/path",
+      "example.com:8080/path",
+      "localhost:3000",
+      "127.0.0.1:8080",
+      "[::1]:8080"
+    ]) {
+      assert.equal(
+        window.AbudiDomainValidationService.validateInput(validInput).valid,
+        true,
+        `Valid HTTP(S) host input must remain accepted: ${validInput}`
+      );
+    }
+
+    input.value =
+      "example.com/path?access_token=domain-secret&mode=read#token=fragment-secret";
+    analyzeButton.click();
+    assert.doesNotMatch(result.textContent, /domain-secret|fragment-secret/);
+    assert.match(result.textContent, /access_token=\[REDACTED\]/);
+    assert.match(result.textContent, /token=\[REDACTED\]/);
+
     input.value = "";
     analyzeButton.click();
     assert.match(result.textContent, /Please enter a valid domain or URL/);
