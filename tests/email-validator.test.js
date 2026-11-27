@@ -66,7 +66,7 @@ try {
   window.clearEmailResult();
   assert.equal(input.value, "");
   assert.match(result.textContent, /Waiting for email input/);
-  assert.equal(window.eval("lastEmailResult"), "");
+  assert.equal(window.__emailState(), "");
 
   console.log("Email format checker regression test: PASS");
 } finally {
