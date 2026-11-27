@@ -37,9 +37,18 @@ try {
   assert.doesNotMatch(result.textContent, /alice|super-secret/);
   assert.match(window.__urlParserState(), /key=visible/, "Query values remain visible as parser output.");
 
+  input.value = "https://example.com/path?access_token=top-secret&mode=read#token=fragment-secret";
+  window.parseURL();
+  assert.doesNotMatch(window.__urlParserState(), /top-secret|fragment-secret/);
+  assert.doesNotMatch(result.textContent, /top-secret|fragment-secret/);
+  assert.match(window.__urlParserState(), /access_token=\[REDACTED\]/);
+  assert.match(window.__urlParserState(), /token=\[REDACTED\]/);
+  assert.match(window.__urlParserState(), /URL contains sensitive data; redacted/);
+
   for (const invalid of [
     "ftp://example.com",
     "javascript:alert(1)",
+    "javascript:123",
     "mailto:user@example.com",
     "https://",
     "https://example.com:99999",
