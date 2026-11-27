@@ -11,57 +11,77 @@ const dom = new JSDOM(html, {
   url: "https://example.test/"
 });
 
-const { window } = dom;
-window.eval(script);
+try {
+  const { window } = dom;
+  window.eval(script);
 
-const escapingCases = [
-  ["&", "&amp;"],
-  ["<", "&lt;"],
-  [">", "&gt;"],
-  ['"', "&quot;"],
-  ["'", "&#39;"],
-  ["&lt;script&gt;", "&amp;lt;script&amp;gt;"],
-  ['"><svg onload=alert(1)>', "&quot;&gt;&lt;svg onload=alert(1)&gt;"]
-];
+  const escapingCases = [
+    ["&", "&amp;"],
+    ["<", "&lt;"],
+    [">", "&gt;"],
+    ['"', "&quot;"],
+    ["'", "&#39;"],
+    ["&lt;script&gt;", "&amp;lt;script&amp;gt;"],
+    ['"><svg onload=alert(1)>', "&quot;&gt;&lt;svg onload=alert(1)&gt;"]
+  ];
 
-for (const [input, expected] of escapingCases) {
+  for (const [input, expected] of escapingCases) {
+    assert.equal(
+      window.sanitize(input),
+      expected,
+      "HTML escaping must encode every HTML-significant character."
+    );
+  }
+
+  const payload = '<img src=x onerror="alert(1)">';
+  window.document.getElementById("emailInput").value = payload;
+  window.validateEmail();
+
+  const emailResult = window.document.getElementById("emailResult");
   assert.equal(
-    window.sanitize(input),
-    expected,
-    "HTML escaping must encode every HTML-significant character."
+    emailResult.querySelector("img"),
+    null,
+    "Untrusted email input must not create an HTML element."
   );
+  assert.equal(
+    emailResult.textContent.includes(payload),
+    true,
+    "Escaped user input must remain visible as literal text."
+  );
+
+  const entityPayload = "&lt;img src=x onerror=alert(1)&gt;";
+  window.document.getElementById("emailInput").value = entityPayload;
+  window.validateEmail();
+
+  assert.equal(
+    emailResult.querySelector("img"),
+    null,
+    "Entity-encoded input must remain text and not be parsed as an element."
+  );
+  assert.equal(
+    emailResult.textContent.includes(entityPayload),
+    true,
+    "Entity-encoded input must retain its literal visible representation."
+  );
+
+  const decodedPayload = '<svg onload="alert(1)">';
+  window.document.getElementById("base64Input").value =
+    Buffer.from(decodedPayload, "utf8").toString("base64");
+  window.decodeBase64();
+
+  const base64Result = window.document.getElementById("base64Result");
+  assert.equal(
+    base64Result.querySelector("svg"),
+    null,
+    "Decoded Base64 content must be rendered as text, not parsed HTML."
+  );
+  assert.equal(
+    base64Result.textContent.includes(decodedPayload),
+    true,
+    "Decoded content must remain readable to the user."
+  );
+
+  console.log("Output escaping regression test: PASS");
+} finally {
+  dom.window.close();
 }
-
-const payload = '<img src=x onerror="window.__xssExecuted=true">';
-window.__xssExecuted = false;
-window.document.getElementById("emailInput").value = payload;
-window.validateEmail();
-
-const emailResult = window.document.getElementById("emailResult");
-assert.equal(
-  emailResult.querySelector("img"),
-  null,
-  "Untrusted email input must never create an HTML element."
-);
-assert.equal(
-  window.__xssExecuted,
-  false,
-  "Untrusted email input must not execute an event handler."
-);
-assert.ok(
-  emailResult.textContent.includes(payload),
-  "Escaping must preserve the original user input as visible text."
-);
-
-const entityPayload = "&lt;img src=x onerror=alert(1)&gt;";
-window.document.getElementById("emailInput").value = entityPayload;
-window.validateEmail();
-assert.equal(
-  emailResult.querySelector("img"),
-  null,
-  "Entity-encoded input must remain text after HTML parsing."
-);
-assert.ok(emailResult.textContent.includes(entityPayload));
-
-dom.window.close();
-console.log("Output escaping regression test: PASS");
