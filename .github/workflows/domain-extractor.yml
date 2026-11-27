@@ -26,6 +26,9 @@ jobs:
       - name: Install test dependencies
         run: npm install
 
+      - name: Validate repository JavaScript syntax
+        run: npm run check:js-syntax
+
       - name: Run Domain Extractor smoke test
         run: npm run test:domain-extractor
 
