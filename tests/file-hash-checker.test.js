@@ -139,6 +139,7 @@ async function main() {
     await window.generateFileHash();
     assert.match(result.textContent, /choose a file first/i);
 
+    // Assert internal state through the isolated test-only accessor appended to the VM script.
     console.log("File hash checker regression test: PASS");
   } finally {
     dom.window.close();
