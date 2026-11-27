@@ -40,6 +40,8 @@ try {
     "alice@-example.com",
     "alice@example-.com",
     "alice@example.c",
+    "alice@123.456",
+    "alice@example.123",
     "alice@example.com:25",
     "alice name@example.com",
     "alice@example.com/path",
