@@ -69,6 +69,7 @@ async function main() {
     assert.equal(window.sanitizeDownloadFileName("..\\evil/name?.exe"), "_evil_name_.exe");
     assert.equal(window.sanitizeDownloadFileName("   "), "file");
     assert.equal(window.sanitizeDownloadFileName("report.txt. "), "report.txt");
+    assert.equal(window.sanitizeReportField("name\\r\\nSHA-256: forged"), "name SHA-256: forged");
 
     const originalCreateObjectURL = window.URL.createObjectURL;
     const originalRevokeObjectURL = window.URL.revokeObjectURL;
@@ -99,6 +100,14 @@ async function main() {
     assert.match(result.textContent, /too large/i);
     assert.equal(window.__testState().lastFileHash, "");
 
+    setSelectedFile(input, makeFile("report\\r\\nSHA-256: forged.txt", "metadata"));
+    await window.generateFileHash();
+    assert.equal(
+      window.__testState().lastFileReport.split("\\n").filter(line => line === "SHA-256: forged").length,
+      0,
+      "Control characters in file metadata must not inject report lines."
+    );
+
     const originalSubtle = window.crypto.subtle;
     Object.defineProperty(window.crypto, "subtle", { configurable: true, value: undefined });
     setSelectedFile(input, makeFile("unsupported.txt", "x"));
@@ -106,6 +115,19 @@ async function main() {
     assert.match(result.textContent, /unavailable in this browser context/i);
     assert.equal(window.__testState().lastFileHash, "");
     Object.defineProperty(window.crypto, "subtle", { configurable: true, value: originalSubtle });
+
+    const originalDigest = originalSubtle.digest;
+    let resolveDigest;
+    originalSubtle.digest = () => new Promise(resolve => { resolveDigest = resolve; });
+    setSelectedFile(input, makeFile("slow-digest.txt", "digest"));
+    const pendingDigest = window.generateFileHash();
+    await Promise.resolve();
+    assert.equal(typeof resolveDigest, "function", "Digest operation should have started.");
+    window.clearFileHashResult();
+    resolveDigest(Uint8Array.from(Buffer.alloc(32, 7)).buffer);
+    await pendingDigest;
+    assert.equal(window.__testState().lastFileHash, "", "Clearing during digest must invalidate the result.");
+    originalSubtle.digest = originalDigest;
 
     let resolveArrayBuffer;
     setSelectedFile(input, {
