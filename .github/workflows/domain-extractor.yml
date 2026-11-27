@@ -43,3 +43,6 @@ jobs:
 
       - name: Run file hash checker regression test
         run: npm run test:file-hash-checker
+
+      - name: Run hash generator lifecycle regression test
+        run: npm run test:hash-generator
