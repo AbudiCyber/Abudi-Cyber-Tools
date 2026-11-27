@@ -59,7 +59,7 @@ try {
 
   window.clearLinkAnalysisResult();
   assert.equal(input.value, "");
-  assert.match(result.textContent, /Waiting for input/);
+  assert.match(result.textContent, /Waiting for link input/);
   assert.equal(window.__linkState(), "");
 
   console.log("Link analyzer scope regression test: PASS");
