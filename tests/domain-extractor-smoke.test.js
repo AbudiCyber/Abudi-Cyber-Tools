@@ -714,7 +714,7 @@ function waitFor(condition, timeout = 5000) {
       "javascript:alert(1)",
       "http:example.com",
       "https://alice:secret@example.com",
-      "https://example.com\\n.evil",
+      "https://example.com\u0001.evil"
       "https://example.com\\u0001.evil"
     ];
 
