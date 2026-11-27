@@ -567,9 +567,6 @@ function classifyIPv4(ip) {
     return { scope: "Deprecated 6to4 relay", routable: "No", icon: "⚠", note: "Deprecated 6to4 relay anycast block." };
   }
 
-  if (a === 224 && b <= 0) {
-    return { scope: "Multicast", routable: "Special", icon: "⚠", note: "Used for multicast traffic, not ordinary unicast hosts." };
-  }
   if (a >= 224 && a <= 239) {
     return { scope: "Multicast", routable: "Special", icon: "⚠", note: "Used for multicast traffic, not ordinary unicast hosts." };
   }
@@ -588,9 +585,6 @@ function classifyIPv6(ip) {
   const allZeroPrefix = groups.slice(0, 7).every(group => group === 0);
   const first = groups[0];
   const second = groups[1];
-  const isPrefix64 = (prefixGroups) =>
-    prefixGroups.every((group, index) => groups[index] === group);
-
   if (allZeroPrefix && groups[7] === 1) {
     return { scope: "Loopback", routable: "No", icon: "⚠", note: "Points back to the same device." };
   }
