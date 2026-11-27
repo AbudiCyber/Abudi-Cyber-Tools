@@ -6,7 +6,8 @@
     "test:password-security": "node tests/password-security.test.js",
     "check:js-syntax": "node scripts/check-js-syntax.js",
     "test:output-escaping": "node tests/output-escaping.test.js",
-    "test:ip-analyzer": "node tests/ip-analyzer.test.js"
+    "test:ip-analyzer": "node tests/ip-analyzer.test.js",
+    "test:file-hash-checker": "node tests/file-hash-checker.test.js"
   },
   "devDependencies": {
     "jsdom": "26.1.0"
