@@ -80,6 +80,19 @@ async function main() {
     assert.equal(window.__hashState().value, "", "Clearing while hashing must discard the stale result.");
     assert.match(result.textContent, /Waiting for hash input/);
 
+    let resolveEditedDigest;
+    window.crypto.subtle.digest = () => new Promise(resolve => { resolveEditedDigest = resolve; });
+    input.value = "pending edit";
+    const pendingEdit = window.generateHash();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(typeof resolveEditedDigest, "function");
+    input.value = "new input";
+    input.dispatchEvent(new window.Event("input"));
+    resolveEditedDigest(Uint8Array.from(Buffer.alloc(32, 5)).buffer);
+    await pendingEdit;
+    assert.equal(window.__hashState().value, "", "Editing while hashing must discard the stale digest.");
+    assert.match(result.textContent, /Input changed/);
+
     input.value = "x".repeat(window.__hashState().max + 1);
     await window.generateHash();
     assert.match(result.textContent, /too large/i);
