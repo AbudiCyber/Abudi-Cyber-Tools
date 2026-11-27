@@ -47,8 +47,47 @@ assert.ok(randomCalls > 0, "Web Crypto must be used");
 window.document.getElementById("passwordInput").value = "ExampleSecret123!";
 window.document.getElementById("checkPasswordBtn").click();
 const checkResult = window.document.getElementById("passwordCheckerResult").textContent;
-assert.match(checkResult, /Strong Password/);
+assert.match(checkResult, /15\+ characters \(length indicator only\)/);
+assert.doesNotMatch(checkResult, /Strong Password/);
+assert.match(checkResult, /no breached-password database lookup/i);
 assert.doesNotMatch(checkResult, /ExampleSecret123!/, "Password checker output must not reveal the entered password");
+
+
+const passwordField = window.document.getElementById("passwordInput");
+const checkButton = window.document.getElementById("checkPasswordBtn");
+passwordField.value = "Password123!";
+checkButton.click();
+assert.match(window.document.getElementById("passwordCheckerResult").textContent, /Predictable pattern detected/);
+assert.doesNotMatch(window.document.getElementById("passwordCheckerResult").textContent, /Password123!/);
+
+passwordField.value = "aaaaaaaaaaaaaaaa";
+checkButton.click();
+assert.match(window.document.getElementById("passwordCheckerResult").textContent, /Predictable pattern detected/);
+
+passwordField.value = "a".repeat(14);
+checkButton.click();
+assert.match(window.document.getElementById("passwordCheckerResult").textContent, /Below 15-character single-factor benchmark/);
+
+passwordField.value = "a".repeat(15);
+checkButton.click();
+assert.match(window.document.getElementById("passwordCheckerResult").textContent, /15\+ characters \(length indicator only\)/);
+
+passwordField.value = "🛡".repeat(15);
+checkButton.click();
+assert.match(window.document.getElementById("passwordCheckerResult").textContent, /15 Unicode characters/);
+
+passwordField.value = "LongUniquePassphraseExample";
+checkButton.click();
+assert.ok(window.eval("lastPasswordCheckResult").length > 0);
+passwordField.value = "changed";
+passwordField.dispatchEvent(new window.Event("input"));
+assert.equal(window.eval("lastPasswordCheckResult"), "", "Editing a password must invalidate the previous assessment.");
+assert.match(window.document.getElementById("passwordCheckerResult").textContent, /Password changed/);
+
+passwordField.value = "x".repeat(1025);
+checkButton.click();
+assert.match(window.document.getElementById("passwordCheckerResult").textContent, /Maximum supported length/);
+assert.equal(window.eval("lastPasswordCheckResult"), "");
 
 dom.window.close();
 console.log("Password security regression test: PASS");
