@@ -12,7 +12,7 @@ try {
   const { window } = dom;
   const input = window.document.getElementById("emailInput");
   const result = window.document.getElementById("emailResult");
-  window.eval(script + "\\nwindow.__emailState = () => lastEmailResult;");
+  window.eval(script + "\nwindow.__emailState = () => lastEmailResult;");
 
   const validCases = [
     "alice@example.com",
