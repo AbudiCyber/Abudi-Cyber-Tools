@@ -608,6 +608,7 @@ function classifyIPv6(ip) {
   if (first === 0x0100 && second === 0 && groups[2] === 0 && groups[3] === 1) {
     return { scope: "Dummy prefix", routable: "No", icon: "⚠", note: "Special-purpose dummy IPv6 prefix." };
   }
+  // TEREDO is registered for the entire 2001::/32 prefix.
   if (first === 0x2001 && second === 0) {
     return { scope: "Teredo", routable: "Special", icon: "⚠", note: "Teredo transition mechanism prefix; routing depends on the mechanism and network." };
   }
