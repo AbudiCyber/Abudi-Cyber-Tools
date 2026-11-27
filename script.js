@@ -124,32 +124,51 @@ async function copyLogicalValue(value, resultBox, successMessage) {
 
 // ===== Text Analyzer Pro =====
 function analyzeText() {
-  const rawText = textInput.value.trim();
-  if (!rawText) {
-    textAnalyzerResult.innerHTML = "⚠ Please enter text first.";
+  // Preserve the exact input: leading/trailing whitespace and line breaks are data.
+  const rawText = textInput.value;
+  if (!rawText.trim()) {
+    textAnalyzerResult.textContent = "⚠ Please enter text first.";
     lastTextAnalysisResult = "";
     return;
   }
-  if (rawText.length > 5000) {
-    textAnalyzerResult.innerHTML = "⚠ Text is too long. Maximum supported length is 5000 characters.";
+
+  // Bound analysis by Unicode code points to avoid UTF-16 surrogate-pair surprises.
+  const codePoints = Array.from(rawText);
+  if (codePoints.length > 5000) {
+    textAnalyzerResult.textContent = "⚠ Text is too long. Maximum supported length is 5000 Unicode characters.";
     lastTextAnalysisResult = "";
     return;
   }
-  const characters = rawText.length;
-  const words = rawText ? rawText.split(/\s+/).length : 0;
-  const numbers = (rawText.match(/\d/g) || []).length;
+
+  const characters = codePoints.length;
+  const words = rawText.trim().split(/\s+/u).length;
+  const numbers = (rawText.match(/\p{N}/gu) || []).length;
   const symbols = (rawText.match(/[^\p{L}\p{N}\s]/gu) || []).length;
   const lines = rawText.split(/\r\n|\r|\n/).length;
-  const spaces = (rawText.match(/\s/g) || []).length;
-  lastTextAnalysisResult = `Text Analysis\nCharacters: ${characters}\nWords: ${words}\nNumbers: ${numbers}\nSymbols: ${symbols}\nLines: ${lines}\nSpaces: ${spaces}`;
-  textAnalyzerResult.innerHTML = `📝 Text Analysis<br><br><b>Characters:</b> ${characters}<br><b>Words:</b> ${words}<br><b>Numbers:</b> ${numbers}<br><b>Symbols:</b> ${symbols}<br><b>Lines:</b> ${lines}<br><b>Spaces:</b> ${spaces}`;
-}
-function clearTextAnalysisResult() {
-  textInput.value = "";
-  textAnalyzerResult.innerHTML = "Waiting for text input...";
-  lastTextAnalysisResult = "";
+  const spaces = (rawText.match(/\s/gu) || []).length;
+
+  lastTextAnalysisResult = `Text Analysis
+Characters: ${characters}
+Words: ${words}
+Numbers: ${numbers}
+Symbols: ${symbols}
+Lines: ${lines}
+Whitespace: ${spaces}`;
+
+  textAnalyzerResult.textContent = `📝 Text Analysis
+Characters: ${characters}
+Words: ${words}
+Numbers: ${numbers}
+Symbols: ${symbols}
+Lines: ${lines}
+Whitespace: ${spaces}`;
 }
 
+function clearTextAnalysisResult() {
+  textInput.value = "";
+  textAnalyzerResult.textContent = "Waiting for text input...";
+  lastTextAnalysisResult = "";
+}
 // ===== Password Checker Pro =====
 const PASSWORD_CHECKER_MAX_CODE_POINTS = 1024;
 const KNOWN_WEAK_PASSWORD_EXAMPLES = new Set([
