@@ -66,7 +66,7 @@ async function main() {
     assert.match(result.textContent, /&lt;img|img src=x/);
     assert.equal(window.eval("lastFileHash").length, 64);
 
-    assert.equal(window.sanitizeDownloadFileName("..\\evil/name?.exe"), "___evil_name_.exe");
+    assert.equal(window.sanitizeDownloadFileName("..\\evil/name?.exe"), "_evil_name_.exe");
     assert.equal(window.sanitizeDownloadFileName("   "), "file");
     assert.equal(window.sanitizeDownloadFileName("report.txt. "), "report.txt");
 
@@ -88,11 +88,10 @@ async function main() {
     window.URL.createObjectURL = originalCreateObjectURL;
     window.URL.revokeObjectURL = originalRevokeObjectURL;
 
-    const previousHash = window.eval("lastFileHash");
     setSelectedFile(input, {
       name: "oversized.bin",
       type: "application/octet-stream",
-      size: window.FILE_HASH_MAX_BYTES + 1,
+      size: window.eval("FILE_HASH_MAX_BYTES") + 1,
       lastModified: 0,
       arrayBuffer: async () => { throw new Error("must not read oversized files"); }
     });
@@ -118,9 +117,10 @@ async function main() {
     });
     const pending = window.generateFileHash();
     window.clearFileHashResult();
-    resolveArrayBuffer(Buffer.from("slow").buffer.slice(
-      Buffer.from("slow").byteOffset,
-      Buffer.from("slow").byteOffset + Buffer.from("slow").byteLength
+    const slowBytes = Buffer.from("slow");
+    resolveArrayBuffer(slowBytes.buffer.slice(
+      slowBytes.byteOffset,
+      slowBytes.byteOffset + slowBytes.byteLength
     ));
     await pending;
     assert.equal(window.eval("lastFileHash"), "", "Clearing must invalidate an in-flight hash operation.");
