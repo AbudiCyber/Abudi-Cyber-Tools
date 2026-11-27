@@ -637,6 +637,11 @@ function clearEmailResult() {
 // ===== URL Parser Pro =====
 function parseURL() {
   const input = urlParserInput.value.trim();
+  if (/[\\u0000-\\u001F\\u007F]/.test(input)) {
+    urlParserResult.textContent = "❌ URL contains unsupported control characters.";
+    lastUrlParserResult = "";
+    return;
+  }
   if (!input) {
     urlParserResult.textContent = "⚠ Please enter a URL first.";
     lastUrlParserResult = "";
