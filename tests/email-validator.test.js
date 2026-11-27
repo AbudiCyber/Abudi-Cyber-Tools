@@ -12,7 +12,7 @@ try {
   const { window } = dom;
   const input = window.document.getElementById("emailInput");
   const result = window.document.getElementById("emailResult");
-  window.eval(script);
+  window.eval(script + "\\nwindow.__emailState = () => lastEmailResult;");
 
   const validCases = [
     "alice@example.com",
@@ -44,6 +44,7 @@ try {
     "alice name@example.com",
     "alice@example.com/path",
     "a".repeat(65) + "@example.com",
+    "alice@" + ["a".repeat(63), "b".repeat(63), "c".repeat(63), "d".repeat(61)].join("."),
     "alice@" + "a".repeat(64) + ".com"
   ];
 
@@ -61,7 +62,7 @@ try {
 
   input.value = "alice@example.com";
   window.validateEmail();
-  assert.match(window.eval("lastEmailResult"), /does not verify mailbox existence or deliverability/);
+  assert.match(window.__emailState(), /does not verify mailbox existence or deliverability/);
   window.clearEmailResult();
   assert.equal(input.value, "");
   assert.match(result.textContent, /Waiting for email input/);
