@@ -82,10 +82,22 @@ function encodeUnicodeBase64(text) {
 }
 
 function decodeUnicodeBase64(base64Text) {
-  const binary = atob(base64Text);
+  const compact = base64Text.replace(/\\s/g, "");
+  if (
+    !compact ||
+    compact.length % 4 !== 0 ||
+    !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(compact)
+  ) {
+    throw new Error("INVALID_BASE64_FORMAT");
+  }
+
+  const binary = atob(compact);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return new TextDecoder().decode(bytes);
+
+  // Reject non-canonical padding bits and malformed UTF-8 instead of silently replacing bytes.
+  if (btoa(binary) !== compact) throw new Error("NON_CANONICAL_BASE64");
+  return new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes);
 }
 
 function copyTextWithFallback(text) {
@@ -498,9 +510,10 @@ function clearHashResult() {
 }
 // ===== Base64 Encoder / Decoder Pro =====
 function encodeBase64() {
-  const text = base64Input.value.trim();
-  if (!text) {
-    base64Result.innerHTML = "⚠ Please enter text to encode first.";
+  // Whitespace is valid data and must not be trimmed from the input.
+  const text = base64Input.value;
+  if (text.length === 0) {
+    base64Result.textContent = "⚠ Please enter text to encode first.";
     lastBase64Result = "";
     return;
   }
@@ -509,14 +522,15 @@ function encodeBase64() {
     lastBase64Result = encoded;
     base64Result.innerHTML = `🔢 Base64 Encoded<br><br>${codeBlock(encoded)}`;
   } catch {
-    base64Result.innerHTML = "❌ Failed to encode Base64.";
+    base64Result.textContent = "❌ Failed to encode Base64.";
     lastBase64Result = "";
   }
 }
+
 function decodeBase64() {
-  const text = base64Input.value.trim();
-  if (!text) {
-    base64Result.innerHTML = "⚠ Please enter Base64 text to decode first.";
+  const text = base64Input.value;
+  if (!text.trim()) {
+    base64Result.textContent = "⚠ Please enter Base64 text to decode first.";
     lastBase64Result = "";
     return;
   }
@@ -525,16 +539,16 @@ function decodeBase64() {
     lastBase64Result = decoded;
     base64Result.innerHTML = `🔓 Base64 Decoded<br><br>${codeBlock(decoded)}`;
   } catch {
-    base64Result.innerHTML = "❌ Invalid Base64 text.";
+    base64Result.textContent = "❌ Invalid Base64 or malformed UTF-8 text.";
     lastBase64Result = "";
   }
 }
+
 function clearBase64Result() {
   base64Input.value = "";
-  base64Result.innerHTML = "Waiting for Base64 input...";
+  base64Result.textContent = "Waiting for Base64 input...";
   lastBase64Result = "";
 }
-
 // ===== Email Format Checker =====
 function inspectEmailAddress(email) {
   if (email.length > 254) return { valid: false, reason: "The address exceeds the 254-character email limit." };
