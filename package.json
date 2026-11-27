@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "test:domain-extractor": "node tests/domain-extractor-smoke.test.js",
-    "test:password-security": "node tests/password-security.test.js"
+    "test:password-security": "node tests/password-security.test.js",
+    "check:js-syntax": "node scripts/check-js-syntax.js"
   },
   "devDependencies": {
     "jsdom": "26.1.0"
