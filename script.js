@@ -299,31 +299,76 @@ function clearLinkAnalysisResult() {
 }
 
 // ===== Hash Generator Pro =====
-async function generateHash() {
-  const text = hashInput.value.trim();
-  if (!text) {
-    hashResult.innerHTML = "⚠ Please enter text to hash first.";
-    lastHashResult = "";
-    return;
-  }
-  const algorithm = hashType.value;
-  try {
-    const data = new TextEncoder().encode(text);
-    const hashBuffer = await crypto.subtle.digest(algorithm, data);
-    const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
-    lastHashResult = hashHex;
-    hashResult.innerHTML = `🔐 Hash Generated<br><br><b>Algorithm:</b> ${sanitize(algorithm)}<br><b>Input Length:</b> ${text.length} characters<br><br><b>Hash:</b><br><br>${codeBlock(hashHex)}`;
-  } catch {
-    hashResult.innerHTML = "❌ Hash generation failed.";
-    lastHashResult = "";
-  }
-}
-function clearHashResult() {
-  hashInput.value = "";
-  hashResult.innerHTML = "Waiting for hash input...";
+// ===== Hash Generator Pro =====
+const HASH_GENERATOR_MAX_BYTES = 1024 * 1024;
+const HASH_GENERATOR_ALGORITHMS = new Set(["SHA-1", "SHA-256"]);
+let hashRequestId = 0;
+
+function invalidateHashRequest(message) {
+  hashRequestId += 1;
   lastHashResult = "";
+  if (message) hashResult.textContent = message;
 }
 
+function handleHashInputChange() {
+  invalidateHashRequest(hashInput.value ? "Input changed. Generate a new hash to continue." : "Waiting for hash input...");
+}
+
+function handleHashAlgorithmChange() {
+  invalidateHashRequest("Hash algorithm changed. Generate a new hash to continue.");
+}
+
+async function generateHash() {
+  const requestId = ++hashRequestId;
+  const input = hashInput.value;
+  if (!input.trim()) {
+    lastHashResult = "";
+    hashResult.textContent = "⚠ Please enter text to hash first.";
+    return;
+  }
+
+  lastHashResult = "";
+  const algorithm = hashType.value;
+  if (!HASH_GENERATOR_ALGORITHMS.has(algorithm)) {
+    hashResult.textContent = "❌ Unsupported hash algorithm.";
+    return;
+  }
+
+  try {
+    const data = new TextEncoder().encode(input);
+    if (data.byteLength > HASH_GENERATOR_MAX_BYTES) {
+      hashResult.textContent = "⚠ Input is too large. Maximum supported size is 1 MiB of UTF-8 data.";
+      return;
+    }
+
+    const cryptoApi = globalThis.crypto;
+    if (!cryptoApi || !cryptoApi.subtle || typeof cryptoApi.subtle.digest !== "function") {
+      hashResult.textContent = "❌ Hash generation is unavailable in this browser context. Open Abudi over HTTPS or use a browser that supports Web Crypto.";
+      return;
+    }
+
+    hashResult.textContent = "⏳ Generating hash locally...";
+    const hashBuffer = await cryptoApi.subtle.digest(algorithm, data);
+    if (requestId !== hashRequestId) return;
+
+    const hashHex = Array.from(new Uint8Array(hashBuffer))
+      .map(byte => byte.toString(16).padStart(2, "0"))
+      .join("");
+    if (!hashHex) throw new Error("Empty digest returned");
+
+    lastHashResult = hashHex;
+    hashResult.innerHTML = `🔐 Hash Generated<br><br><b>Algorithm:</b> ${sanitize(algorithm)}<br><b>Input Length:</b> ${Array.from(input).length} characters<br><b>Input Size:</b> ${data.byteLength} UTF-8 bytes<br><br><b>Hash:</b><br><br>${codeBlock(hashHex)}`;
+  } catch {
+    if (requestId !== hashRequestId) return;
+    lastHashResult = "";
+    hashResult.textContent = "❌ Hash generation failed. The browser cryptographic operation could not be completed.";
+  }
+}
+
+function clearHashResult() {
+  invalidateHashRequest("Waiting for hash input...");
+  hashInput.value = "";
+}
 // ===== Base64 Encoder / Decoder Pro =====
 function encodeBase64() {
   const text = base64Input.value.trim();
