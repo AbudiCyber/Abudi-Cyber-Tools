@@ -638,30 +638,79 @@ function clearEmailResult() {
 function parseURL() {
   const input = urlParserInput.value.trim();
   if (!input) {
-    urlParserResult.innerHTML = "⚠ Please enter a URL first.";
+    urlParserResult.textContent = "⚠ Please enter a URL first.";
     lastUrlParserResult = "";
     return;
   }
+
   try {
-    const normalizedInput = input.startsWith("http://") || input.startsWith("https://") ? input : "https://" + input;
+    const hasHttpScheme = /^https?:\/\//i.test(input);
+    const looksLikeHostPort = /^[^/?#]+:\d+(?:[/?#]|$)/.test(input);
+    const hasExplicitScheme = /^[a-z][a-z\d+.-]*:/i.test(input);
+
+    if (hasExplicitScheme && !hasHttpScheme && !looksLikeHostPort) {
+      throw new Error("UNSUPPORTED_URL_SCHEME");
+    }
+
+    const normalizedInput = hasHttpScheme ? input : "https://" + input;
     const url = new URL(normalizedInput);
+
+    if (!["http:", "https:"].includes(url.protocol) || !url.hostname) {
+      throw new Error("UNSUPPORTED_URL_SCHEME");
+    }
+
+    // Never expose embedded username/password in the normalized URL or copied report.
+    const hasCredentials = Boolean(url.username || url.password);
+    const safeUrl = new URL(url.href);
+    safeUrl.username = "";
+    safeUrl.password = "";
+
     const port = url.port || "Default";
     const query = url.search || "None";
     const fragment = url.hash || "None";
-    lastUrlParserResult = `URL Analysis\nOriginal Input: ${input}\nNormalized URL: ${url.href}\nProtocol: ${url.protocol}\nHostname: ${url.hostname}\nPort: ${port}\nPath: ${url.pathname}\nQuery: ${query}\nFragment: ${fragment}`;
-    urlParserResult.innerHTML = `🌍 URL Analysis<br><br><b>Original Input:</b> ${sanitize(input)}<br><b>Normalized URL:</b> ${sanitize(url.href)}<br><b>Protocol:</b> ${sanitize(url.protocol)}<br><b>Hostname:</b> ${sanitize(url.hostname)}<br><b>Port:</b> ${sanitize(port)}<br><b>Path:</b> ${sanitize(url.pathname)}<br><b>Query:</b> ${sanitize(query)}<br><b>Fragment:</b> ${sanitize(fragment)}`;
-  } catch {
-    urlParserResult.innerHTML = "❌ Invalid URL.";
+    const report = [
+      "URL Analysis",
+      `Original Input: ${hasCredentials ? "[URL contains credentials; redacted]" : input}`,
+      `Normalized URL: ${safeUrl.href}`,
+      `Protocol: ${url.protocol}`,
+      `Hostname: ${url.hostname}`,
+      `Port: ${port}`,
+      `Path: ${url.pathname}`,
+      `Query: ${query}`,
+      `Fragment: ${fragment}`,
+      `Credentials: ${hasCredentials ? "Present (redacted)" : "None"}`
+    ].join("\n");
+
+    lastUrlParserResult = report;
+    urlParserResult.innerHTML = [
+      "🌍 URL Analysis",
+      `<b>Original Input:</b> ${sanitize(hasCredentials ? "[URL contains credentials; redacted]" : input)}`,
+      `<b>Normalized URL:</b> ${sanitize(safeUrl.href)}`,
+      `<b>Protocol:</b> ${sanitize(url.protocol)}`,
+      `<b>Hostname:</b> ${sanitize(url.hostname)}`,
+      `<b>Port:</b> ${sanitize(port)}`,
+      `<b>Path:</b> ${sanitize(url.pathname)}`,
+      `<b>Query:</b> ${sanitize(query)}`,
+      `<b>Fragment:</b> ${sanitize(fragment)}`,
+      `<b>Credentials:</b> ${hasCredentials ? "Present (redacted)" : "None"}`
+    ].join("<br><br>");
+  } catch (error) {
+    const message = error?.message === "UNSUPPORTED_URL_SCHEME"
+      ? "❌ Only HTTP and HTTPS URLs are supported."
+      : "❌ Invalid URL. Check the hostname, port, and URL format.";
+    urlParserResult.textContent = message;
     lastUrlParserResult = "";
   }
 }
+
 function clearUrlParserResult() {
   urlParserInput.value = "";
-  urlParserResult.innerHTML = "Waiting for URL input...";
+  urlParserResult.textContent = "Waiting for URL input...";
   lastUrlParserResult = "";
 }
 
 // ===== URL Encoder / Decoder Pro =====
+
 function showUrlCodecResult(mode, input, output) {
   lastUrlCodecResult = output;
   urlCodecResult.innerHTML = `🧩 URL ${mode}<br><br><b>Input:</b><br>${codeBlock(input)}<br><br><b>Result:</b><br>${codeBlock(output)}`;
