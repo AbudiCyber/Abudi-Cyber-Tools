@@ -13,6 +13,7 @@ const dom = new JSDOM(html, {
 
 try {
   const { window } = dom;
+  window.TextDecoder = TextDecoder;
   window.eval(script);
 
   const escapingCases = [
