@@ -470,27 +470,91 @@ function clearBase64Result() {
   lastBase64Result = "";
 }
 
-// ===== Email Validator Pro =====
+// ===== Email Format Checker =====
+function inspectEmailAddress(email) {
+  if (email.length > 254) return { valid: false, reason: "The address exceeds the 254-character email limit." };
+
+  const atIndex = email.indexOf("@");
+  if (atIndex <= 0 || atIndex !== email.lastIndexOf("@") || atIndex === email.length - 1) {
+    return { valid: false, reason: "Use one @ symbol with a local part and a domain." };
+  }
+
+  const localPart = email.slice(0, atIndex);
+  const domain = email.slice(atIndex + 1);
+
+  if (localPart.length > 64) return { valid: false, reason: "The local part exceeds 64 characters." };
+  if (
+    localPart.startsWith(".") ||
+    localPart.endsWith(".") ||
+    localPart.includes("..") ||
+    !/^[A-Za-z0-9!#$%&'*+/=?^_\x60{|}~.-]+$/.test(localPart)
+  ) {
+    return { valid: false, reason: "The local part contains unsupported characters or dot placement." };
+  }
+
+  if (!/^[\p{L}\p{N}.-]+$/u.test(domain) || domain.startsWith(".") || domain.endsWith(".") || domain.includes("..")) {
+    return { valid: false, reason: "The domain contains invalid characters or dot placement." };
+  }
+
+  let asciiDomain;
+  try {
+    const parsedDomain = new URL(`http://${domain}/`);
+    if (parsedDomain.username || parsedDomain.password || parsedDomain.port || parsedDomain.pathname !== "/") {
+      return { valid: false, reason: "The domain contains unsupported URL components." };
+    }
+    asciiDomain = parsedDomain.hostname.toLowerCase();
+  } catch {
+    return { valid: false, reason: "The domain is not a valid hostname." };
+  }
+
+  if (!asciiDomain || asciiDomain.length > 253) {
+    return { valid: false, reason: "The domain length is invalid." };
+  }
+
+  const labels = asciiDomain.split(".");
+  if (
+    /^(?:\d{1,3}\.){3}\d{1,3}$/.test(asciiDomain) ||
+    labels.length < 2 ||
+    labels.some(label =>
+      label.length < 1 ||
+      label.length > 63 ||
+      !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i.test(label)
+    )
+  ) {
+    return { valid: false, reason: "The domain must contain valid DNS labels, not an IP address literal." };
+  }
+
+  if (labels[labels.length - 1].length < 2 || !/[a-z]/i.test(labels[labels.length - 1])) {
+    return { valid: false, reason: "The top-level domain must contain at least two characters." };
+  }
+
+  if (localPart.length + 1 + asciiDomain.length > 254) {
+    return { valid: false, reason: "The normalized address exceeds the 254-character email limit." };
+  }
+
+  return { valid: true, reason: "The address matches the supported email syntax." };
+}
+
 function validateEmail() {
   const email = emailInput.value.trim();
   if (!email) {
-    emailResult.innerHTML = "⚠ Please enter an email address first.";
+    emailResult.textContent = "⚠ Please enter an email address first.";
     lastEmailResult = "";
     return;
   }
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const isValid = emailRegex.test(email);
-  const status = isValid ? "Valid Email Address" : "Invalid Email Address";
-  const icon = isValid ? "✅" : "❌";
-  lastEmailResult = `${email} - ${status}`;
-  emailResult.innerHTML = `📧 Email Validation<br><br><b>Email:</b> ${sanitize(email)}<br><br>${icon} <b>${status}</b>`;
-}
-function clearEmailResult() {
-  emailInput.value = "";
-  emailResult.innerHTML = "Waiting for email input...";
-  lastEmailResult = "";
+
+  const result = inspectEmailAddress(email);
+  const status = result.valid ? "Format appears valid" : "Invalid email format";
+  const icon = result.valid ? "✅" : "❌";
+  lastEmailResult = `${email} - ${status}\n${result.reason}\nThis check does not verify mailbox existence or deliverability.`;
+  emailResult.innerHTML = `📧 Email Format Check<br><br><b>Email:</b> ${sanitize(email)}<br><br>${icon} <b>${status}</b><br>${sanitize(result.reason)}<br><br><small>This is a syntax check only. It does not verify that the mailbox exists, accepts mail, or is reachable.</small>`;
 }
 
+function clearEmailResult() {
+  emailInput.value = "";
+  emailResult.textContent = "Waiting for email input...";
+  lastEmailResult = "";
+}
 // ===== URL Parser Pro =====
 function parseURL() {
   const input = urlParserInput.value.trim();

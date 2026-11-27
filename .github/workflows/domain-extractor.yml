@@ -46,3 +46,6 @@ jobs:
 
       - name: Run hash generator lifecycle regression test
         run: npm run test:hash-generator
+
+      - name: Run email format checker regression test
+        run: npm run test:email-validator
