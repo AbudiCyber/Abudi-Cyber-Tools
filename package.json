@@ -4,7 +4,8 @@
   "scripts": {
     "test:domain-extractor": "node tests/domain-extractor-smoke.test.js",
     "test:password-security": "node tests/password-security.test.js",
-    "check:js-syntax": "node scripts/check-js-syntax.js"
+    "check:js-syntax": "node scripts/check-js-syntax.js",
+    "test:output-escaping": "node tests/output-escaping.test.js"
   },
   "devDependencies": {
     "jsdom": "26.1.0"

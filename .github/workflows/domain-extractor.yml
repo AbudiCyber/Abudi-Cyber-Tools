@@ -34,3 +34,6 @@ jobs:
 
       - name: Run password security regression test
         run: npm run test:password-security
+
+      - name: Run output escaping regression test
+        run: npm run test:output-escaping

@@ -42,7 +42,15 @@ let lastFileName = "";
 let lastFileReport = "";
 
 function sanitize(input) {
-  return String(input).replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const htmlEntities = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  };
+
+  return String(input).replace(/[&<>"']/g, character => htmlEntities[character]);
 }
 
 function codeBlock(value) {
