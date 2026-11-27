@@ -608,7 +608,7 @@ function classifyIPv6(ip) {
   if (first === 0x0100 && second === 0 && groups[2] === 0 && groups[3] === 1) {
     return { scope: "Dummy prefix", routable: "No", icon: "⚠", note: "Special-purpose dummy IPv6 prefix." };
   }
-  if (first === 0x2001 && second === 0 && groups.slice(2).every(group => group === 0)) {
+  if (first === 0x2001 && second === 0) {
     return { scope: "Teredo", routable: "Special", icon: "⚠", note: "Teredo transition mechanism prefix; routing depends on the mechanism and network." };
   }
   if (first === 0x2001 && second === 1 && groups.slice(2, 7).every(group => group === 0) && [1, 2, 3].includes(groups[7])) {
