@@ -1,0 +1,154 @@
+const assert = require("node:assert/strict");
+const { createHash } = require("node:crypto");
+const fs = require("node:fs");
+const path = require("node:path");
+const { JSDOM } = require("jsdom");
+
+const root = path.join(__dirname, "..");
+const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+const script = fs.readFileSync(path.join(root, "script.js"), "utf8");
+
+function makeFile(name, content, type = "text/plain") {
+  const bytes = Buffer.from(content);
+  return {
+    name,
+    type,
+    size: bytes.length,
+    lastModified: 1700000000000,
+    arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
+  };
+}
+
+function setSelectedFile(input, file) {
+  Object.defineProperty(input, "files", {
+    configurable: true,
+    value: file ? [file] : []
+  });
+}
+
+async function main() {
+  const dom = new JSDOM(html, {
+    runScripts: "outside-only",
+    url: "https://example.test/"
+  });
+
+  try {
+    const { window } = dom;
+    const input = window.document.getElementById("fileHashInput");
+    const result = window.document.getElementById("fileHashResult");
+    const expectedHash = createHash("sha256").update("abc").digest("hex");
+
+    Object.defineProperty(window.crypto, "subtle", {
+      configurable: true,
+      value: {
+        digest: async (algorithm, buffer) => {
+          assert.equal(algorithm, "SHA-256");
+          return createHash("sha256").update(Buffer.from(buffer)).digest().buffer.slice(
+            createHash("sha256").update(Buffer.from(buffer)).digest().byteOffset,
+            createHash("sha256").update(Buffer.from(buffer)).digest().byteOffset +
+              createHash("sha256").update(Buffer.from(buffer)).digest().byteLength
+          );
+        }
+      }
+    });
+
+    window.eval(script);
+
+    setSelectedFile(input, makeFile("sample.txt", "abc"));
+    await window.generateFileHash();
+    assert.equal(window.lastFileHash, expectedHash, "SHA-256 must match the known test vector.");
+    assert.match(result.textContent, /Local-only hash analysis/);
+    assert.match(result.textContent, /not an antivirus scan/i);
+    assert.equal(window.lastFileName, "sample.txt");
+    assert.match(window.lastFileReport, new RegExp(expectedHash));
+
+    setSelectedFile(input, makeFile("<img src=x onerror=alert(1)>.exe", "payload"));
+    await window.generateFileHash();
+    assert.equal(result.querySelector("img"), null, "Untrusted file names must not create HTML elements.");
+    assert.match(result.textContent, /Potentially risky file type/);
+    assert.match(result.textContent, /&lt;img|img src=x/);
+    assert.equal(window.lastFileHash.length, 64);
+
+    assert.equal(window.sanitizeDownloadFileName("..\\evil/name?.exe"), "___evil_name_.exe");
+    assert.equal(window.sanitizeDownloadFileName("   "), "file");
+    assert.equal(window.sanitizeDownloadFileName("report.txt. "), "report.txt");
+
+    const originalCreateObjectURL = window.URL.createObjectURL;
+    const originalRevokeObjectURL = window.URL.revokeObjectURL;
+    let capturedDownloadName = "";
+    let capturedBlob = null;
+    window.URL.createObjectURL = blob => {
+      capturedBlob = blob;
+      return "blob:https://example.test/hash-report";
+    };
+    window.URL.revokeObjectURL = () => {};
+    window.HTMLAnchorElement.prototype.click = function () {
+      capturedDownloadName = this.download;
+    };
+    window.downloadReport();
+    assert.equal(capturedDownloadName, "___img_src=x_onerror=alert(1)__.exe_hash_report.txt");
+    assert.ok(capturedBlob instanceof window.Blob);
+    window.URL.createObjectURL = originalCreateObjectURL;
+    window.URL.revokeObjectURL = originalRevokeObjectURL;
+
+    const previousHash = window.lastFileHash;
+    setSelectedFile(input, {
+      name: "oversized.bin",
+      type: "application/octet-stream",
+      size: window.FILE_HASH_MAX_BYTES + 1,
+      lastModified: 0,
+      arrayBuffer: async () => { throw new Error("must not read oversized files"); }
+    });
+    await window.generateFileHash();
+    assert.match(result.textContent, /too large/i);
+    assert.equal(window.lastFileHash, "");
+
+    const originalSubtle = window.crypto.subtle;
+    Object.defineProperty(window.crypto, "subtle", { configurable: true, value: undefined });
+    setSelectedFile(input, makeFile("unsupported.txt", "x"));
+    await window.generateFileHash();
+    assert.match(result.textContent, /unavailable in this browser context/i);
+    assert.equal(window.lastFileHash, "");
+    Object.defineProperty(window.crypto, "subtle", { configurable: true, value: originalSubtle });
+
+    let resolveArrayBuffer;
+    setSelectedFile(input, {
+      name: "slow.txt",
+      type: "text/plain",
+      size: 4,
+      lastModified: 0,
+      arrayBuffer: () => new Promise(resolve => { resolveArrayBuffer = resolve; })
+    });
+    const pending = window.generateFileHash();
+    window.clearFileHashResult();
+    resolveArrayBuffer(Buffer.from("slow").buffer.slice(
+      Buffer.from("slow").byteOffset,
+      Buffer.from("slow").byteOffset + Buffer.from("slow").byteLength
+    ));
+    await pending;
+    assert.equal(window.lastFileHash, "", "Clearing must invalidate an in-flight hash operation.");
+    assert.equal(window.lastFileName, "");
+    assert.match(result.textContent, /Waiting for file input/);
+
+    setSelectedFile(input, makeFile("change.txt", "first"));
+    const pendingOnChange = window.generateFileHash();
+    setSelectedFile(input, makeFile("new-selection.txt", "second"));
+    input.dispatchEvent(new window.Event("change"));
+    await pendingOnChange;
+    assert.equal(window.lastFileHash, "", "Changing selection must invalidate an in-flight hash operation.");
+    assert.match(result.textContent, /selection changed/i);
+
+    setSelectedFile(input, null);
+    await window.generateFileHash();
+    assert.match(result.textContent, /choose a file first/i);
+
+    console.log("File hash checker regression test: PASS");
+  } finally {
+    dom.window.close();
+  }
+}
+
+main().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});
