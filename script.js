@@ -189,13 +189,18 @@ function checkPassword() {
 
   const characters = Array.from(password);
   const length = characters.length;
+  if (length > PASSWORD_CHECKER_MAX_CODE_POINTS) {
+    passwordCheckerResult.textContent = "⚠ Password is too long for this local check. Maximum supported length is 1,024 Unicode characters.";
+    lastPasswordCheckResult = "";
+    return;
+  }
   const hasLower = /[a-z]/.test(password);
   const hasUpper = /[A-Z]/.test(password);
   const hasNumbers = /\d/.test(password);
   const hasSymbols = /[^\p{L}\p{N}\s]/u.test(password);
   const normalized = password.toLowerCase();
   const isRepeatedCharacter = characters.length > 1 && characters.every(character => character === characters[0]);
-  const isKnownWeakExample = KNOWN_WEAK_PASSWORD_EXAMPLES.has(normalized);
+  const isKnownWeakExample = KNOWN_WEAK_PASSWORD_EXAMPLES.has(normalized) || /^(?:password|qwerty|letmein|admin|welcome)[0-9!@#$]*$/i.test(password);
   const isSimpleSequence = /^(?:0123456789|1234567890|abcdefghijklmnopqrstuvwxyz|qwertyuiop)$/i.test(password);
   const hasPredictablePattern = isRepeatedCharacter || isKnownWeakExample || isSimpleSequence;
 
@@ -1003,6 +1008,7 @@ bindClick("clearTextAnalysisBtn", clearTextAnalysisResult);
 bindClick("checkPasswordBtn", checkPassword);
 bindClick("copyPasswordCheckBtn", () => copyLogicalValue(lastPasswordCheckResult, passwordCheckerResult, "Password check result copied."));
 bindClick("clearPasswordCheckBtn", clearPasswordCheckResult);
+passwordInput.addEventListener("input", handlePasswordInputChange);
 bindClick("generatePasswordBtn", generatePassword);
 bindClick("copyPasswordBtn", () => copyLogicalValue(generatedPassword, passwordGeneratorResult, "Password copied."));
 bindClick("clearPasswordBtn", clearPasswordResult);
