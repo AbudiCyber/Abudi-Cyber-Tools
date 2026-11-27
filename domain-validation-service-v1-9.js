@@ -34,10 +34,10 @@
       return createInvalidResult(normalizedValue);
     }
 
-    const hasHttpScheme = /^https?:\\/\\//i.test(normalizedValue);
-    const looksLikeHostPort =
+    const hasHttpScheme = /^https?:\/\//i.test(normalizedValue);
+      /^(?:localhost|[^:/?#.]+(?:\.[^:/?#.]+)+|\[[0-9a-f:.]+\]):\d+(?:[/?#]|$)/i.test(normalizedValue);
       /^(?:localhost|[^:/?#.]+(?:\\.[^:/?#.]+)+|\\[[0-9a-f:.]+\\]):\\d+(?:[/?#]|$)/i.test(normalizedValue);
-    const hasExplicitScheme = /^[a-z][a-z\\d+.-]*:/i.test(normalizedValue);
+    const hasExplicitScheme = /^[a-z][a-z\d+.-]*:/i.test(normalizedValue);
 
     if (hasExplicitScheme && !hasHttpScheme && !looksLikeHostPort) {
       return createInvalidResult(normalizedValue);
