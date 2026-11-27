@@ -82,7 +82,7 @@ function encodeUnicodeBase64(text) {
 }
 
 function decodeUnicodeBase64(base64Text) {
-  const compact = base64Text.replace(/\\s/g, "");
+  const compact = base64Text.replace(/\s/g, "");
   if (
     !compact ||
     compact.length % 4 !== 0 ||
