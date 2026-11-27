@@ -650,7 +650,7 @@ function parseURL() {
 
   try {
     const hasHttpScheme = /^https?:\/\//i.test(input);
-    const looksLikeHostPort = /^[^/?#]+:\d+(?:[/?#]|$)/.test(input);
+    const looksLikeHostPort = /^(?:localhost|[^:/?#.]+(?:\.[^:/?#.]+)+|\[[0-9a-f:.]+\]):\d+(?:[/?#]|$)/i.test(input);
     const hasExplicitScheme = /^[a-z][a-z\d+.-]*:/i.test(input);
 
     if (hasExplicitScheme && !hasHttpScheme && !looksLikeHostPort) {
@@ -671,11 +671,22 @@ function parseURL() {
     safeUrl.password = "";
 
     const port = url.port || "Default";
-    const query = url.search || "None";
-    const fragment = url.hash || "None";
+    const redactSensitiveParameters = value =>
+      value.replace(
+        /([?&#])(access_token|refresh_token|token|api[_-]?key|password|passwd|secret|sessionid|authorization)=([^&#]*)/gi,
+        "$1$2=[REDACTED]"
+      );
+    const query = url.search ? redactSensitiveParameters(url.search) : "None";
+    const fragment = url.hash ? redactSensitiveParameters(url.hash) : "None";
+    const hasSensitiveParameters = query.includes("[REDACTED]") || fragment.includes("[REDACTED]");
+    safeUrl.search = query === "None" ? "" : query;
+    safeUrl.hash = fragment === "None" ? "" : fragment;
+    const sensitiveInputLabel = hasCredentials || hasSensitiveParameters
+      ? "[URL contains sensitive data; redacted]"
+      : input;
     const report = [
       "URL Analysis",
-      `Original Input: ${hasCredentials ? "[URL contains credentials; redacted]" : input}`,
+      `Original Input: ${sensitiveInputLabel}`,
       `Normalized URL: ${safeUrl.href}`,
       `Protocol: ${url.protocol}`,
       `Hostname: ${url.hostname}`,
@@ -689,7 +700,7 @@ function parseURL() {
     lastUrlParserResult = report;
     urlParserResult.innerHTML = [
       "🌍 URL Analysis",
-      `<b>Original Input:</b> ${sanitize(hasCredentials ? "[URL contains credentials; redacted]" : input)}`,
+      `<b>Original Input:</b> ${sanitize(sensitiveInputLabel)}`,
       `<b>Normalized URL:</b> ${sanitize(safeUrl.href)}`,
       `<b>Protocol:</b> ${sanitize(url.protocol)}`,
       `<b>Hostname:</b> ${sanitize(url.hostname)}`,
