@@ -83,16 +83,18 @@ assert.doesNotMatch(window.document.getElementById("passwordCheckerResult").text
 
 passwordField.value = "LongUniquePassphraseExample";
 checkButton.click();
-assert.ok(window.eval("lastPasswordCheckResult").length > 0);
+assert.match(window.document.getElementById("passwordCheckerResult").textContent, /Password Quality Check/);
 passwordField.value = "changed";
 passwordField.dispatchEvent(new window.Event("input"));
-assert.equal(window.eval("lastPasswordCheckResult"), "", "Editing a password must invalidate the previous assessment.");
+window.document.getElementById("copyPasswordCheckBtn").click();
+assert.match(window.document.getElementById("passwordCheckerResult").textContent, /Nothing to copy yet/);
 assert.match(window.document.getElementById("passwordCheckerResult").textContent, /Password changed/);
 
 passwordField.value = "x".repeat(1025);
 checkButton.click();
 assert.match(window.document.getElementById("passwordCheckerResult").textContent, /Maximum supported length/);
-assert.equal(window.eval("lastPasswordCheckResult"), "");
+window.document.getElementById("copyPasswordCheckBtn").click();
+assert.match(window.document.getElementById("passwordCheckerResult").textContent, /Nothing to copy yet/);
 
 dom.window.close();
 console.log("Password security regression test: PASS");
