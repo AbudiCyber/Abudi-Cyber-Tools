@@ -9,7 +9,8 @@
     "test:ip-analyzer": "node tests/ip-analyzer.test.js",
     "test:file-hash-checker": "node tests/file-hash-checker.test.js",
     "test:hash-generator": "node tests/hash-generator-lifecycle.test.js",
-    "test:email-validator": "node tests/email-validator.test.js"
+    "test:email-validator": "node tests/email-validator.test.js",
+    "test:link-analyzer": "node tests/link-analyzer.test.js"
   },
   "devDependencies": {
     "jsdom": "26.1.0"
