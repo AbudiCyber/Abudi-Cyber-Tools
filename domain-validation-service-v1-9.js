@@ -52,7 +52,9 @@
 
       if (
         !url.hostname ||
-        !SUPPORTED_PROTOCOLS.includes(url.protocol)
+        !SUPPORTED_PROTOCOLS.includes(url.protocol) ||
+        url.username ||
+        url.password
       ) {
         return createInvalidResult(normalizedValue);
       }
