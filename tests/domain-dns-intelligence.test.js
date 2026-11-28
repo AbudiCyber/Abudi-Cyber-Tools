@@ -131,6 +131,53 @@ function response(payload, options = {}) {
     );
   }
 
+
+  const specialUseHostnames = [
+    "printer.localhost",
+    "printer.local",
+    "gateway.home.arpa",
+    "hiddenservice.onion",
+    "project.alt",
+    "resolver.resolver.arpa",
+    "registration.service.arpa"
+  ];
+  for (const hostname of specialUseHostnames) {
+    assert.throws(
+      () => service.normalizeHostname(hostname),
+      error => error.message === "DNS_SPECIAL_USE_DOMAIN",
+      "Special-use names must not be sent to the public DNS provider: " + hostname
+    );
+  }
+
+  for (const hostname of [
+    "localhost.example.com",
+    "notlocal.example.com",
+    "example.com.localhost.attacker.test"
+  ]) {
+    assert.equal(
+      service.normalizeHostname(hostname),
+      hostname,
+      "Special-use suffix matching must not reject unrelated public hostnames."
+    );
+  }
+
+  let specialUseNetworkCalls = 0;
+  await assert.rejects(
+    service.lookup("printer.local", {
+      types: ["A"],
+      fetchImpl: async () => {
+        specialUseNetworkCalls += 1;
+        throw new Error("SPECIAL_USE_QUERY_MUST_NOT_BE_SENT");
+      }
+    }),
+    error => error.message === "DNS_SPECIAL_USE_DOMAIN"
+  );
+  assert.equal(
+    specialUseNetworkCalls,
+    0,
+    "The external DNS transport must not be called for special-use names."
+  );
+
   assert.throws(
     () => service.normalizeHostname(null),
     error => error.message === "INVALID_INPUT_TYPE"
