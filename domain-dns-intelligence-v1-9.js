@@ -65,12 +65,6 @@
     "alt",
     "resolver.arpa",
     "service.arpa",
-    "test",
-    "invalid",
-    "example",
-    "example.com",
-    "example.net",
-    "example.org"
   ]);
   const MAX_ANSWERS = 128;
   const MAX_DATA_LENGTH = 2048;
