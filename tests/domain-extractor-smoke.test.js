@@ -1,6 +1,7 @@
 const assert = require("node:assert/strict");
 const path = require("node:path");
 const { JSDOM } = require("jsdom");
+const { TextEncoder, TextDecoder } = require("node:util");
 
 const pagePath = path.join(__dirname, "..", "domain-extractor.html");
 
@@ -31,6 +32,8 @@ function waitFor(condition, timeout = 5000) {
     runScripts: "dangerously",
     resources: "usable",
     beforeParse(window) {
+      window.TextEncoder = TextEncoder;
+      window.TextDecoder = TextDecoder;
       Object.defineProperty(window.navigator, "clipboard", {
         configurable: true,
         value: {
