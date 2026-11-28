@@ -896,6 +896,42 @@ function waitFor(condition, timeout = 5000) {
     assert.equal(dnsButton.disabled, false);
     assert.equal(dnsButton.textContent, "Resolve DNS Records");
 
+    let resolveStaleLookup;
+    let staleSignal;
+    window.AbudiDNSIntelligence = Object.freeze({
+      lookup: (hostname, options = {}) => {
+        return new Promise(resolve => {
+          staleSignal = options.signal;
+          resolveStaleLookup = () => resolve(Object.freeze({ hostname }));
+        });
+      },
+      format: report => "DNS Mock Report: " + report.hostname
+    });
+
+    input.value = "old.example.com";
+    dnsButton.click();
+    await new Promise(resolve => setTimeout(resolve, 10));
+    assert.equal(dnsButton.disabled, true);
+    assert.equal(staleSignal.aborted, false);
+
+    input.value = "new.example.com";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+
+    const inputChangedMessage =
+      "DNS lookup cancelled because the hostname changed.";
+    assert.equal(staleSignal.aborted, true);
+    assert.equal(dnsButton.disabled, false);
+    assert.equal(result.textContent, inputChangedMessage);
+
+    // Deliberately resolve despite abort: the UI request token must reject stale data.
+    resolveStaleLookup();
+    await new Promise(resolve => setTimeout(resolve, 10));
+    assert.equal(
+      result.textContent,
+      inputChangedMessage,
+      "A late DNS response must not overwrite the result after the hostname changes."
+    );
+
     console.log("Domain Extractor smoke test: PASS");
   } finally {
     dom.window.close();

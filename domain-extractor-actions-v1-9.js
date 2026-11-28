@@ -178,6 +178,16 @@
       throw new Error("DNS_ACTION_NOT_READY");
     }
 
+    input.oninput = () => {
+      if (!dnsController) return;
+
+      cancelDNSLookup();
+      window.AbudiDomainResultService.setText(
+        result,
+        "DNS lookup cancelled because the hostname changed."
+      );
+    };
+
     dnsButton.onclick = async () => {
       cancelDNSLookup();
       const requestId = dnsRequestId;
