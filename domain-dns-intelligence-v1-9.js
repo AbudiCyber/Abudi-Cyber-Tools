@@ -230,9 +230,12 @@
     const chunks = [];
     let totalBytes = 0;
 
-    async function cancelReader() {
+    function cancelReader() {
       try {
-        await reader.cancel();
+        const cancellation = reader.cancel();
+        if (cancellation && typeof cancellation.catch === "function") {
+          cancellation.catch(() => {});
+        }
       } catch {
         // Preserve the primary validation error when stream cleanup also fails.
       }
@@ -245,7 +248,7 @@
 
         const chunk = part.value;
         if (!(chunk instanceof Uint8Array)) {
-          await cancelReader();
+          cancelReader();
           throw new Error("DNS_RESPONSE_INVALID");
         }
 
