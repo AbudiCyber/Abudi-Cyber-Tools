@@ -197,8 +197,10 @@
       );
 
       try {
+        const hostname =
+          window.AbudiDomainExtractor.extractDomain(validation.value).hostname;
         const report = await window.AbudiDNSIntelligence.lookup(
-          validation.value,
+          hostname,
           { signal: dnsController.signal }
         );
         if (requestId !== dnsRequestId) return;
