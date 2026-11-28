@@ -119,11 +119,16 @@
     return normalized;
   }
 
-  function sanitizeData(value) {
-    if (typeof value !== "string") return "";
-    return value
-      .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "")
-      .slice(0, MAX_DATA_LENGTH);
+  function validateRecordText(value) {
+    if (
+      typeof value !== "string" ||
+      value.length === 0 ||
+      value.length > MAX_DATA_LENGTH ||
+      /[\x00-\x1f\x7f\u2028\u2029]/.test(value)
+    ) {
+      throw new Error("DNS_RECORD_DATA_INVALID");
+    }
+    return value;
   }
 
   function parseResponse(payload, requestedType, hostname) {
@@ -169,8 +174,6 @@
         typeof answer !== "object" ||
         typeof answer.name !== "string" ||
         !Number.isInteger(answer.type) ||
-        !Number.isFinite(answer.TTL) ||
-        answer.TTL < 0 ||
         typeof answer.data !== "string"
       ) {
         throw new Error("DNS_RECORD_INVALID");
