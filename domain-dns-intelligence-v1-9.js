@@ -19,6 +19,14 @@
     16: "TXT",
     28: "AAAA",
     33: "SRV",
+    43: "DS",
+    46: "RRSIG",
+    47: "NSEC",
+    48: "DNSKEY",
+    50: "NSEC3",
+    51: "NSEC3PARAM",
+    59: "CDS",
+    60: "CDNSKEY",
     257: "CAA"
   });
   const TYPE_NUMBERS = Object.freeze(Object.fromEntries(

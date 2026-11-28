@@ -144,6 +144,20 @@ function response(payload, options = {}) {
   assert.equal(Object.isFrozen(parsed.records), true);
   assert.equal(Object.isFrozen(parsed.records[0]), true);
 
+  const dnssecResponse = service.parseResponse({
+    Status: 0,
+    Question: [{ name: "example.com.", type: 1 }],
+    Answer: [
+      { name: "example.com.", type: 46, TTL: 300, data: "A 8 2 300 20300101000000 20260101000000 12345 example.com. signature" },
+      { name: "example.com.", type: 48, TTL: 300, data: "257 3 8 AwEAAQ==" }
+    ]
+  }, "A", "example.com");
+  assert.deepEqual(
+    dnssecResponse.records.map(record => record.type),
+    ["RRSIG", "DNSKEY"],
+    "DNSSEC records returned by the resolver must not invalidate an otherwise valid JSON response."
+  );
+
   assert.throws(
     () => service.parseResponse({ Status: 65535, Question: [{ name: "example.com.", type: 1 }] }, "A", "example.com"),
     error => error.message === "DNS_RESPONSE_STATUS_INVALID"
