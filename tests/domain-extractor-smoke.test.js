@@ -927,6 +927,18 @@ function waitFor(condition, timeout = 5000) {
           assert.equal(options.credentials, "omit");
           assert.equal(options.referrerPolicy, "no-referrer");
 
+          const payload = {
+            Status: 0,
+            Question: [{ name: "shop.example.co.uk.", type: 1 }],
+            Answer: [{
+              name: "shop.example.co.uk.",
+              type: 1,
+              TTL: 60,
+              data: "192.0.2.44"
+            }]
+          };
+          const encoded = new TextEncoder().encode(JSON.stringify(payload));
+          let consumed = false;
           return {
             ok: true,
             headers: {
@@ -934,20 +946,25 @@ function waitFor(condition, timeout = 5000) {
                 if (name.toLowerCase() === "content-type") {
                   return "application/dns-json; charset=UTF-8";
                 }
-                if (name.toLowerCase() === "content-length") return "128";
+                if (name.toLowerCase() === "content-length") {
+                  return String(encoded.byteLength);
+                }
                 return null;
               }
             },
-            json: async () => ({
-              Status: 0,
-              Question: [{ name: "shop.example.co.uk.", type: 1 }],
-              Answer: [{
-                name: "shop.example.co.uk.",
-                type: 1,
-                TTL: 60,
-                data: "192.0.2.44"
-              }]
-            })
+            body: {
+              getReader() {
+                return {
+                  async read() {
+                    if (consumed) return { done: true };
+                    consumed = true;
+                    return { done: false, value: encoded };
+                  },
+                  async cancel() {},
+                  releaseLock() {}
+                };
+              }
+            }
           };
         }
       }
