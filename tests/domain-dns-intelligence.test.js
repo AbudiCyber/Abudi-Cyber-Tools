@@ -152,7 +152,7 @@ function response(payload, options = {}) {
   for (const hostname of [
     "localhost.example.com",
     "notlocal.example.com",
-    "example.com.localhost.attacker.test"
+    "example.com.localhost.attacker.net"
   ]) {
     assert.equal(
       service.normalizeHostname(hostname),
