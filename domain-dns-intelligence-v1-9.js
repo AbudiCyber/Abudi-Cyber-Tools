@@ -190,6 +190,44 @@
     });
   }
 
+  async function readJSONResponse(response) {
+    const reader = response.body?.getReader?.();
+    if (!reader) return response.json();
+
+    const chunks = [];
+    let totalBytes = 0;
+
+    try {
+      while (true) {
+        const part = await reader.read();
+        if (part.done) break;
+        const chunk = part.value;
+        if (!(chunk instanceof Uint8Array)) {
+          throw new Error("DNS_RESPONSE_INVALID");
+        }
+        totalBytes += chunk.byteLength;
+        if (totalBytes > MAX_CONTENT_LENGTH) {
+          await reader.cancel();
+          throw new Error("DNS_RESPONSE_TOO_LARGE");
+        }
+        chunks.push(chunk);
+      }
+
+      const bytes = new Uint8Array(totalBytes);
+      let offset = 0;
+      for (const chunk of chunks) {
+        bytes.set(chunk, offset);
+        offset += chunk.byteLength;
+      }
+      return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+    } catch (error) {
+      if (error?.message === "DNS_RESPONSE_TOO_LARGE") throw error;
+      throw new Error("DNS_RESPONSE_INVALID");
+    } finally {
+      reader.releaseLock?.();
+    }
+  }
+
   async function queryType(hostname, type, options) {
     const controller = new AbortController();
     const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -241,7 +279,7 @@
         throw new Error("DNS_RESPONSE_TOO_LARGE");
       }
 
-      const payload = await response.json();
+      const payload = await readJSONResponse(response);
       return parseResponse(payload, type, hostname);
     } catch (error) {
       if (timedOut) throw new Error("DNS_TIMEOUT");
