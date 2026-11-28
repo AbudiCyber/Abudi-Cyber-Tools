@@ -201,15 +201,18 @@
       while (true) {
         const part = await reader.read();
         if (part.done) break;
+
         const chunk = part.value;
         if (!(chunk instanceof Uint8Array)) {
           throw new Error("DNS_RESPONSE_INVALID");
         }
+
         totalBytes += chunk.byteLength;
         if (totalBytes > MAX_CONTENT_LENGTH) {
           await reader.cancel();
           throw new Error("DNS_RESPONSE_TOO_LARGE");
         }
+
         chunks.push(chunk);
       }
 
@@ -219,6 +222,7 @@
         bytes.set(chunk, offset);
         offset += chunk.byteLength;
       }
+
       return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
     } catch (error) {
       if (error?.message === "DNS_RESPONSE_TOO_LARGE") throw error;
