@@ -25,6 +25,12 @@
       );
     }
 
+    if (window.AbudiPublicSuffixService) {
+      const intelligence = window.AbudiPublicSuffixService.analyze(input);
+      lines.push("Public Suffix: " + intelligence.publicSuffix);
+      lines.push("Registrable Domain: " + intelligence.registrableDomain);
+    }
+
     if (window.AbudiDomainTLD) {
       lines.push(
         "TLD: " + window.AbudiDomainTLD.getTLD(input)
@@ -82,7 +88,7 @@
   }
 
   window.AbudiDomainUI = Object.freeze({
-    version: "1.9.2",
+    version: "1.9.3",
     formatExtended,
     setTemporaryButtonText
   });

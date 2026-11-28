@@ -2,45 +2,14 @@
 (() => {
   "use strict";
 
-  function isIpAddress(hostname) {
-    return (
-      hostname.includes(":") ||
-      /^(?:\d{1,3}\.){3}\d{1,3}$/.test(hostname)
-    );
-  }
-
   function getSubdomain(input) {
-    if (typeof input !== "string") {
-      throw new Error("INVALID_INPUT_TYPE");
-    }
-    const raw = input.trim();
-
-    if (!raw) {
-      throw new Error("EMPTY_INPUT");
-    }
-    if (raw.includes("\\")) {
-      throw new Error("BACKSLASH_NOT_ALLOWED");
-    }
-
-    const u = new URL(
-      raw.includes("://") ? raw : "https://" + raw
-    );
-
-    const hostname = u.hostname.toLowerCase();
-
-    if (hostname === "localhost" || isIpAddress(hostname)) {
-      return "none";
-    }
-
-    const parts = hostname.split(".").filter(Boolean);
-
-    return parts.length > 2
-      ? parts.slice(0, -2).join(".")
-      : "none";
+    const service = window.AbudiPublicSuffixService;
+    if (!service) throw new Error("PUBLIC_SUFFIX_SERVICE_NOT_READY");
+    return service.getSubdomain(input);
   }
 
   window.AbudiDomainSubdomain = Object.freeze({
-    version: "1.9.3",
+    version: "1.9.4",
     getSubdomain
   });
 })();

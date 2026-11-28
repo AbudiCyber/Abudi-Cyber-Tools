@@ -77,7 +77,7 @@ function waitFor(condition, timeout = 5000) {
     );
 
     assert.ok(window.AbudiDomainBootstrap);
-    assert.equal(window.AbudiDomainBootstrap.version, "1.9.1");
+    assert.equal(window.AbudiDomainBootstrap.version, "1.9.2");
     assert.equal(Object.isFrozen(window.AbudiDomainBootstrap), true);
     assert.equal(typeof window.AbudiDomainBootstrap.start, "function");
     assert.equal(typeof window.AbudiDomainBootstrap.load, "function");
@@ -421,6 +421,90 @@ function waitFor(condition, timeout = 5000) {
         "https://api.v1.example.com"
       ),
       "api.v1"
+    );
+
+    const publicSuffixCases = [
+      {
+        value: "https://shop.example.co.uk",
+        suffix: "co.uk",
+        registrable: "example.co.uk",
+        subdomain: "shop",
+        tld: "uk"
+      },
+      {
+        value: "https://api.shop.example.co.uk",
+        suffix: "co.uk",
+        registrable: "example.co.uk",
+        subdomain: "api.shop",
+        tld: "uk"
+      },
+      {
+        value: "https://www.example.com.au",
+        suffix: "com.au",
+        registrable: "example.com.au",
+        subdomain: "www",
+        tld: "au"
+      },
+      {
+        value: "https://a.b.ck",
+        suffix: "b.ck",
+        registrable: "a.b.ck",
+        subdomain: "none",
+        tld: "ck"
+      },
+      {
+        value: "https://foo.www.ck",
+        suffix: "ck",
+        registrable: "www.ck",
+        subdomain: "foo",
+        tld: "ck"
+      },
+      {
+        value: "https://foo.city.kawasaki.jp",
+        suffix: "kawasaki.jp",
+        registrable: "city.kawasaki.jp",
+        subdomain: "foo",
+        tld: "jp"
+      },
+      {
+        value: "https://project.alice.github.io",
+        suffix: "github.io",
+        registrable: "alice.github.io",
+        subdomain: "project",
+        tld: "io"
+      },
+      {
+        value: "https://example.com",
+        suffix: "com",
+        registrable: "example.com",
+        subdomain: "none",
+        tld: "com"
+      }
+    ];
+
+    assert.equal(
+      window.AbudiPublicSuffixService.listVersion,
+      "2026-11-27_12-48-40_UTC"
+    );
+    assert.ok(
+      window.AbudiPublicSuffixList.rules.length > 10000,
+      "The complete vendored PSL snapshot must be loaded."
+    );
+
+    for (const testCase of publicSuffixCases) {
+      const analysis = window.AbudiPublicSuffixService.analyze(testCase.value);
+      assert.equal(analysis.publicSuffix, testCase.suffix, testCase.value);
+      assert.equal(analysis.registrableDomain, testCase.registrable, testCase.value);
+      assert.equal(analysis.subdomain, testCase.subdomain, testCase.value);
+      assert.equal(analysis.tld, testCase.tld, testCase.value);
+      assert.equal(window.AbudiDomainTLD.getTLD(testCase.value), testCase.tld);
+      assert.equal(window.AbudiDomainSubdomain.getSubdomain(testCase.value), testCase.subdomain);
+    }
+
+    assert.equal(
+      window.AbudiPublicSuffixService.getRegistrableDomain("https://co.uk"),
+      "none",
+      "A public suffix alone must not be reported as a registrable domain."
     );
 
     const malformedExtensionInput = "https://example.com\\\\@evil.com";
