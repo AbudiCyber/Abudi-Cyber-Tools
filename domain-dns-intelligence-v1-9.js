@@ -254,7 +254,7 @@
 
         totalBytes += chunk.byteLength;
         if (totalBytes > MAX_CONTENT_LENGTH) {
-          await cancelReader();
+          cancelReader();
           throw new Error("DNS_RESPONSE_TOO_LARGE");
         }
 
