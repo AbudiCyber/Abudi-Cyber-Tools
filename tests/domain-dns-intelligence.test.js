@@ -89,6 +89,8 @@ function response(payload, options = {}) {
     "https://user:pass@example.com",
     "https://example.com:8443",
     "https://example.com\\@evil.com",
+    "https://bad..example.com",
+    "https://bad_label.example.com",
     "not a domain",
     "co.uk"
   ]) {
@@ -212,6 +214,20 @@ function response(payload, options = {}) {
   assert.match(report, /DNS Intelligence — Google Public DNS/);
   assert.match(report, /192\.0\.2\.10/);
   assert.match(report, /AD is a resolver-provided flag/);
+
+  const xJavascriptContentType = await service.lookup("example.com", {
+    types: ["A"],
+    fetchImpl: async () => response({
+      Status: 0,
+      Question: [{ name: "example.com.", type: 1 }],
+      Answer: [{ name: "example.com.", type: 1, TTL: 30, data: "192.0.2.20" }]
+    }, { contentType: "application/x-javascript; charset=UTF-8" })
+  });
+  assert.equal(
+    xJavascriptContentType.complete,
+    true,
+    "The documented Google JSON response media type must be accepted."
+  );
 
   const nxdomain = await service.lookup("example.com", {
     types: ["A"],
