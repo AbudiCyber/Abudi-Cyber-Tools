@@ -183,6 +183,8 @@
         typeof answer !== "object" ||
         typeof answer.name !== "string" ||
         !Number.isInteger(answer.type) ||
+        answer.type < 0 ||
+        answer.type > 65535 ||
         typeof answer.data !== "string"
       ) {
         throw new Error("DNS_RECORD_INVALID");
@@ -191,13 +193,12 @@
       if (
         !Number.isInteger(answer.TTL) ||
         answer.TTL < 0 ||
-        answer.TTL > 0xFFFFFFFF
+        answer.TTL > 0x7FFFFFFF
       ) {
         throw new Error("DNS_RECORD_INVALID");
       }
 
-      const type = TYPE_CODES[answer.type];
-      if (!type) throw new Error("DNS_RECORD_TYPE_UNKNOWN");
+      const type = TYPE_CODES[answer.type] || "TYPE" + answer.type;
 
       const name = validateRecordText(answer.name);
       const data = validateRecordText(answer.data);

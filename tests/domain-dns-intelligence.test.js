@@ -216,13 +216,20 @@ function response(payload, options = {}) {
     }, "A", "example.com"),
     error => error.message === "DNS_RECORD_INVALID"
   );
+  const unknownRecordType = service.parseResponse({
+    Status: 0,
+    Question: [{ name: "example.com.", type: 1 }],
+    Answer: [{ name: "example.com.", type: 65000, TTL: 10, data: "opaque" }]
+  }, "A", "example.com");
+  assert.equal(unknownRecordType.records[0].type, "TYPE65000");
+  assert.equal(unknownRecordType.records[0].data, "opaque");
   assert.throws(
     () => service.parseResponse({
       Status: 0,
       Question: [{ name: "example.com.", type: 1 }],
-      Answer: [{ name: "example.com.", type: 65000, TTL: 10, data: "opaque" }]
+      Answer: [{ name: "example.com.", type: 65536, TTL: 10, data: "invalid" }]
     }, "A", "example.com"),
-    error => error.message === "DNS_RECORD_TYPE_UNKNOWN"
+    error => error.message === "DNS_RECORD_INVALID"
   );
   assert.throws(
     () => service.parseResponse({
@@ -235,7 +242,7 @@ function response(payload, options = {}) {
     error => error.message === "DNS_ANSWER_SECTION_INVALID"
   );
 
-  for (const invalidTTL of [1.5, -1, 4294967296, NaN, Infinity]) {
+  for (const invalidTTL of [1.5, -1, 2147483648, 4294967296, NaN, Infinity]) {
     assert.throws(
       () => service.parseResponse({
         Status: 0,
@@ -245,6 +252,12 @@ function response(payload, options = {}) {
       error => error.message === "DNS_RECORD_INVALID"
     );
   }
+  const maximumTTL = service.parseResponse({
+    Status: 0,
+    Question: [{ name: "example.com.", type: 1 }],
+    Answer: [{ name: "example.com.", type: 1, TTL: 2147483647, data: "192.0.2.1" }]
+  }, "A", "example.com");
+  assert.equal(maximumTTL.records[0].ttl, 2147483647);
   assert.throws(
     () => service.parseResponse({
       Status: 0,
