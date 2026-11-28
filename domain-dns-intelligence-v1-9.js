@@ -140,7 +140,7 @@
     if (
       !Number.isInteger(payload.Status) ||
       payload.Status < 0 ||
-      payload.Status > 65535
+      payload.Status > 4095
     ) {
       throw new Error("DNS_RESPONSE_STATUS_INVALID");
     }
