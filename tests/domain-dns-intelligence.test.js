@@ -38,13 +38,34 @@ function createService() {
     Set,
     Promise,
     Error,
-    RegExp
+    RegExp,
+    Uint8Array,
+    TextDecoder
   }, { filename: "domain-dns-intelligence-v1-9.js" });
 
   return window.AbudiDNSIntelligence;
 }
 
-function response(payload, options = {}) {
+function streamBody(chunks, options = {}) {
+  let index = 0;
+
+  return {
+    getReader() {
+      return {
+        async read() {
+          if (index >= chunks.length) return { done: true };
+          return { done: false, value: chunks[index++] };
+        },
+        async cancel() {
+          if (options.cancelError) throw new Error("STREAM_CANCEL_FAILED");
+        },
+        releaseLock() {}
+      };
+    }
+  };
+}
+
+function responseFromChunks(chunks, options = {}) {
   return {
     ok: options.ok !== false,
     headers: {
@@ -53,13 +74,21 @@ function response(payload, options = {}) {
           return options.contentType || "application/dns-json; charset=UTF-8";
         }
         if (name.toLowerCase() === "content-length") {
-          return options.contentLength || "128";
+          if (Object.prototype.hasOwnProperty.call(options, "contentLength")) {
+            return options.contentLength;
+          }
+          return String(chunks.reduce((sum, chunk) => sum + chunk.byteLength, 0));
         }
         return null;
       }
     },
-    json: async () => payload
+    body: streamBody(chunks, options)
   };
+}
+
+function response(payload, options = {}) {
+  const bytes = new TextEncoder().encode(JSON.stringify(payload));
+  return responseFromChunks([bytes], options);
 }
 
 (async () => {
@@ -372,6 +401,118 @@ function response(payload, options = {}) {
     })
   });
   assert.equal(tooLarge.failures[0].error, "DNS_RESPONSE_TOO_LARGE");
+  const oversizedStream = await service.lookup("example.com", {
+    types: ["A"],
+    fetchImpl: async () => responseFromChunks(
+      [new Uint8Array(262145)],
+      { contentLength: null, cancelError: true }
+    )
+  });
+  assert.equal(
+    oversizedStream.failures[0].error,
+    "DNS_RESPONSE_TOO_LARGE",
+    "An oversized streamed body must remain classified as oversized even if stream cancellation fails."
+  );
+
+  let unboundedJSONFallbackCalled = false;
+  const missingStream = await service.lookup("example.com", {
+    types: ["A"],
+    fetchImpl: async () => ({
+      ok: true,
+      headers: {
+        get(name) {
+          if (name.toLowerCase() === "content-type") return "application/dns-json";
+          return null;
+        }
+      },
+      json: async () => {
+        unboundedJSONFallbackCalled = true;
+        return {
+          Status: 0,
+          Question: [{ name: "example.com.", type: 1 }],
+          Answer: []
+        };
+      }
+    })
+  });
+  assert.equal(missingStream.complete, false);
+  assert.equal(missingStream.failures[0].error, "DNS_RESPONSE_STREAM_UNAVAILABLE");
+  assert.equal(
+    unboundedJSONFallbackCalled,
+    false,
+    "The JSON convenience method must not bypass streamed response size limits."
+  );
+
+  const partialResult = await service.lookup("example.com", {
+    types: ["A", "MX"],
+    fetchImpl: async requestUrl => {
+      const requestedType = new URL(requestUrl).searchParams.get("type");
+      if (requestedType === "MX") {
+        return response({
+          Status: 0,
+          Question: [{ name: "example.com.", type: 15 }]
+        }, { contentType: "text/html" });
+      }
+      return response({
+        Status: 0,
+        Question: [{ name: "example.com.", type: 1 }],
+        Answer: [{ name: "example.com.", type: 1, TTL: 60, data: "192.0.2.33" }]
+      });
+    }
+  });
+  assert.equal(partialResult.complete, false);
+  assert.equal(partialResult.results.length, 2);
+  assert.equal(partialResult.records.length, 1);
+  assert.equal(partialResult.records[0].data, "192.0.2.33");
+  assert.equal(partialResult.failures.length, 1);
+  assert.equal(partialResult.failures[0].requestedType, "MX");
+  assert.equal(partialResult.failures[0].error, "DNS_CONTENT_TYPE_INVALID");
+
+  let notifyBodyRead;
+  const bodyReadStarted = new Promise(resolve => {
+    notifyBodyRead = resolve;
+  });
+  const bodyAbortController = new AbortController();
+  const pendingBodyLookup = service.lookup("example.com", {
+    types: ["A"],
+    signal: bodyAbortController.signal,
+    fetchImpl: async (requestUrl, options) => ({
+      ok: true,
+      headers: {
+        get(name) {
+          if (name.toLowerCase() === "content-type") return "application/dns-json";
+          if (name.toLowerCase() === "content-length") return "128";
+          return null;
+        }
+      },
+      body: {
+        getReader() {
+          return {
+            read() {
+              notifyBodyRead();
+              return new Promise((resolve, reject) => {
+                options.signal.addEventListener("abort", () => {
+                  const error = new Error("stream read aborted");
+                  error.name = "AbortError";
+                  reject(error);
+                }, { once: true });
+              });
+            },
+            async cancel() {},
+            releaseLock() {}
+          };
+        }
+      }
+    })
+  });
+  await bodyReadStarted;
+  bodyAbortController.abort();
+  await assert.rejects(
+    pendingBodyLookup,
+    error => error.message === "DNS_LOOKUP_CANCELLED",
+    "Caller cancellation must remain observable while the response body is being consumed."
+  );
+
 
   await assert.rejects(
     service.lookup("example.com", { types: ["ANY"], fetchImpl: async () => response({

@@ -225,10 +225,18 @@
 
   async function readJSONResponse(response) {
     const reader = response.body?.getReader?.();
-    if (!reader) return response.json();
+    if (!reader) throw new Error("DNS_RESPONSE_STREAM_UNAVAILABLE");
 
     const chunks = [];
     let totalBytes = 0;
+
+    async function cancelReader() {
+      try {
+        await reader.cancel();
+      } catch {
+        // Preserve the primary validation error when stream cleanup also fails.
+      }
+    }
 
     try {
       while (true) {
@@ -237,12 +245,13 @@
 
         const chunk = part.value;
         if (!(chunk instanceof Uint8Array)) {
+          await cancelReader();
           throw new Error("DNS_RESPONSE_INVALID");
         }
 
         totalBytes += chunk.byteLength;
         if (totalBytes > MAX_CONTENT_LENGTH) {
-          await reader.cancel();
+          await cancelReader();
           throw new Error("DNS_RESPONSE_TOO_LARGE");
         }
 
@@ -258,10 +267,19 @@
 
       return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
     } catch (error) {
-      if (error?.message === "DNS_RESPONSE_TOO_LARGE") throw error;
+      if (
+        error?.message === "DNS_RESPONSE_TOO_LARGE" ||
+        error?.message === "DNS_RESPONSE_STREAM_UNAVAILABLE"
+      ) {
+        throw error;
+      }
       throw new Error("DNS_RESPONSE_INVALID");
     } finally {
-      reader.releaseLock?.();
+      try {
+        reader.releaseLock?.();
+      } catch {
+        // A stream cleanup error must not replace the response validation result.
+      }
     }
   }
 
