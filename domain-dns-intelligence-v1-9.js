@@ -55,6 +55,23 @@
     22: "BADTRUNC",
     23: "BADCOOKIE"
   });
+  // IANA special-use namespaces must not be disclosed to a public resolver.
+  // IANA specifies that special-use status also applies to subdomains.
+  const SPECIAL_USE_SUFFIXES = Object.freeze([
+    "localhost",
+    "local",
+    "home.arpa",
+    "onion",
+    "alt",
+    "resolver.arpa",
+    "service.arpa",
+    "test",
+    "invalid",
+    "example",
+    "example.com",
+    "example.net",
+    "example.org"
+  ]);
   const MAX_ANSWERS = 128;
   const MAX_DATA_LENGTH = 2048;
   const MAX_CONTENT_LENGTH = 262144;
@@ -89,6 +106,12 @@
     }
 
     const hostname = url.hostname.toLowerCase().replace(/\.$/, "");
+    if (SPECIAL_USE_SUFFIXES.some(suffix =>
+      hostname === suffix || hostname.endsWith("." + suffix)
+    )) {
+      throw new Error("DNS_SPECIAL_USE_DOMAIN");
+    }
+
     const labels = hostname.split(".");
     if (
       hostname.length > 253 ||
