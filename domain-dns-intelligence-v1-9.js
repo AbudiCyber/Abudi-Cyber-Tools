@@ -21,6 +21,9 @@
     33: "SRV",
     257: "CAA"
   });
+  const TYPE_NUMBERS = Object.freeze(Object.fromEntries(
+    Object.entries(TYPE_CODES).map(([number, name]) => [name, Number(number)])
+  ));
   const ALLOWED_TYPES = new Set(DEFAULT_TYPES);
   const STATUS_NAMES = Object.freeze({
     0: "NOERROR",
@@ -111,6 +114,23 @@
     }
 
     const status = payload.Status;
+    if (payload.Question !== undefined) {
+      const questions = payload.Question;
+      if (!Array.isArray(questions) || questions.length !== 1) {
+        throw new Error("DNS_QUESTION_SECTION_INVALID");
+      }
+      const question = questions[0];
+      const questionName = typeof question?.name === "string"
+        ? question.name.toLowerCase().replace(/\\.$/, "")
+        : "";
+      if (
+        questionName !== hostname.toLowerCase().replace(/\\.$/, "") ||
+        question.type !== TYPE_NUMBERS[requestedType]
+      ) {
+        throw new Error("DNS_QUESTION_MISMATCH");
+      }
+    }
+
     const answers = payload.Answer === undefined ? [] : payload.Answer;
 
     if (!Array.isArray(answers) || answers.length > MAX_ANSWERS) {
@@ -177,7 +197,9 @@
       const url = new URL(ENDPOINT);
       url.searchParams.set("name", hostname);
       url.searchParams.set("type", type);
-      url.searchParams.set("do", "true");
+      url.searchParams.set("do", "false");
+      url.searchParams.set("ct", "application/x-javascript");
+      url.searchParams.set("edns_client_subnet", "0.0.0.0/0");
 
       const fetcher = options.fetchImpl || window.fetch?.bind(window);
       if (typeof fetcher !== "function") throw new Error("DNS_FETCH_UNAVAILABLE");
@@ -188,7 +210,7 @@
         credentials: "omit",
         cache: "no-store",
         referrerPolicy: "no-referrer",
-        headers: { Accept: "application/dns-json" },
+        headers: { Accept: "application/x-javascript, application/json" },
         signal: controller.signal
       });
 
