@@ -31,7 +31,20 @@
     2: "SERVFAIL",
     3: "NXDOMAIN",
     4: "NOTIMP",
-    5: "REFUSED"
+    5: "REFUSED",
+    6: "YXDOMAIN",
+    7: "YXRRSET",
+    8: "NXRRSET",
+    9: "NOTAUTH",
+    10: "NOTZONE",
+    16: "BADVERS",
+    17: "BADKEY",
+    18: "BADTIME",
+    19: "BADMODE",
+    20: "BADNAME",
+    21: "BADALG",
+    22: "BADTRUNC",
+    23: "BADCOOKIE"
   });
   const MAX_ANSWERS = 128;
   const MAX_DATA_LENGTH = 2048;
@@ -121,17 +134,17 @@
     if (
       !Number.isInteger(payload.Status) ||
       payload.Status < 0 ||
-      payload.Status > 5
+      payload.Status > 4095
     ) {
       throw new Error("DNS_RESPONSE_STATUS_INVALID");
     }
 
     const status = payload.Status;
-    if (payload.Question !== undefined) {
-      const questions = payload.Question;
-      if (!Array.isArray(questions) || questions.length !== 1) {
-        throw new Error("DNS_QUESTION_SECTION_INVALID");
-      }
+    const questions = payload.Question;
+    if (!Array.isArray(questions) || questions.length !== 1) {
+      throw new Error("DNS_QUESTION_SECTION_INVALID");
+    }
+    {
       const question = questions[0];
       const questionName = typeof question?.name === "string"
         ? question.name.toLowerCase().replace(/\.$/, "")
@@ -163,12 +176,19 @@
         throw new Error("DNS_RECORD_INVALID");
       }
 
+      if (
+        !Number.isInteger(answer.TTL) ||
+        answer.TTL < 0 ||
+        answer.TTL > 0xFFFFFFFF
+      ) {
+        throw new Error("DNS_RECORD_INVALID");
+      }
+
       const type = TYPE_CODES[answer.type];
       if (!type) throw new Error("DNS_RECORD_TYPE_UNKNOWN");
 
-      const name = sanitizeData(answer.name);
-      const data = sanitizeData(answer.data);
-      if (!name || !data) throw new Error("DNS_RECORD_DATA_INVALID");
+      const name = validateRecordText(answer.name);
+      const data = validateRecordText(answer.data);
 
       return Object.freeze({
         name,
@@ -182,7 +202,7 @@
       hostname,
       requestedType,
       status,
-      statusName: STATUS_NAMES[status],
+      statusName: STATUS_NAMES[status] || "RCODE_" + status,
       authenticatedData: payload.AD === true,
       recursionAvailable: payload.RA === true,
       truncated: payload.TC === true,
