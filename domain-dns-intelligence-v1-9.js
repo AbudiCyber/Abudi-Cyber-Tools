@@ -219,7 +219,7 @@
       }
 
       const contentType = response.headers?.get?.("content-type") || "";
-      if (!/application\/(?:dns-json|json)(?:\s*;|$)/i.test(contentType)) {
+      if (!/application\/(?:dns-json|json|x-javascript)(?:\s*;|$)/i.test(contentType)) {
         throw new Error("DNS_CONTENT_TYPE_INVALID");
       }
 
