@@ -37,6 +37,7 @@
     8: "NXRRSET",
     9: "NOTAUTH",
     10: "NOTZONE",
+    11: "DSOTYPENI",
     16: "BADVERS",
     17: "BADKEY",
     18: "BADTIME",
@@ -139,7 +140,7 @@
     if (
       !Number.isInteger(payload.Status) ||
       payload.Status < 0 ||
-      payload.Status > 4095
+      payload.Status > 65535
     ) {
       throw new Error("DNS_RESPONSE_STATUS_INVALID");
     }
