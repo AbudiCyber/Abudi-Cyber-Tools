@@ -222,6 +222,10 @@
   async function lookup(input, options = {}) {
     const hostname = normalizeHostname(input);
     const types = normalizeTypes(options.types || DEFAULT_TYPES);
+    const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    if (!Number.isInteger(timeoutMs) || timeoutMs < 500 || timeoutMs > 20000) {
+      throw new Error("DNS_TIMEOUT_INVALID");
+    }
 
     if (options.signal?.aborted) throw new Error("DNS_LOOKUP_CANCELLED");
 
