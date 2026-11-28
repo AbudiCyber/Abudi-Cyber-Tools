@@ -165,7 +165,11 @@ function response(payload, options = {}) {
   }, "A", "example.com");
   assert.equal(unassignedRcode.statusName, "RCODE_11");
   assert.throws(
-    () => service.parseResponse({ Status: 0, Answer: "bad" }, "A", "example.com"),
+    () => service.parseResponse({
+      Status: 0,
+      Question: [{ name: "example.com.", type: 1 }],
+      Answer: "bad"
+    }, "A", "example.com"),
     error => error.message === "DNS_ANSWER_SECTION_INVALID"
   );
   assert.throws(
@@ -209,7 +213,7 @@ function response(payload, options = {}) {
     () => service.parseResponse({
       Status: 0,
       Question: [{ name: "example.com.", type: 1 }],
-      Answer: [{ name: "example.com.", type: 1, TTL: 1, data: "line1\\nline2" }]
+      Answer: [{ name: "example.com.", type: 1, TTL: 1, data: "line1\nline2" }]
     }, "A", "example.com"),
     error => error.message === "DNS_RECORD_DATA_INVALID"
   );
