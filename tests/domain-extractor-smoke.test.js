@@ -879,6 +879,74 @@ function waitFor(condition, timeout = 5000) {
 
     const { dnsButton } = window.AbudiDomainDOM.getElements();
     assert.ok(dnsButton, "DNS lookup control must be present.");
+
+    // Exercise the real DNS and Public Suffix modules together before replacing
+    // DNS with a UI mock below.
+    const realDNSService = window.AbudiDNSIntelligence;
+    assert.equal(
+      realDNSService.normalizeHostname(
+        "https://shop.example.co.uk/private/path?token=must-not-leak"
+      ),
+      "shop.example.co.uk",
+      "DNS normalization must preserve the registrable hostname under a multi-label public suffix."
+    );
+    assert.equal(
+      realDNSService.normalizeHostname("https://bücher.com/private"),
+      "xn--bcher-kva.com",
+      "DNS normalization must produce the same ASCII IDN form as the Public Suffix engine."
+    );
+
+    let publicSuffixFetchCalls = 0;
+    assert.throws(
+      () => realDNSService.normalizeHostname("https://co.uk"),
+      error => error && error.message === "DNS_REQUIRES_REGISTRABLE_DOMAIN",
+      "A public suffix alone must never trigger a DNS lookup."
+    );
+    assert.equal(publicSuffixFetchCalls, 0);
+
+    const integratedDNSReport = await realDNSService.lookup(
+      "https://shop.example.co.uk/private/path?token=must-not-leak#secret",
+      {
+        types: ["A"],
+        fetchImpl: async (requestUrl, options) => {
+          publicSuffixFetchCalls += 1;
+          const request = new URL(requestUrl);
+          assert.equal(request.hostname, "dns.google");
+          assert.equal(request.searchParams.get("name"), "shop.example.co.uk");
+          assert.equal(request.searchParams.get("type"), "A");
+          assert.equal(options.credentials, "omit");
+          assert.equal(options.referrerPolicy, "no-referrer");
+
+          return {
+            ok: true,
+            headers: {
+              get(name) {
+                if (name.toLowerCase() === "content-type") {
+                  return "application/dns-json; charset=UTF-8";
+                }
+                if (name.toLowerCase() === "content-length") return "128";
+                return null;
+              }
+            },
+            json: async () => ({
+              Status: 0,
+              Question: [{ name: "shop.example.co.uk.", type: 1 }],
+              Answer: [{
+                name: "shop.example.co.uk.",
+                type: 1,
+                TTL: 60,
+                data: "192.0.2.44"
+              }]
+            })
+          };
+        }
+      }
+    );
+    assert.equal(publicSuffixFetchCalls, 1);
+    assert.equal(integratedDNSReport.complete, true);
+    assert.equal(integratedDNSReport.hostname, "shop.example.co.uk");
+    assert.equal(integratedDNSReport.records[0].data, "192.0.2.44");
+
     let dnsLookupHostname = "";
     window.AbudiDNSIntelligence = Object.freeze({
       lookup: async hostname => {
