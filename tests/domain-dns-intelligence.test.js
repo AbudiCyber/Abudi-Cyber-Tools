@@ -104,6 +104,23 @@ function response(payload, options = {}) {
     error => error.message === "INVALID_INPUT_TYPE"
   );
 
+  assert.throws(
+    () => service.parseResponse({
+      Status: 0,
+      Question: [{ name: "attacker.example.", type: 1 }],
+      Answer: []
+    }, "A", "example.com"),
+    error => error.message === "DNS_QUESTION_MISMATCH"
+  );
+  assert.throws(
+    () => service.parseResponse({
+      Status: 0,
+      Question: "invalid",
+      Answer: []
+    }, "A", "example.com"),
+    error => error.message === "DNS_QUESTION_SECTION_INVALID"
+  );
+
   const parsed = service.parseResponse({
     Status: 0,
     AD: true,
@@ -183,7 +200,10 @@ function response(payload, options = {}) {
     assert.equal(call.url.searchParams.get("name"), "example.com");
     assert.equal(call.options.credentials, "omit");
     assert.equal(call.options.referrerPolicy, "no-referrer");
-    assert.equal(call.options.headers.Accept, "application/dns-json");
+    assert.equal(call.options.headers.Accept, "application/x-javascript, application/json");
+    assert.equal(call.url.searchParams.get("ct"), "application/x-javascript");
+    assert.equal(call.url.searchParams.get("do"), "false");
+    assert.equal(call.url.searchParams.get("edns_client_subnet"), "0.0.0.0/0");
     assert.equal(call.options.mode, "cors");
     assert.equal(call.options.method, "GET");
   }
