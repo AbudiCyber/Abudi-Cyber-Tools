@@ -1,8 +1,11 @@
-// Abudi Cyber Tools — vendored Public Suffix List data
-// Source: https://publicsuffix.org/list/public_suffix_list.dat
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// Derived from the official Public Suffix List:
+// https://publicsuffix.org/list/public_suffix_list.dat
 // PSL version: 2026-11-27_12-48-40_UTC
 // Upstream commit: 73edc270543c9a079e6a21f310adc5744ee7c20d
-// License: Mozilla Public License 2.0 (MPL-2.0)
 // Keep this dataset synchronized with the official source; do not hand-edit rules.
 (() => {
   "use strict";
