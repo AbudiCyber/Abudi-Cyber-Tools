@@ -19,6 +19,14 @@
     16: "TXT",
     28: "AAAA",
     33: "SRV",
+    43: "DS",
+    46: "RRSIG",
+    47: "NSEC",
+    48: "DNSKEY",
+    50: "NSEC3",
+    51: "NSEC3PARAM",
+    59: "CDS",
+    60: "CDNSKEY",
     257: "CAA"
   });
   const TYPE_NUMBERS = Object.freeze(Object.fromEntries(
@@ -31,8 +39,33 @@
     2: "SERVFAIL",
     3: "NXDOMAIN",
     4: "NOTIMP",
-    5: "REFUSED"
+    5: "REFUSED",
+    6: "YXDOMAIN",
+    7: "YXRRSET",
+    8: "NXRRSET",
+    9: "NOTAUTH",
+    10: "NOTZONE",
+    11: "DSOTYPENI",
+    16: "BADVERS",
+    17: "BADKEY",
+    18: "BADTIME",
+    19: "BADMODE",
+    20: "BADNAME",
+    21: "BADALG",
+    22: "BADTRUNC",
+    23: "BADCOOKIE"
   });
+  // IANA special-use namespaces must not be disclosed to a public resolver.
+  // IANA specifies that special-use status also applies to subdomains.
+  const SPECIAL_USE_SUFFIXES = Object.freeze([
+    "localhost",
+    "local",
+    "home.arpa",
+    "onion",
+    "alt",
+    "resolver.arpa",
+    "service.arpa",
+  ]);
   const MAX_ANSWERS = 128;
   const MAX_DATA_LENGTH = 2048;
   const MAX_CONTENT_LENGTH = 262144;
@@ -67,6 +100,12 @@
     }
 
     const hostname = url.hostname.toLowerCase().replace(/\.$/, "");
+    if (SPECIAL_USE_SUFFIXES.some(suffix =>
+      hostname === suffix || hostname.endsWith("." + suffix)
+    )) {
+      throw new Error("DNS_SPECIAL_USE_DOMAIN");
+    }
+
     const labels = hostname.split(".");
     if (
       hostname.length > 253 ||
@@ -106,11 +145,16 @@
     return normalized;
   }
 
-  function sanitizeData(value) {
-    if (typeof value !== "string") return "";
-    return value
-      .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "")
-      .slice(0, MAX_DATA_LENGTH);
+  function validateRecordText(value) {
+    if (
+      typeof value !== "string" ||
+      value.length === 0 ||
+      value.length > MAX_DATA_LENGTH ||
+      /[\x00-\x1f\x7f\u2028\u2029]/.test(value)
+    ) {
+      throw new Error("DNS_RECORD_DATA_INVALID");
+    }
+    return value;
   }
 
   function parseResponse(payload, requestedType, hostname) {
@@ -121,17 +165,17 @@
     if (
       !Number.isInteger(payload.Status) ||
       payload.Status < 0 ||
-      payload.Status > 5
+      payload.Status > 65534
     ) {
       throw new Error("DNS_RESPONSE_STATUS_INVALID");
     }
 
     const status = payload.Status;
-    if (payload.Question !== undefined) {
-      const questions = payload.Question;
-      if (!Array.isArray(questions) || questions.length !== 1) {
-        throw new Error("DNS_QUESTION_SECTION_INVALID");
-      }
+    const questions = payload.Question;
+    if (!Array.isArray(questions) || questions.length !== 1) {
+      throw new Error("DNS_QUESTION_SECTION_INVALID");
+    }
+    {
       const question = questions[0];
       const questionName = typeof question?.name === "string"
         ? question.name.toLowerCase().replace(/\.$/, "")
@@ -156,19 +200,25 @@
         typeof answer !== "object" ||
         typeof answer.name !== "string" ||
         !Number.isInteger(answer.type) ||
-        !Number.isFinite(answer.TTL) ||
-        answer.TTL < 0 ||
+        answer.type < 0 ||
+        answer.type > 65535 ||
         typeof answer.data !== "string"
       ) {
         throw new Error("DNS_RECORD_INVALID");
       }
 
-      const type = TYPE_CODES[answer.type];
-      if (!type) throw new Error("DNS_RECORD_TYPE_UNKNOWN");
+      if (
+        !Number.isInteger(answer.TTL) ||
+        answer.TTL < 0 ||
+        answer.TTL > 0x7FFFFFFF
+      ) {
+        throw new Error("DNS_RECORD_INVALID");
+      }
 
-      const name = sanitizeData(answer.name);
-      const data = sanitizeData(answer.data);
-      if (!name || !data) throw new Error("DNS_RECORD_DATA_INVALID");
+      const type = TYPE_CODES[answer.type] || "TYPE" + answer.type;
+
+      const name = validateRecordText(answer.name);
+      const data = validateRecordText(answer.data);
 
       return Object.freeze({
         name,
@@ -182,7 +232,7 @@
       hostname,
       requestedType,
       status,
-      statusName: STATUS_NAMES[status],
+      statusName: STATUS_NAMES[status] || "RCODE_" + status,
       authenticatedData: payload.AD === true,
       recursionAvailable: payload.RA === true,
       truncated: payload.TC === true,
@@ -192,10 +242,21 @@
 
   async function readJSONResponse(response) {
     const reader = response.body?.getReader?.();
-    if (!reader) return response.json();
+    if (!reader) throw new Error("DNS_RESPONSE_STREAM_UNAVAILABLE");
 
     const chunks = [];
     let totalBytes = 0;
+
+    function cancelReader() {
+      try {
+        const cancellation = reader.cancel();
+        if (cancellation && typeof cancellation.catch === "function") {
+          cancellation.catch(() => {});
+        }
+      } catch {
+        // Preserve the primary validation error when stream cleanup also fails.
+      }
+    }
 
     try {
       while (true) {
@@ -204,12 +265,13 @@
 
         const chunk = part.value;
         if (!(chunk instanceof Uint8Array)) {
+          cancelReader();
           throw new Error("DNS_RESPONSE_INVALID");
         }
 
         totalBytes += chunk.byteLength;
         if (totalBytes > MAX_CONTENT_LENGTH) {
-          await reader.cancel();
+          cancelReader();
           throw new Error("DNS_RESPONSE_TOO_LARGE");
         }
 
@@ -225,10 +287,19 @@
 
       return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
     } catch (error) {
-      if (error?.message === "DNS_RESPONSE_TOO_LARGE") throw error;
+      if (
+        error?.message === "DNS_RESPONSE_TOO_LARGE" ||
+        error?.message === "DNS_RESPONSE_STREAM_UNAVAILABLE"
+      ) {
+        throw error;
+      }
       throw new Error("DNS_RESPONSE_INVALID");
     } finally {
-      reader.releaseLock?.();
+      try {
+        reader.releaseLock?.();
+      } catch {
+        // A stream cleanup error must not replace the response validation result.
+      }
     }
   }
 

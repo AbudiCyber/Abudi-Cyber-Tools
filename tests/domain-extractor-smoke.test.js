@@ -1,6 +1,7 @@
 const assert = require("node:assert/strict");
 const path = require("node:path");
 const { JSDOM } = require("jsdom");
+const { TextEncoder, TextDecoder } = require("node:util");
 
 const pagePath = path.join(__dirname, "..", "domain-extractor.html");
 
@@ -31,6 +32,8 @@ function waitFor(condition, timeout = 5000) {
     runScripts: "dangerously",
     resources: "usable",
     beforeParse(window) {
+      window.TextEncoder = TextEncoder;
+      window.TextDecoder = TextDecoder;
       Object.defineProperty(window.navigator, "clipboard", {
         configurable: true,
         value: {
@@ -879,6 +882,103 @@ function waitFor(condition, timeout = 5000) {
 
     const { dnsButton } = window.AbudiDomainDOM.getElements();
     assert.ok(dnsButton, "DNS lookup control must be present.");
+
+    // Exercise the real DNS and Public Suffix modules together before replacing
+    // DNS with a UI mock below.
+    const realDNSService = window.AbudiDNSIntelligence;
+    assert.equal(
+      realDNSService.normalizeHostname(
+        "https://shop.example.co.uk/private/path?token=must-not-leak"
+      ),
+      "shop.example.co.uk",
+      "DNS normalization must preserve the registrable hostname under a multi-label public suffix."
+    );
+    assert.equal(
+      realDNSService.normalizeHostname("https://bücher.com/private"),
+      "xn--bcher-kva.com",
+      "DNS normalization must produce the same ASCII IDN form as the Public Suffix engine."
+    );
+
+    let publicSuffixFetchCalls = 0;
+    await assert.rejects(
+      realDNSService.lookup("https://co.uk", {
+        types: ["A"],
+        fetchImpl: async () => {
+          publicSuffixFetchCalls += 1;
+          throw new Error("PUBLIC_SUFFIX_MUST_NOT_BE_QUERIED");
+        }
+      }),
+      error => error && error.message === "DNS_REQUIRES_REGISTRABLE_DOMAIN",
+      "A public suffix alone must be rejected before any DNS request."
+    );
+    assert.equal(
+      publicSuffixFetchCalls,
+      0,
+      "The DNS transport must not be called for a public suffix without a registrable domain."
+    );
+
+    const integratedDNSReport = await realDNSService.lookup(
+      "https://shop.example.co.uk/private/path?token=must-not-leak#secret",
+      {
+        types: ["A"],
+        fetchImpl: async (requestUrl, options) => {
+          publicSuffixFetchCalls += 1;
+          const request = new URL(requestUrl);
+          assert.equal(request.hostname, "dns.google");
+          assert.equal(request.searchParams.get("name"), "shop.example.co.uk");
+          assert.equal(request.searchParams.get("type"), "A");
+          assert.equal(options.credentials, "omit");
+          assert.equal(options.referrerPolicy, "no-referrer");
+
+          const payload = {
+            Status: 0,
+            Question: [{ name: "shop.example.co.uk.", type: 1 }],
+            Answer: [{
+              name: "shop.example.co.uk.",
+              type: 1,
+              TTL: 60,
+              data: "192.0.2.44"
+            }]
+          };
+          const encoded = new window.Uint8Array(
+            new TextEncoder().encode(JSON.stringify(payload))
+          );
+          let consumed = false;
+          return {
+            ok: true,
+            headers: {
+              get(name) {
+                if (name.toLowerCase() === "content-type") {
+                  return "application/dns-json; charset=UTF-8";
+                }
+                if (name.toLowerCase() === "content-length") {
+                  return String(encoded.byteLength);
+                }
+                return null;
+              }
+            },
+            body: {
+              getReader() {
+                return {
+                  async read() {
+                    if (consumed) return { done: true };
+                    consumed = true;
+                    return { done: false, value: encoded };
+                  },
+                  async cancel() {},
+                  releaseLock() {}
+                };
+              }
+            }
+          };
+        }
+      }
+    );
+    assert.equal(publicSuffixFetchCalls, 1);
+    assert.equal(integratedDNSReport.complete, true);
+    assert.equal(integratedDNSReport.hostname, "shop.example.co.uk");
+    assert.equal(integratedDNSReport.records[0].data, "192.0.2.44");
+
     let dnsLookupHostname = "";
     window.AbudiDNSIntelligence = Object.freeze({
       lookup: async hostname => {
@@ -895,6 +995,42 @@ function waitFor(condition, timeout = 5000) {
     assert.match(result.textContent, /DNS Mock Report: example\.com/);
     assert.equal(dnsButton.disabled, false);
     assert.equal(dnsButton.textContent, "Resolve DNS Records");
+
+    let resolveStaleLookup;
+    let staleSignal;
+    window.AbudiDNSIntelligence = Object.freeze({
+      lookup: (hostname, options = {}) => {
+        return new Promise(resolve => {
+          staleSignal = options.signal;
+          resolveStaleLookup = () => resolve(Object.freeze({ hostname }));
+        });
+      },
+      format: report => "DNS Mock Report: " + report.hostname
+    });
+
+    input.value = "old.example.com";
+    dnsButton.click();
+    await new Promise(resolve => setTimeout(resolve, 10));
+    assert.equal(dnsButton.disabled, true);
+    assert.equal(staleSignal.aborted, false);
+
+    input.value = "new.example.com";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+
+    const inputChangedMessage =
+      "DNS lookup cancelled because the hostname changed.";
+    assert.equal(staleSignal.aborted, true);
+    assert.equal(dnsButton.disabled, false);
+    assert.equal(result.textContent, inputChangedMessage);
+
+    // Deliberately resolve despite abort: the UI request token must reject stale data.
+    resolveStaleLookup();
+    await new Promise(resolve => setTimeout(resolve, 10));
+    assert.equal(
+      result.textContent,
+      inputChangedMessage,
+      "A late DNS response must not overwrite the result after the hostname changes."
+    );
 
     console.log("Domain Extractor smoke test: PASS");
   } finally {
