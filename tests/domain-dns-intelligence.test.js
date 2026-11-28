@@ -125,6 +125,7 @@ function response(payload, options = {}) {
 
   const parsed = service.parseResponse({
     Status: 0,
+    Question: [{ name: "example.com.", type: 1 }],
     AD: true,
     RA: true,
     Answer: [
@@ -144,9 +145,25 @@ function response(payload, options = {}) {
   assert.equal(Object.isFrozen(parsed.records[0]), true);
 
   assert.throws(
-    () => service.parseResponse({ Status: 9 }, "A", "example.com"),
+    () => service.parseResponse({ Status: 4096, Question: [{ name: "example.com.", type: 1 }] }, "A", "example.com"),
     error => error.message === "DNS_RESPONSE_STATUS_INVALID"
   );
+  assert.throws(
+    () => service.parseResponse({ Status: 0, Answer: [] }, "A", "example.com"),
+    error => error.message === "DNS_QUESTION_SECTION_INVALID"
+  );
+  const extendedRcode = service.parseResponse({
+    Status: 23,
+    Question: [{ name: "example.com.", type: 1 }],
+    Answer: []
+  }, "A", "example.com");
+  assert.equal(extendedRcode.statusName, "BADCOOKIE");
+  const unassignedRcode = service.parseResponse({
+    Status: 11,
+    Question: [{ name: "example.com.", type: 1 }],
+    Answer: []
+  }, "A", "example.com");
+  assert.equal(unassignedRcode.statusName, "RCODE_11");
   assert.throws(
     () => service.parseResponse({ Status: 0, Answer: "bad" }, "A", "example.com"),
     error => error.message === "DNS_ANSWER_SECTION_INVALID"
@@ -154,6 +171,7 @@ function response(payload, options = {}) {
   assert.throws(
     () => service.parseResponse({
       Status: 0,
+      Question: [{ name: "example.com.", type: 1 }],
       Answer: [{ name: "example.com.", type: 1, TTL: -1, data: "192.0.2.1" }]
     }, "A", "example.com"),
     error => error.message === "DNS_RECORD_INVALID"
@@ -161,6 +179,7 @@ function response(payload, options = {}) {
   assert.throws(
     () => service.parseResponse({
       Status: 0,
+      Question: [{ name: "example.com.", type: 1 }],
       Answer: [{ name: "example.com.", type: 65000, TTL: 10, data: "opaque" }]
     }, "A", "example.com"),
     error => error.message === "DNS_RECORD_TYPE_UNKNOWN"
@@ -168,11 +187,39 @@ function response(payload, options = {}) {
   assert.throws(
     () => service.parseResponse({
       Status: 0,
+      Question: [{ name: "example.com.", type: 1 }],
       Answer: Array.from({ length: 129 }, () => ({
         name: "example.com.", type: 1, TTL: 10, data: "192.0.2.1"
       }))
     }, "A", "example.com"),
     error => error.message === "DNS_ANSWER_SECTION_INVALID"
+  );
+
+  for (const invalidTTL of [1.5, -1, 4294967296, NaN, Infinity]) {
+    assert.throws(
+      () => service.parseResponse({
+        Status: 0,
+        Question: [{ name: "example.com.", type: 1 }],
+        Answer: [{ name: "example.com.", type: 1, TTL: invalidTTL, data: "192.0.2.1" }]
+      }, "A", "example.com"),
+      error => error.message === "DNS_RECORD_INVALID"
+    );
+  }
+  assert.throws(
+    () => service.parseResponse({
+      Status: 0,
+      Question: [{ name: "example.com.", type: 1 }],
+      Answer: [{ name: "example.com.", type: 1, TTL: 1, data: "line1\\nline2" }]
+    }, "A", "example.com"),
+    error => error.message === "DNS_RECORD_DATA_INVALID"
+  );
+  assert.throws(
+    () => service.parseResponse({
+      Status: 0,
+      Question: [{ name: "example.com.", type: 1 }],
+      Answer: [{ name: "example.com.", type: 1, TTL: 1, data: "x".repeat(2049) }]
+    }, "A", "example.com"),
+    error => error.message === "DNS_RECORD_DATA_INVALID"
   );
 
   let calls = [];
@@ -183,6 +230,7 @@ function response(payload, options = {}) {
       const type = calls.at(-1).url.searchParams.get("type");
       return response({
         Status: 0,
+        Question: [{ name: "example.com.", type: type === "A" ? 1 : 15 }],
         AD: true,
         Answer: type === "A"
           ? [{ name: "example.com.", type: 1, TTL: 60, data: "192.0.2.10" }]
@@ -231,7 +279,10 @@ function response(payload, options = {}) {
 
   const nxdomain = await service.lookup("example.com", {
     types: ["A"],
-    fetchImpl: async () => response({ Status: 3 })
+    fetchImpl: async () => response({
+      Status: 3,
+      Question: [{ name: "example.com.", type: 1 }]
+    })
   });
   assert.equal(nxdomain.results[0].statusName, "NXDOMAIN");
   assert.equal(nxdomain.records.length, 0);
@@ -239,7 +290,10 @@ function response(payload, options = {}) {
 
   const badContentType = await service.lookup("example.com", {
     types: ["A"],
-    fetchImpl: async () => response({ Status: 0 }, {
+    fetchImpl: async () => response({
+      Status: 0,
+      Question: [{ name: "example.com.", type: 1 }]
+    }, {
       contentType: "text/html"
     })
   });
@@ -248,20 +302,29 @@ function response(payload, options = {}) {
 
   const httpFailure = await service.lookup("example.com", {
     types: ["A"],
-    fetchImpl: async () => response({}, { ok: false })
+    fetchImpl: async () => response({
+      Status: 0,
+      Question: [{ name: "example.com.", type: 1 }]
+    }, { ok: false })
   });
   assert.equal(httpFailure.failures[0].error, "DNS_HTTP_ERROR");
 
   const tooLarge = await service.lookup("example.com", {
     types: ["A"],
-    fetchImpl: async () => response({ Status: 0 }, {
+    fetchImpl: async () => response({
+      Status: 0,
+      Question: [{ name: "example.com.", type: 1 }]
+    }, {
       contentLength: "300000"
     })
   });
   assert.equal(tooLarge.failures[0].error, "DNS_RESPONSE_TOO_LARGE");
 
   await assert.rejects(
-    service.lookup("example.com", { types: ["ANY"], fetchImpl: async () => response({ Status: 0 }) }),
+    service.lookup("example.com", { types: ["ANY"], fetchImpl: async () => response({
+      Status: 0,
+      Question: [{ name: "example.com.", type: 1 }]
+    }) }),
     error => error.message === "DNS_RECORD_TYPE_UNSUPPORTED"
   );
   await assert.rejects(
@@ -276,7 +339,10 @@ function response(payload, options = {}) {
     service.lookup("example.com", {
       types: ["A"],
       timeoutMs: 200,
-      fetchImpl: async () => response({ Status: 0 })
+      fetchImpl: async () => response({
+        Status: 0,
+        Question: [{ name: "example.com.", type: 1 }]
+      })
     }),
     error => error.message === "DNS_TIMEOUT_INVALID"
   );
