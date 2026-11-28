@@ -940,7 +940,9 @@ function waitFor(condition, timeout = 5000) {
               data: "192.0.2.44"
             }]
           };
-          const encoded = new TextEncoder().encode(JSON.stringify(payload));
+          const encoded = new window.Uint8Array(
+            new TextEncoder().encode(JSON.stringify(payload))
+          );
           let consumed = false;
           return {
             ok: true,
