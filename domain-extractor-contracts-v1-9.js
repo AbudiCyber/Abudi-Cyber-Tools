@@ -50,6 +50,13 @@
       ])
     }),
     Object.freeze({
+      errorCode: "DOMAIN_DNS_INTELLIGENCE_NOT_READY",
+      checks: Object.freeze([
+        () => window.AbudiDNSIntelligence?.lookup,
+        () => window.AbudiDNSIntelligence?.format
+      ])
+    }),
+    Object.freeze({
       errorCode: "DOMAIN_ACTIONS_NOT_READY",
       checks: Object.freeze([
         () => window.AbudiDomainActions?.bindAllActions

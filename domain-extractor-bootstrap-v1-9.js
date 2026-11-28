@@ -2,7 +2,7 @@
 (() => {
   "use strict";
 
-  const CACHE_VERSION = "1-9-26";
+  const CACHE_VERSION = "1-9-27";
 
   const files = [
     "domain-extractor-errors-v1-9.js",
@@ -20,6 +20,7 @@
     "domain-validation-service-v1-9.js",
     "domain-result-service-v1-9.js",
     "domain-clipboard-service-v1-9.js",
+    "domain-dns-intelligence-v1-9.js",
     "domain-extractor-actions-v1-9.js"
   ];
 
@@ -90,7 +91,7 @@
   }
 
   window.AbudiDomainBootstrap = Object.freeze({
-    version: "1.9.2",
+    version: "1.9.3",
     start,
     load
   });

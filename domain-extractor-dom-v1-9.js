@@ -8,7 +8,8 @@
       result: document.getElementById("r"),
       analyzeButton: document.getElementById("a"),
       copyButton: document.getElementById("c"),
-      clearButton: document.getElementById("x")
+      clearButton: document.getElementById("x"),
+      dnsButton: document.getElementById("dns")
     });
   }
 
@@ -18,7 +19,8 @@
       result,
       analyzeButton,
       copyButton,
-      clearButton
+      clearButton,
+      dnsButton
     } = getElements();
 
     if (
@@ -26,14 +28,15 @@
       !result ||
       !analyzeButton ||
       !copyButton ||
-      !clearButton
+      !clearButton ||
+      !dnsButton
     ) {
       throw new Error("DOM_NOT_READY");
     }
   }
 
   window.AbudiDomainDOM = Object.freeze({
-    version: "1.9.1",
+    version: "1.9.2",
     getElements,
     validateElements
   });
