@@ -897,12 +897,22 @@ function waitFor(condition, timeout = 5000) {
     );
 
     let publicSuffixFetchCalls = 0;
-    assert.throws(
-      () => realDNSService.normalizeHostname("https://co.uk"),
+    await assert.rejects(
+      realDNSService.lookup("https://co.uk", {
+        types: ["A"],
+        fetchImpl: async () => {
+          publicSuffixFetchCalls += 1;
+          throw new Error("PUBLIC_SUFFIX_MUST_NOT_BE_QUERIED");
+        }
+      }),
       error => error && error.message === "DNS_REQUIRES_REGISTRABLE_DOMAIN",
-      "A public suffix alone must never trigger a DNS lookup."
+      "A public suffix alone must be rejected before any DNS request."
     );
-    assert.equal(publicSuffixFetchCalls, 0);
+    assert.equal(
+      publicSuffixFetchCalls,
+      0,
+      "The DNS transport must not be called for a public suffix without a registrable domain."
+    );
 
     const integratedDNSReport = await realDNSService.lookup(
       "https://shop.example.co.uk/private/path?token=must-not-leak#secret",
