@@ -66,12 +66,25 @@
       throw new Error("DNS_REQUIRES_PUBLIC_DOMAIN");
     }
 
-    const intelligence = window.AbudiPublicSuffixService?.analyze(url.hostname);
+    const hostname = url.hostname.toLowerCase().replace(/\.$/, "");
+    const labels = hostname.split(".");
+    if (
+      hostname.length > 253 ||
+      labels.some(label =>
+        label.length < 1 ||
+        label.length > 63 ||
+        !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(label)
+      )
+    ) {
+      throw new Error("INVALID_DNS_HOSTNAME");
+    }
+
+    const intelligence = window.AbudiPublicSuffixService?.analyze(hostname);
     if (!intelligence || intelligence.registrableDomain === "none") {
       throw new Error("DNS_REQUIRES_REGISTRABLE_DOMAIN");
     }
 
-    return url.hostname.toLowerCase();
+    return hostname;
   }
 
   function normalizeTypes(types) {
