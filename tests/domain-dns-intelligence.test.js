@@ -422,7 +422,10 @@ function response(payload, options = {}) {
         [new Uint8Array(262145)],
         { contentLength: null, cancelNeverResolves: true }
       )
-    }).then(() => "UNEXPECTED_SUCCESS", error => error.message),
+    }).then(
+      result => result.failures[0]?.error || "UNEXPECTED_SUCCESS",
+      error => error.message
+    ),
     new Promise(resolve => setTimeout(() => resolve("CLEANUP_BLOCKED_RESULT"), 150))
   ]);
   assert.equal(
