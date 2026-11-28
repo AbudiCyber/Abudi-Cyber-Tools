@@ -121,10 +121,10 @@
       }
       const question = questions[0];
       const questionName = typeof question?.name === "string"
-        ? question.name.toLowerCase().replace(/\\.$/, "")
+        ? question.name.toLowerCase().replace(/\.$/, "")
         : "";
       if (
-        questionName !== hostname.toLowerCase().replace(/\\.$/, "") ||
+        questionName !== hostname.toLowerCase().replace(/\.$/, "") ||
         question.type !== TYPE_NUMBERS[requestedType]
       ) {
         throw new Error("DNS_QUESTION_MISMATCH");
