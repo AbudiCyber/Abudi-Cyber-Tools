@@ -116,6 +116,16 @@
     }
 
     const labels = hostname.split(".").filter(Boolean);
+    if (labels.length < 2) {
+      return Object.freeze({
+        hostname,
+        publicSuffix: "none",
+        registrableDomain: "none",
+        subdomain: "none",
+        tld: "none"
+      });
+    }
+
     const publicSuffix = getPublicSuffix(hostname);
     const suffixLabels = publicSuffix.split(".");
     const registrableCount = suffixLabels.length + 1;
