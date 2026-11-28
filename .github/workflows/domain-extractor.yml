@@ -32,6 +32,9 @@ jobs:
       - name: Run Domain Extractor smoke test
         run: npm run test:domain-extractor
 
+      - name: Run DNS intelligence regression test
+        run: npm run test:domain-dns
+
       - name: Run password security regression test
         run: npm run test:password-security
 
