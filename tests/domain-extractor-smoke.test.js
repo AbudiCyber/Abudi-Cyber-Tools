@@ -877,6 +877,25 @@ function waitFor(condition, timeout = 5000) {
       "Temporary feedback must not overwrite text changed by another action."
     );
 
+    const { dnsButton } = window.AbudiDomainDOM.getElements();
+    assert.ok(dnsButton, "DNS lookup control must be present.");
+    let dnsLookupHostname = "";
+    window.AbudiDNSIntelligence = Object.freeze({
+      lookup: async hostname => {
+        dnsLookupHostname = hostname;
+        return Object.freeze({ hostname });
+      },
+      format: report => "DNS Mock Report: " + report.hostname
+    });
+
+    input.value = "https://example.com/private/path?token=must-not-be-sent";
+    dnsButton.click();
+    await new Promise(resolve => setTimeout(resolve, 10));
+    assert.equal(dnsLookupHostname, "example.com");
+    assert.match(result.textContent, /DNS Mock Report: example\.com/);
+    assert.equal(dnsButton.disabled, false);
+    assert.equal(dnsButton.textContent, "Resolve DNS Records");
+
     console.log("Domain Extractor smoke test: PASS");
   } finally {
     dom.window.close();
