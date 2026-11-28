@@ -145,7 +145,7 @@ function response(payload, options = {}) {
   assert.equal(Object.isFrozen(parsed.records[0]), true);
 
   assert.throws(
-    () => service.parseResponse({ Status: 4096, Question: [{ name: "example.com.", type: 1 }] }, "A", "example.com"),
+    () => service.parseResponse({ Status: 65536, Question: [{ name: "example.com.", type: 1 }] }, "A", "example.com"),
     error => error.message === "DNS_RESPONSE_STATUS_INVALID"
   );
   assert.throws(
