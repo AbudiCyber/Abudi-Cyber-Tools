@@ -77,7 +77,7 @@ function waitFor(condition, timeout = 5000) {
     );
 
     assert.ok(window.AbudiDomainBootstrap);
-    assert.equal(window.AbudiDomainBootstrap.version, "1.9.2");
+    assert.equal(window.AbudiDomainBootstrap.version, "1.9.3");
     assert.equal(Object.isFrozen(window.AbudiDomainBootstrap), true);
     assert.equal(typeof window.AbudiDomainBootstrap.start, "function");
     assert.equal(typeof window.AbudiDomainBootstrap.load, "function");
