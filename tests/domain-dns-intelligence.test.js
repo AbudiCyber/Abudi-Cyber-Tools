@@ -58,6 +58,7 @@ function streamBody(chunks, options = {}) {
         },
         async cancel() {
           if (options.cancelError) throw new Error("STREAM_CANCEL_FAILED");
+          if (options.cancelNeverResolves) return new Promise(() => {});
         },
         releaseLock() {}
       };
@@ -413,6 +414,23 @@ function response(payload, options = {}) {
     "DNS_RESPONSE_TOO_LARGE",
     "An oversized streamed body must remain classified as oversized even if stream cancellation fails."
   );
+  const oversizedCancellationOutcome = await Promise.race([
+    service.lookup("example.com", {
+      types: ["A"],
+      timeoutMs: 500,
+      fetchImpl: async () => responseFromChunks(
+        [new Uint8Array(262145)],
+        { contentLength: null, cancelNeverResolves: true }
+      )
+    }).then(() => "UNEXPECTED_SUCCESS", error => error.message),
+    new Promise(resolve => setTimeout(() => resolve("CLEANUP_BLOCKED_RESULT"), 150))
+  ]);
+  assert.equal(
+    oversizedCancellationOutcome,
+    "DNS_RESPONSE_TOO_LARGE",
+    "The primary oversized-response error must not wait indefinitely for stream cancellation."
+  );
+
 
   let unboundedJSONFallbackCalled = false;
   const missingStream = await service.lookup("example.com", {
