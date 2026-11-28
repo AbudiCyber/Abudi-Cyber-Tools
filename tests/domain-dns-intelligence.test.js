@@ -163,7 +163,7 @@ function response(payload, options = {}) {
     Question: [{ name: "example.com.", type: 1 }],
     Answer: []
   }, "A", "example.com");
-  assert.equal(unassignedRcode.statusName, "RCODE_11");
+  assert.equal(unassignedRcode.statusName, "DSOTYPENI");
   assert.throws(
     () => service.parseResponse({
       Status: 0,
