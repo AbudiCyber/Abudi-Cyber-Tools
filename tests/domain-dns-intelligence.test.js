@@ -145,7 +145,11 @@ function response(payload, options = {}) {
   assert.equal(Object.isFrozen(parsed.records[0]), true);
 
   assert.throws(
-    () => service.parseResponse({ Status: 4096, Question: [{ name: "example.com.", type: 1 }] }, "A", "example.com"),
+    () => service.parseResponse({ Status: 65535, Question: [{ name: "example.com.", type: 1 }] }, "A", "example.com"),
+    error => error.message === "DNS_RESPONSE_STATUS_INVALID"
+  );
+  assert.throws(
+    () => service.parseResponse({ Status: 65536, Question: [{ name: "example.com.", type: 1 }] }, "A", "example.com"),
     error => error.message === "DNS_RESPONSE_STATUS_INVALID"
   );
   assert.throws(
@@ -170,6 +174,18 @@ function response(payload, options = {}) {
     Answer: []
   }, "A", "example.com");
   assert.equal(privateUseRcode.statusName, "RCODE_4095");
+  const unassignedExtendedRcode = service.parseResponse({
+    Status: 4096,
+    Question: [{ name: "example.com.", type: 1 }],
+    Answer: []
+  }, "A", "example.com");
+  assert.equal(unassignedExtendedRcode.statusName, "RCODE_4096");
+  const highestAssignableRcode = service.parseResponse({
+    Status: 65534,
+    Question: [{ name: "example.com.", type: 1 }],
+    Answer: []
+  }, "A", "example.com");
+  assert.equal(highestAssignableRcode.statusName, "RCODE_65534");
   assert.throws(
     () => service.parseResponse({
       Status: 0,
